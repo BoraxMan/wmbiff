@@ -38,11 +38,20 @@
 #include <sys/stat.h>
 #include "assert.h"
 
+#ifdef HAVE_MEMFROB
+#define DEFROB(x) memfrob(x, x ## _len)
+#define ENFROB(x) memfrob(x, x ## _len)
+#else
+#define DEFROB(x)
+#define ENFROB(x)
+#endif
+
 typedef struct password_binding_struct {
 	struct password_binding_struct *next;
 	char user[32];
 	char server[255];
 	char password[32];			/* may be frobnicated */
+	unsigned char password_len;	/* frobnicated *'s are nulls */
 } *password_binding;
 
 static password_binding pass_list = NULL;
@@ -101,9 +110,8 @@ char *passwordFor(const char *username,
 		if (p->password[0] != '\0') {
 			if (bFlushCache == 0) {
 				char *ret = strdup(p->password);
-#ifdef HAVE_MEMFROB
-				memfrob(ret, strlen(ret));
-#endif
+				unsigned short ret_len = p->password_len;
+				DEFROB(ret);
 				return (ret);
 			}
 			/* else fall through, overwrite */
@@ -154,9 +162,8 @@ char *passwordFor(const char *username,
 			strncpy(p->password, password_ptr, 31);
 			p->password[31] = '\0';	/* force a null termination */
 			// caller is responsible for freeing plaintext version free(password_ptr);
-#ifdef HAVE_MEMFROB
-			memfrob(p->password, strlen(p->password));
-#endif
+			p->password_len = strlen(p->password);
+			ENFROB(p->password);
 			p->next = pass_list;
 			pass_list = p;
 			if (strlen(password_ptr) > 31) {

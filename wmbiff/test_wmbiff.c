@@ -9,8 +9,8 @@
 #endif
 
 #ifdef HAVE_MEMFROB
-#define DEFROB(x) memfrob(x, strlen(x))
-#define ENFROB(x) memfrob(x, strlen(x))
+#define DEFROB(x) memfrob(x, x ## _len)
+#define ENFROB(x) memfrob(x, x ## _len)
 #else
 #define DEFROB(x)
 #define ENFROB(x)
@@ -55,7 +55,7 @@ int test_backtickExpand(void) {
 
 #define CKSTRING(x,shouldbe) if(strcmp(x,shouldbe)) { \
 printf("Failed: expected '" #shouldbe "' but got '%s'\n", x); \
- return 1; }
+ return 1; } else { printf("good: '" shouldbe "' == '%s'\n", x); } 
 
 /* return 1 if fail, 0 if success */
 int test_passwordMgr(void) {
@@ -152,6 +152,14 @@ int test_passwordMgr(void) {
 		return(1);
 	}
 	printf("SUCCESS: expected '' got '%s'\n", b);
+
+	m.askpass = "echo \"rt*m\"; #";
+	b = passwordFor("faq", "faq", &m, 0);
+	if (strcmp(b, "rt*m") != 0) {
+		printf("FAILURE: expected '' got '%s'\n", b);
+		return(1);
+	}
+	printf("SUCCESS: expected 'rt*m' got '%s'\n", b);
     return(0);
 }
 
@@ -187,6 +195,21 @@ int test_imap4creator(void) {
     }
     CKSTRING(m.path, "\"space box\"");
     CKSTRING(m.u.pop_imap.serverName, "bar");
+    CKINT(m.u.pop_imap.serverPort, 143);
+
+    if(imap4Create(&m, "imap:star *as* star/\"space box\"")) {
+        return 1;
+    }
+    printf("mmm %s", (m.u.pop_imap.password));
+    DEFROB(m.u.pop_imap.password);
+    CKSTRING(m.u.pop_imap.password, "*as*");
+    CKINT(m.u.pop_imap.serverPort, 143);
+    if(imap4Create(&m, "imap:user:*as*@bar/blah")) {
+        return 1;
+    }
+    
+    DEFROB(m.u.pop_imap.password);
+    CKSTRING(m.u.pop_imap.password, "*as*");
     CKINT(m.u.pop_imap.serverPort, 143);
 
     if(imap4Create(&m, "imap:user pass bar/\"space box\" 12")) {

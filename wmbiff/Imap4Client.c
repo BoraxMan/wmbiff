@@ -37,8 +37,8 @@ extern int Relax;
 #define IMAP_DM(pc, lvl, args...) DM(pc, lvl, "imap4: " args)
 
 #ifdef HAVE_MEMFROB
-#define DEFROB(x) memfrob(x, strlen(x))
-#define ENFROB(x) memfrob(x, strlen(x))
+#define DEFROB(x) memfrob(x, x ## _len)
+#define ENFROB(x) memfrob(x, x ## _len)
 #else
 #define DEFROB(x)
 #define ENFROB(x)
@@ -183,7 +183,8 @@ FILE *imap_open(Pop3 pc)
 	if (sd == -1) {
 		if (complained_already == 0) {
 			IMAP_DM(pc, DEBUG_ERROR, "Couldn't connect to %s:%d: %s\n",
-					PCU.serverName, PCU.serverPort, strerror(errno));
+					PCU.serverName, PCU.serverPort,
+					errno ? strerror(errno) : "");
 			complained_already = 1;
 		}
 		if (errno == ETIMEDOUT) {
@@ -528,12 +529,11 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 		return -1;
 	}
 
+	PCU.password_len = strlen(PCU.password);
 	if (PCU.password[0] == '\0') {
 		PCU.interactive_password = 1;
 	} else {
-#ifdef HAVE_MEMFROB
-		memfrob(PCU.password, strlen(PCU.password));
-#endif
+		ENFROB(PCU.password);
 	}
 
 	// grab_authList(unaliased_str + matchedchars, PCU.authList);
@@ -542,7 +542,7 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 
 	IMAP_DM(pc, DEBUG_INFO, "userName= '%s'\n", PCU.userName);
 	IMAP_DM(pc, DEBUG_INFO, "password is %d characters long\n",
-			(int) strlen(PCU.password));
+			(int) PCU.password_len);
 	IMAP_DM(pc, DEBUG_INFO, "serverName= '%s'\n", PCU.serverName);
 	IMAP_DM(pc, DEBUG_INFO, "serverPath= '%s'\n", pc->path);
 	IMAP_DM(pc, DEBUG_INFO, "serverPort= '%d'\n", PCU.serverPort);
@@ -678,6 +678,7 @@ static void ask_user_for_password( /*@notnull@ */ Pop3 pc, int bFlushCache)
 				passwordFor(PCU.userName, PCU.serverName, pc, bFlushCache);
 			if (password != NULL) {
 				strcpy(PCU.password, password);
+				PCU.password_len = strlen(password);
 				free(password);
 				ENFROB(PCU.password);
 			}
