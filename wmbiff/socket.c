@@ -1,4 +1,4 @@
-/* $Id: socket.c,v 1.9 2003/07/03 05:34:22 bluehal Exp $ */
+/* $Id: socket.c,v 1.10 2003/10/26 07:42:29 bluehal Exp $ */
 /* Copyright (C) 1998 Trent Piepho  <xyzzy@u.washington.edu>
  *           (C) 1999 Trent Piepho  <xyzzy@speakeasy.org>
  *
@@ -19,8 +19,8 @@
 #endif
 #include <stdio.h>
 #include <unistd.h>
-#include <fcntl.h>
 #include <sys/types.h>
+#include <fcntl.h>
 #include <time.h>
 #include <sys/stat.h>
 #include <sys/socket.h>

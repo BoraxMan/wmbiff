@@ -1,11 +1,11 @@
-/* $Id: maildirClient.c,v 1.12 2002/10/14 05:52:26 bluehal Exp $ */
+/* $Id: maildirClient.c,v 1.13 2003/10/26 07:42:28 bluehal Exp $ */
 /* Author : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
    Modified : Dwayne C. Litzenberger ( dlitz@dlitz.net )
  * 
  * Maildir checker.
  *
- * Last Updated : $Date: 2002/10/14 05:52:26 $
+ * Last Updated : $Date: 2003/10/26 07:42:28 $
  *
  */
 
@@ -15,6 +15,7 @@
 
 #include "Client.h"
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <dirent.h>
 #include <errno.h>
 #include <utime.h>
