@@ -347,6 +347,38 @@ int test_charutil(void) {
     return 0;
 }
 
+#include <netinet/in.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+int test_sock_connect(void) {
+    struct sockaddr_in addr;
+    int s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    int addrlen = sizeof(struct sockaddr_in);
+    if( s < 0 ) {
+        perror("socket");
+        return 1;
+    }
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = 0;
+    addr.sin_port = 0;
+    if( bind(s, &addr, sizeof(struct sockaddr_in)) < 0 ) {
+        perror("bind");
+        return 1;
+    }
+    getsockname(s, &addr, &addrlen);
+    if( listen(s,5) < 0 ) {
+        perror("listen");
+        return 1;
+    }
+    if( sock_connect("127.0.0.1", addr.sin_port) < 0) {
+        return 1;
+    }
+    if( sock_connect("localhost", addr.sin_port) < 0) {
+        return 1;
+    }
+    return 0;
+}
+
 
 int print_info(UNUSED(void *state))
 {
@@ -395,6 +427,11 @@ int main(UNUSED(int argc), UNUSED(char *argv[]))
 	}
 
 	if (test_charutil()) {
+		printf("SOME TESTS FAILED!\n");
+		exit(EXIT_FAILURE);
+	}
+
+	if (test_sock_connect()) {
 		printf("SOME TESTS FAILED!\n");
 		exit(EXIT_FAILURE);
 	}
