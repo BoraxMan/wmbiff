@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.27 2002/06/01 17:58:52 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.28 2002/06/08 22:13:06 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -60,6 +60,10 @@ const char *skin_search_path = DEFAULT_SKIN_PATH;
 /* for gnutls */
 const char *certificate_filename = NULL;	/* not yet supported */
 
+/* it could be argued that a better default exists. */
+#define DEFAULT_FONT  "-*-fixed-*-r-*-*-10-*-*-*-*-*-*-*"
+const char *font = NULL;
+
 int ReadLine(FILE *, char *, char *, int *);
 int Read_Config_File(char *, int *);
 int count_mail(int);
@@ -79,10 +83,18 @@ void sigchld_handler(int sig);
 
 int debug_default = DEBUG_ERROR;
 
+/* color from wmbiff's xpm, down to 24 bits. */
+const char *foreground = "#21B3AF";
+
+/* where vertically the mailbox sits for blitting characters. */
+static int mbox_y(int mboxnum)
+{
+	return ((11 * mboxnum) + 5);
+}
+
 void init_biff(char *config_file)
 {
-	int i, j, loopinterval = DEFAULT_LOOP;
-	char *m;
+	int i, loopinterval = DEFAULT_LOOP;
 
 	for (i = 0; i < 5; i++) {
 		mbox[i].label[0] = 0;
@@ -95,14 +107,6 @@ void init_biff(char *config_file)
 		mbox[i].askpass = DEFAULT_ASKPASS;
 	}
 
-	/* Some defaults, if config file is unavailable */
-	strcpy(mbox[0].label, "Spool");
-	if ((m = getenv("MAIL")) != NULL) {
-		strcpy(mbox[0].path, m);
-	} else if ((m = getenv("USER")) != NULL) {
-		strcpy(mbox[0].path, "/var/mail/");
-		strcat(mbox[0].path, m);
-	}
 #ifdef HAVE_GCRYPT_H
 	/* gcrypt is a little strange, in that it doesn't 
 	 * seem to initialize its memory pool by itself. 
@@ -120,24 +124,43 @@ void init_biff(char *config_file)
 
 	DMA(DEBUG_INFO, "config_file = %s.\n", config_file);
 	if (!Read_Config_File(config_file, &loopinterval)) {
-		if (m == NULL) {
-			DMA(DEBUG_ERROR, "Cannot open '%s' nor use the "
+		char *m;
+		/* setup defaults if there's no config */
+		if ((m = getenv("MAIL")) != NULL) {
+			/* we are using MAIL environment var. type mbox */
+			DMA(DEBUG_INFO, "Using MAIL environment var '%s'.\n", m);
+			strcpy(mbox[0].path, m);
+		} else if ((m = getenv("USER")) != NULL) {
+			/* we are using MAIL environment var. type mbox */
+			DMA(DEBUG_INFO, "Using /var/mail/%s.\n", m);
+			strcpy(mbox[0].path, "/var/mail/");
+			strcat(mbox[0].path, m);
+		} else {
+			DMA(DEBUG_ERROR, "Cannot open config file '%s' nor use the "
 				"MAIL environment var.\n", config_file);
-			exit(1);
+			exit(EXIT_FAILURE);
 		}
-		/* we are using MAIL environment var. type mbox */
-		DMA(DEBUG_INFO, "Using MAIL environment var '%s'.\n", m);
+		if (!exists(mbox[0].path)) {
+			DMA(DEBUG_ERROR, "Cannot open config file '%s', and the "
+				"default %s doesn't exist.\n", config_file, mbox[0].path);
+			exit(EXIT_FAILURE);
+		}
+		strcpy(mbox[0].label, "Spool");
 		mboxCreate((&mbox[0]), mbox[0].path);
 	}
 
 	/* Make labels look right */
 	for (i = 0; i < 5; i++) {
 		if (mbox[i].label[0] != 0) {
-			j = strlen(mbox[i].label);
-			if (j < 5) {
-				memset(mbox[i].label + j, ' ', 5 - j);
+			/* append a colon, but skip if we're using fonts. */
+			if (font == NULL) {
+				int j = strlen(mbox[i].label);
+				if (j < 5) {
+					memset(mbox[i].label + j, ' ', 5 - j);
+				}
+				mbox[i].label[5] = ':';
 			}
-			mbox[i].label[5] = ':';
+			/* but always end after 5 characters */
 			mbox[i].label[6] = 0;
 			/* set global loopinterval to boxes with 0 loop */
 			if (!mbox[i].loopinterval) {
@@ -152,26 +175,30 @@ char **LoadXPM(const char *pixmap_filename)
 	char **xpm;
 	int success;
 	success = XpmReadFileToData((char *) pixmap_filename, &xpm);
-	if (success == XpmOpenFailed) {
+	switch (success) {
+	case XpmOpenFailed:
 		DMA(DEBUG_ERROR, "Unable to open %s\n", pixmap_filename);
-	} else if (success == XpmFileInvalid) {
+		break;
+	case XpmFileInvalid:
 		DMA(DEBUG_ERROR, "%s is not a valid pixmap\n", pixmap_filename);
-	} else if (success == XpmNoMemory) {
+		break;
+	case XpmNoMemory:
 		DMA(DEBUG_ERROR, "Insufficient memory to read %s\n",
 			pixmap_filename);
+		break;
+	default:
 	}
 	return (xpm);
 }
 
+/* tests as "test -f" would */
 int exists(const char *filename)
 {
 	struct stat st_buf;
 	DMA(DEBUG_INFO, "looking for %s\n", filename);
-	if (stat(filename, &st_buf) == 0) {
-		if (S_ISREG(st_buf.st_mode)) {
-			DMA(DEBUG_INFO, "found %s\n", filename);
-			return (1);
-		}
+	if (stat(filename, &st_buf) == 0 && S_ISREG(st_buf.st_mode)) {
+		DMA(DEBUG_INFO, "found %s\n", filename);
+		return (1);
 	}
 	return (0);
 }
@@ -200,7 +227,7 @@ char *search_path(const char *path, const char *find_me)
 			startp =
 				memcpy(buf + pathlen - strlen(path), path, strlen(path));
 		} else if (p == path) {
-			/* double colon apparently means try here */
+			/* double colon in a path apparently means try here */
 			startp = &buf[pathlen + 1];
 		} else {
 			/* copy the part between the colons to the buffer */
@@ -253,13 +280,12 @@ static int wmbiffrc_permissions_check(const char *wmbiffrc_fname)
 }
 
 void do_biff(int argc, char **argv)
-{
+{								/*@noreturn@ */
 	int i;
-	XEvent Event;
-	int but_stat = -1;
+	int but_pressed_region = -1;
 	time_t curtime;
 	int NeedRedraw = 0;
-	int Sleep_Interval = DEFAULT_SLEEP_INTERVAL;	/* Default sleep time (in msec) */
+	int Sleep_Interval = DEFAULT_SLEEP_INTERVAL;	/* in msec */
 	int Blink_Mode = 0;			/* Bit mask, digits are in blinking mode or not.
 								   Each bit for separate mailbox */
 	const char **skin_xpm = NULL;
@@ -281,35 +307,20 @@ void do_biff(int argc, char **argv)
 	openXwindow(argc, argv, skin_xpm, wmbiff_mask_bits,
 				wmbiff_mask_width, wmbiff_mask_height);
 
-	AddMouseRegion(0, 5, 6, 58, 16);
-	AddMouseRegion(1, 5, 16, 58, 26);
-	AddMouseRegion(2, 5, 26, 58, 36);
-	AddMouseRegion(3, 5, 36, 58, 46);
-	AddMouseRegion(4, 5, 46, 58, 56);
-
-	loadFont("-*-fixed-*-r-*-*-10-*-*-*-*-*-*-*");
-
-#if 0
-	copyXPMArea(39, 84, (3 * CHAR_WIDTH), 8, 39, 5);
-	copyXPMArea(39, 84, (3 * CHAR_WIDTH), 8, 39, 16);
-	copyXPMArea(39, 84, (3 * CHAR_WIDTH), 8, 39, 27);
-	copyXPMArea(39, 84, (3 * CHAR_WIDTH), 8, 39, 38);
-	copyXPMArea(39, 84, (3 * CHAR_WIDTH), 8, 39, 49);
-
-	BlitString("XX", 45, 5, 0);
-	BlitString("XX", 45, 16, 0);
-	BlitString("XX", 45, 27, 0);
-	BlitString("XX", 45, 38, 0);
-	BlitString("XX", 45, 49, 0);
-#endif
+	if (font != NULL && loadFont(font) < 0) {
+		DMA(DEBUG_ERROR, "unable to load font. exiting.\n");
+		exit(EXIT_FAILURE);
+	}
 
 	/* Initially read mail counters and resets,
 	   and initially draw labels and counters */
 	curtime = time(0);
 	for (i = 0; i < 5; i++) {
+		/* make it easy to recover the mbox index from a mouse click */
+		AddMouseRegion(i, 5, mbox_y(i), 58, mbox_y(i + 1) - 1);
 		if (mbox[i].label[0] != 0) {
 			mbox[i].prevtime = mbox[i].prevfetch_time = curtime;
-			BlitString(mbox[i].label, 5, (11 * i) + 5, 0);
+			BlitString(mbox[i].label, 5, mbox_y(i), 0);
 			DM(&mbox[i], DEBUG_INFO,
 			   "working on [%d].label=>%s< [%d].path=>%s<\n", i,
 			   mbox[i].label, i, mbox[i].path);
@@ -367,36 +378,39 @@ void do_biff(int argc, char **argv)
 
 		/* X Events */
 		while (XPending(display)) {
+			XEvent Event;
+
 			XNextEvent(display, &Event);
+
 			switch (Event.type) {
 			case Expose:
 				RedrawWindow();
 				break;
 			case DestroyNotify:
 				XCloseDisplay(display);
-				exit(0);
+				exit(EXIT_SUCCESS);
 				break;
 			case ButtonPress:
 				i = CheckMouseRegion(Event.xbutton.x, Event.xbutton.y);
-				but_stat = i;
+				but_pressed_region = i;
 				break;
 			case ButtonRelease:
 				i = CheckMouseRegion(Event.xbutton.x, Event.xbutton.y);
-				if (but_stat == i && but_stat >= 0) {
+				if (but_pressed_region == i && but_pressed_region >= 0) {
 					switch (Event.xbutton.button) {
 					case 1:	/* Left mouse-click */
-						if (mbox[but_stat].action[0] != 0) {
-							execCommand(mbox[but_stat].action);
+						if (mbox[i].action[0] != 0) {
+							execCommand(mbox[i].action);
 						}
 						break;
 					case 3:	/* Right mouse-click */
-						if (mbox[but_stat].fetchcmd[0] != 0) {
-							execCommand(mbox[but_stat].fetchcmd);
+						if (mbox[i].fetchcmd[0] != 0) {
+							execCommand(mbox[i].fetchcmd);
 						}
 						break;
 					}
 				}
-				but_stat = -1;
+				but_pressed_region = -1;
 				/* RedrawWindow(); */
 				break;
 			}
@@ -408,7 +422,7 @@ void do_biff(int argc, char **argv)
 /* helper function for displayMsgCounters, which has outgrown its name */
 static void blitMsgCounters(int i)
 {
-	int y_row = (11 * i) + 5;	/* constant for each mailbox */
+	int y_row = mbox_y(i);		/* constant for each mailbox */
 	ClearDigits(i);				/* Clear digits */
 	if ((mbox[i].blink_stat & 0x01) == 0) {
 		int newmail = (mbox[i].UnreadMsgs > 0) ? 1 : 0;
@@ -452,7 +466,7 @@ void displayMsgCounters(int i, int mail_stat, int *Sleep_Interval,
 		break;
 	case -1:					/* Error was detected */
 		ClearDigits(i);			/* Clear digits */
-		BlitString("XX", 45, (11 * i) + 5, 0);
+		BlitString("XX", 45, mbox_y(i), 0);
 		break;
 	}
 }
@@ -473,10 +487,9 @@ int count_mail(int item)
 	}
 
 	if (mbox[item].checkMail(&(mbox[item])) < 0) {
-		/* we failed to obtain any numbers
-		 * therefore set them to -1's
-		 * ensuring the next pass (even if zero)
-		 * will be captured correctly
+		/* we failed to obtain any numbers therefore set
+		 * them to -1's ensuring the next pass (even if
+		 * zero) will be captured correctly
 		 */
 		mbox[item].TotalMsgs = -1;
 		mbox[item].UnreadMsgs = -1;
@@ -504,63 +517,69 @@ int count_mail(int item)
 */
 static void BlitString(const char *name, int x, int y, int new)
 {
-	int i, c, k = x;
-
-#if USE_FONTS
-	/* an alternate behavior - draw the string using a font
-	   instead of the pixmap.  should allow pretty colors */
-	drawString(x, y + CHAR_HEIGHT, name, new ? "yellow" : "cyan", 0);
-#else
-	/* normal, LED-like behavior. */
-	for (i = 0; name[i]; i++) {
-		c = toupper(name[i]);
-		if (c >= 'A' && c <= 'Z') {	/* it's a letter */
-			c -= 'A';
-			copyXPMArea(c * (CHAR_WIDTH + 1), (new ? 95 : 74),
-						(CHAR_WIDTH + 1), (CHAR_HEIGHT + 1), k, y);
-			k += (CHAR_WIDTH + 1);
-		} else {				/* it's a number or symbol */
-			c -= '0';
-			if (new) {
-				copyXPMArea((c * (CHAR_WIDTH + 1)) + 65, 0,
+	if (font != NULL) {
+		/* an alternate behavior - draw the string using a font
+		   instead of the pixmap.  should allow pretty colors */
+		drawString(x, y + CHAR_HEIGHT, name, new ? "yellow" : foreground,
+				   0);
+	} else {
+		/* normal, LED-like behavior. */
+		int i, c, k = x;
+		for (i = 0; name[i]; i++) {
+			c = toupper(name[i]);
+			if (c >= 'A' && c <= 'Z') {	/* it's a letter */
+				c -= 'A';
+				copyXPMArea(c * (CHAR_WIDTH + 1), (new ? 95 : 74),
 							(CHAR_WIDTH + 1), (CHAR_HEIGHT + 1), k, y);
-			} else {
-				copyXPMArea((c * (CHAR_WIDTH + 1)), 64,
-							(CHAR_WIDTH + 1), (CHAR_HEIGHT + 1), k, y);
+				k += (CHAR_WIDTH + 1);
+			} else {			/* it's a number or symbol */
+				c -= '0';
+				if (new) {
+					copyXPMArea((c * (CHAR_WIDTH + 1)) + 65, 0,
+								(CHAR_WIDTH + 1), (CHAR_HEIGHT + 1), k, y);
+				} else {
+					copyXPMArea((c * (CHAR_WIDTH + 1)), 64,
+								(CHAR_WIDTH + 1), (CHAR_HEIGHT + 1), k, y);
+				}
+				k += (CHAR_WIDTH + 1);
 			}
-			k += (CHAR_WIDTH + 1);
 		}
 	}
-#endif
 }
 
 /* Blits number to give coordinates.. two 0's, right justified */
 void BlitNum(int num, int x, int y, int new)
 {
 	char buf[32];
-	int newx = x;
-
-	if (num > 99)
-		newx -= (CHAR_WIDTH + 1);
-	if (num > 999)
-		newx -= (CHAR_WIDTH + 1);
 
 	sprintf(buf, "%02i", num);
 
-#if USE_FONTS
-	drawString(x + (CHAR_WIDTH * 2 + 4), y + CHAR_HEIGHT, buf,
-			   new ? "yellow" : "cyan", 1);
-#else
-	BlitString(buf, newx, y, new);
-#endif
+	if (font != NULL) {
+		const char *color = (new) ? "yellow" : foreground;
+		drawString(x + (CHAR_WIDTH * 2 + 4), y + CHAR_HEIGHT, buf,
+				   color, 1);
+	} else {
+		int newx = x;
+
+		if (num > 99)
+			newx -= (CHAR_WIDTH + 1);
+		if (num > 999)
+			newx -= (CHAR_WIDTH + 1);
+
+		BlitString(buf, newx, y, new);
+	}
 }
 
 void ClearDigits(int i)
 {
-	copyXPMArea((10 * (CHAR_WIDTH + 1)), 64, (CHAR_WIDTH + 1),
-				(CHAR_HEIGHT + 1), 35, (11 * i) + 5);
-	copyXPMArea(39, 84, (3 * (CHAR_WIDTH + 1)), (CHAR_HEIGHT + 1), 39,
-				(11 * i) + 5);
+	if (font) {
+		eraseRect(39, mbox_y(i), 58, mbox_y(i + 1) - 1);
+	} else {
+		copyXPMArea((10 * (CHAR_WIDTH + 1)), 64, (CHAR_WIDTH + 1),
+					(CHAR_HEIGHT + 1), 35, mbox_y(i));
+		copyXPMArea(39, 84, (3 * (CHAR_WIDTH + 1)), (CHAR_HEIGHT + 1), 39,
+					mbox_y(i));
+	}
 }
 
 /* 	Read a line from a file to obtain a pair setting=value 
@@ -785,13 +804,12 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-void parse_cmd(int argc, char **argv, char *config_file)
+void parse_cmd(int argc, char **argv, /*@out@ */ char *config_file)
 {
 	int i;
 
-	char uconfig_file[256];
+	config_file[0] = 0;
 
-	uconfig_file[0] = 0;
 	/* Parse Command Line */
 
 	for (i = 1; i < argc; i++) {
@@ -803,6 +821,30 @@ void parse_cmd(int argc, char **argv, char *config_file)
 				if (strcmp(arg + 1, "debug") == 0) {
 					debug_default = DEBUG_ALL;
 				} else if (strcmp(arg + 1, "display")) {
+					usage();
+					exit(EXIT_FAILURE);
+				}
+				break;
+			case 'f':
+				if (strcmp(arg + 1, "fg") == 0) {
+					if (argc > (i + 1)) {
+						foreground = strdup(argv[i + 1]);
+						DMA(DEBUG_INFO, "new foreground: %s", foreground);
+						i++;
+						if (font == NULL)
+							font = DEFAULT_FONT;
+					}
+				} else if (strcmp(arg + 1, "font") == 0) {
+					if (argc > (i + 1)) {
+						if (strcmp(argv[i + 1], "default") == 0) {
+							font = DEFAULT_FONT;
+						} else {
+							font = strdup(argv[i + 1]);
+						}
+						DMA(DEBUG_INFO, "new font: %s", font);
+						i++;
+					}
+				} else {
 					usage();
 					exit(EXIT_FAILURE);
 				}
@@ -819,7 +861,7 @@ void parse_cmd(int argc, char **argv, char *config_file)
 				break;
 			case 'c':
 				if (argc > (i + 1)) {
-					strcpy(uconfig_file, argv[i + 1]);
+					strncpy(config_file, argv[i + 1], 255);
 					i++;
 				}
 				break;
@@ -830,7 +872,6 @@ void parse_cmd(int argc, char **argv, char *config_file)
 			}
 		}
 	}
-	strcpy(config_file, uconfig_file);
 }
 
 void usage(void)
@@ -841,10 +882,12 @@ void usage(void)
 		   "Please report bugs to wmbiff-devel@lists.sourceforge.net\n"
 		   "\n"
 		   "usage:\n"
+		   "    -c <filename>             use specified config file\n"
 		   "    -debug                    enable debugging\n"
 		   "    -display <display name>   use specified X display\n"
+		   "    -fg <color>               foreground color\n"
+		   "    -font <font>              font instead of LED\n"
 		   "    -geometry +XPOS+YPOS      initial window position\n"
-		   "    -c <filename>             use specified config file\n"
 		   "    -h                        this help screen\n"
 		   "    -v                        print the version number\n"
 		   "\n");
