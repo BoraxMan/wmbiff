@@ -295,7 +295,7 @@ int imap4Create(Pop3 pc, const char *const str)
 {
 	struct re_registers regs;
 	const char *regex =
-		".*imaps?:([^:]+):([^@]+)@([^/: ]+)(/[^: ]+)?(:[0-9]+)? *";
+		".*imaps?:([^:]{1,32}):([^@]{1,32})@([^/: ]+)(/[^: ]+)?(:[0-9]+)? *";
 
 	/* IMAP4 format: imap:user:password@server/mailbox[:port] */
 	/* If 'str' line is badly formatted, wmbiff won't display the mailbox. */

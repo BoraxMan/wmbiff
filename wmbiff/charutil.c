@@ -1,4 +1,4 @@
-/* $Id: charutil.c,v 1.5 2001/11/16 01:13:36 bluehal Exp $ */
+/* $Id: charutil.c,v 1.6 2001/11/16 07:11:04 bluehal Exp $ */
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -192,7 +192,9 @@ int compile_and_match_regex(const char *regex,
 
 	/* compile the regex pattern */
 	memset(&rpbuf, 0, sizeof(struct re_pattern_buffer));
-	re_syntax_options = RE_SYNTAX_EGREP;
+
+	/* posix egrep interprets intervals (eg. {1,32}) nicely */
+	re_syntax_options = RE_SYNTAX_POSIX_EGREP; 
 	errstr = re_compile_pattern(regex, strlen(regex), &rpbuf);
 	if (errstr != NULL) {
 		fprintf(stderr, "error in compiling regular expression: %s\n",
