@@ -41,7 +41,7 @@ clean:
 	for i in $(OBJS) ; do \
 		rm -f $$i ; \
 	done
-	rm -f wmbiff *~ tags core
+	rm -f wmbiff *~ tags core wmbiff-master.xpm
 
 install: wmbiff
 	$(INSTALL_DIR) $(DESTDIR)$(bindir)
