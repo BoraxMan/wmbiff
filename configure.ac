@@ -27,6 +27,8 @@ case `(uname -s) 2>/dev/null` in
     "Darwin")
        CFLAGS="$CFLAGS -no-cpp-precomp"
        AC_MSG_RESULT(adding cpp precompiler workaround for Mac OS X)
+       LDFLAGS="$LDFLAGS -framework Security"
+       AC_MSG_RESULT(adding -framework Security for Mac OS X)
      ;;
 esac
 
@@ -143,6 +145,8 @@ dnl Password prompting stuff.
 AC_PATH_PROGS(DEFAULT_ASKPASS, ssh-askpass x11-ssh-askpass ssh-askpass-gnome, /usr/bin/ssh-askpass)
 AC_PATH_PROG(CVS2CL, cvs2cl)
 AC_DEFINE_UNQUOTED(DEFAULT_ASKPASS, "$DEFAULT_ASKPASS", [Program to use for querying the user for a password: redefine if not on a debian system])
+
+AC_CHECK_HEADERS(CoreServices/CoreServices.h Security/Security.h)
 
 dnl Skin files; note - this is duplicated in wmbiff/Makefile.am
 dnl haven't thought of a way around it.
