@@ -6,13 +6,18 @@ The latest changelog entry is in a different format, because it's inserted by
 CVS on commit.
 
   $Log: ChangeLog,v $
-  Revision 1.36  2002/06/26 19:04:26  bluehal
-  die configure.in! die acconfig.h!
+  Revision 1.37  2002/07/04 08:00:16  bluehal
+  last minute changes for 0.4.5
 
   Revision 1.1  2002/04/07 05:08:23  bluehal
   use automake / autoconf; after checkout run ./FromCVS.sh
 
 
+
+2002-06-26 Wednesday 19:04 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* ChangeLog, Makefile.am, autoconf/Makefile.am: die configure.in!
+	die acconfig.h!
 
 2002-06-26 Wednesday 18:56 UTC -- Neil Spring <nspring@cs.washington.edu>
 

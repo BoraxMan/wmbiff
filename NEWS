@@ -1,13 +1,13 @@
 Release Notes
 ~~~~~~~~~~~~~
-Release 0.4.4 - Unreleased
+Release 0.4.4 - June 27, 2002
   * GNUTLS version 0.4.3 required.  The API has changed, and 
     wmbiff is no longer compatible with GNUTLS versions prior
     to 0.4.3.  Certificate checking may be slightly more strict.
   * GCRYPT version 1.1.7 is expected as well.
   * Partial rewrite of mailbox-parsing code, splint annotations.
   * Bugfix in debug messages of ShellClient.
-  * Internal cleanups.
+  * Internal cleanups; migration to autoconf 2.5
 
 Release 0.4.3 - June 8, 2002
   * IPv6 support for real. (missed a detail with autoconf)
@@ -340,4 +340,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.25 2002/06/24 07:18:09 bluehal Exp $
+$Id: NEWS,v 1.26 2002/07/04 08:00:17 bluehal Exp $

@@ -7,9 +7,9 @@ dnl and configure:
 dnl  installation prefix
 dnl  version
 
-AC_INIT(wmbiff, 0.4.4, wmbiff-devel@lists.sourceforge.net)
+AC_INIT(wmbiff, 0.4.5, wmbiff-devel@lists.sourceforge.net)
 AC_CONFIG_AUX_DIR(autoconf)
-AM_INIT_AUTOMAKE(wmbiff, 0.4.4)
+AM_INIT_AUTOMAKE(wmbiff, 0.4.5)
 dnl AUTOHEADER="$AUTOHEADER -l \\\\\\\$\(srcdir)/autoconf"
 AM_CONFIG_HEADER(config.h)
 dnl make sure autoheader finds version, implicitly defined above.
