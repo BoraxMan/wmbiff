@@ -325,14 +325,12 @@ int imap4Create(Pop3 pc, const char *const str)
 		PCU.dossl = 0;
 
 	for (matchedchars = 0, i = 0;
-		 regexes[i] != NULL && matchedchars <= 0; i++)
-	{
+		 regexes[i] != NULL && matchedchars <= 0; i++) {
 		matchedchars = compile_and_match_regex(regexes[i], str, &regs);
 	}
 
 	/* failed to match either regex */
-	if (matchedchars <= 0)
-	{
+	if (matchedchars <= 0) {
 		pc->label[0] = '\0';
 		fprintf(stderr, "Couldn't parse line %s (%d)\n", str,
 				matchedchars);
