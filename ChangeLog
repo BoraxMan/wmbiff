@@ -6,13 +6,72 @@ The latest changelog entry is in a different format, because it's inserted by
 CVS on commit.
 
   $Log: ChangeLog,v $
-  Revision 1.33  2002/06/08 22:22:11  bluehal
-  release 0.4.3 final updates
+  Revision 1.34  2002/06/24 07:18:09  bluehal
+  roughly finished 0.4.4
 
   Revision 1.1  2002/04/07 05:08:23  bluehal
   use automake / autoconf; after checkout run ./FromCVS.sh
 
 
+
+2002-06-24 Monday 01:23 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Makefile.am, configure.in, wmbiff/Makefile.am: basic
+	gnutls 0.4.3 support (that is, it compiles.)
+
+2002-06-24 Monday 01:18 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: gnutls-common.c, gnutls-common.h, tlsComm.c: basic
+	gnutls 0.4.3 support (that is, it compiles.)
+
+2002-06-23 Sunday 01:26 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiff.c: cleanup to periodic mail checking, removal of
+	the first mail check - now all cases are the same
+
+2002-06-21 Friday 04:34 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiff.c: y_ and x_origin, and num_mailboxes constants,
+	highlight color for fn, restructured mailbox creation routines
+
+2002-06-21 Friday 04:31 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Pop3Client.c: splint
+
+2002-06-21 Friday 04:31 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: LicqClient.c, ShellClient.c, charutil.c,
+	maildirClient.c, mboxClient.c, passwordMgr.c, test_wmbiff.c:
+	config.h
+
+2002-06-21 Friday 04:30 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Imap4Client.c: clarity and splint
+
+2002-06-21 Friday 04:29 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Client.h: splint support
+
+2002-06-21 Friday 04:29 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiff.1: highlight color
+
+2002-06-21 Friday 04:28 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Makefile.am: verify that config.h is included in each .c
+	file
+
+2002-06-15 Saturday 09:05 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* configure.in: likely bugfix for newer autoconf?
+
+2002-06-15 Saturday 09:04 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* Makefile.am: keep automake1.6 happy
+
+2002-06-08 Saturday 22:22 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* ChangeLog, NEWS, configure.in: release 0.4.3 final updates
 
 2002-06-08 Saturday 22:20 UTC -- Neil Spring <nspring@cs.washington.edu>
 

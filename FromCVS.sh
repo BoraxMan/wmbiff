@@ -11,3 +11,6 @@ fi
  autoconf && \
  ./configure && \
  make
+
+   # when adding gnome support, integrate:
+   #aclocal -I /usr/share/aclocal/gnome-macros;
