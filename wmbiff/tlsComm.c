@@ -70,7 +70,7 @@ struct connection_state {
 };
 
 /* gotta do our own line buffering, sigh */
-static int
+int
 getline_from_buffer(char *readbuffer, char *linebuffer, int linebuflen);
 void handle_gnutls_read_error(int readbytes, struct connection_state *scs);
 
@@ -124,14 +124,21 @@ static int wait_for_it(int sd, int timeoutseconds)
 	return (FD_ISSET(sd, &readfds));
 }
 
-static int
-getline_from_buffer(char *readbuffer, char *linebuffer, int linebuflen)
+int getline_from_buffer(char *readbuffer, char *linebuffer, int linebuflen)
 {
 	char *p, *q;
 	int i;
 	/* find end of line (stopping if linebuflen is too small. */
 	for (p = readbuffer, i = 0;
 		 *p != '\n' && *p != '\0' && i < linebuflen - 1; p++, i++);
+
+	/* gobble \n if it starts the line. */
+	if (*p == '\n') {
+		/* grab the end of line too! and then advance past
+		   the newline */
+		i++;
+		p++;
+	}
 
 	if (i != 0) {
 		/* grab the end of line too! */
