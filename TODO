@@ -39,7 +39,14 @@ these todo items are welcome.
 * Support GSSAPI or SASL authentication
   Authentication using krb5 would be sweet.
 * Unlikely to get done, unless someone volunteers:
-* Support POP over TLS.
+* KDE/Gnome users: Test with KDE or gnome-panel
+  Does Debian bug #108529 apply to wmbiff?  Can wmbiff
+  be swallowed by gnome-panel?  It seems possible.  It 
+  appears to be swallowed by FVWM correctly.
+* Autoconf / Automake Wizards: fix FromCVS.sh
+  How best to deal with libgnutls's macros?  All 
+  I can do is hack.
+* Paranoid Pop People: Support POP over TLS.
   tlsComm.c should make it easy to provide TLS support
   for POP.  Unfortunately, this would only be useful for
   someone who has such a server that doesn't support IMAPS.
@@ -48,7 +55,7 @@ these todo items are welcome.
   If it works, tell us.  Optionally the patch at sourceforge
   could be integrated.
 
-$Id: TODO,v 1.11 2002/04/20 18:15:25 bluehal Exp $
+$Id: TODO,v 1.12 2002/04/27 08:34:14 bluehal Exp $
 
 Local Variables:
 mode: outline
