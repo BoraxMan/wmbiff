@@ -35,6 +35,4 @@ ChangeLog: stamp-h Makefile configure.in
       echo "ChangeLog doesn't seem like a good target. not touching anyway."; \
     fi
 
-#      touch $@; \
-
 
