@@ -1,5 +1,10 @@
 Release Notes
 ~~~~~~~~~~~~~
+Release 0.4.19 - November 8, 2003
+  * Fix test_tlscomm with the right signature for read()
+  * Another bugfix to IMAP msglst when headers are abnormal.
+  * Avoid strcpy for overlapping regions.
+
 Release 0.4.18 - November 8, 2003
   * Update security.debian.rb for ruby 1.8.
   * Bugfix to avoid infinite loop when reading from IMAP.
@@ -449,4 +454,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.52 2003/11/08 21:58:55 bluehal Exp $
+$Id: NEWS,v 1.53 2003/11/09 03:16:47 bluehal Exp $
