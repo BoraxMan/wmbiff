@@ -1,7 +1,6 @@
-  $Log: ChangeLog,v $
-  Revision 1.19  2002/01/27 19:59:01  jordi
-  Released WMBiff 0.3.6.
+2002-01-27 Sunday 19:59 UTC -- Jordi Mallach <jordi@sindominio.net>
 
+	* ChangeLog, NEWS: Released WMBiff 0.3.6.
 
 2002-01-27 Sunday 19:56 UTC -- Jordi Mallach <jordi@sindominio.net>
 
@@ -213,7 +212,7 @@
 	wmbiff/wmbiffrc.5: Backed out hoehoe's patch, preparing to apply
 	Neil's.
 
-2001-09-24 Monday 11:58 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
+2001-09-24 Monday 11:58 UTC -- Jordi Mallach <jordi@sindominio.net>
 
 	* ChangeLog, NEWS, README, wmbiff/ApopClient.c, wmbiff/Client.h,
 	wmbiff/Makefile, wmbiff/sample.wmbiffrc, wmbiff/wmbiff.1,
@@ -221,31 +220,31 @@
 	NAKAYAMA Takao <hoehoe@wakaba.jp>.  Fixed some bits of the manpage
 	(Jordi) Bumped version to 0.3.2.
 
-2001-09-24 Monday 11:56 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
+2001-09-24 Monday 11:56 UTC -- Jordi Mallach <jordi@sindominio.net>
 
 	* maint/prerelease.sh: Removed -t to cvs2cl invocation, to make
 	cleaner ChangeLogs.
 
-2001-06-24 Sunday 18:17 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
+2001-06-24 Sunday 18:17 UTC -- Jordi Mallach <jordi@sindominio.net>
 
 	* ChangeLog, NEWS: Released wmbiff 0.3.1.
 
-2001-06-24 Sunday 18:08 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
+2001-06-24 Sunday 18:08 UTC -- Jordi Mallach <jordi@sindominio.net>
 
 	* ChangeLog, README: Removed duplicate entry for Vladimir Popov in
 	README.
 
-2001-06-23 Saturday 00:09 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
+2001-06-23 Saturday 00:09 UTC -- Jordi Mallach <jordi@sindominio.net>
 
 	* wmbiff/Imap4Client.c: Imap fix from Rob Funk
 
-2001-06-23 Saturday 00:07 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
+2001-06-23 Saturday 00:07 UTC -- Jordi Mallach <jordi@sindominio.net>
 
 	* ChangeLog, NEWS, maint/changelog.sed, maint/prerelease.sh:
 	Renamed CHANGES to ChangeLog and RELEASE-NOTES to NEWS, modified
 	release scripts accordingly. Added Mark to the sed file.
 
-2001-06-22 Friday 23:55 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
+2001-06-22 Friday 23:55 UTC -- Jordi Mallach <jordi@sindominio.net>
 
 	* CHANGES, RELEASE-NOTES: Renamed to NEWS and ChangeLog
 
@@ -278,7 +277,7 @@
 	Belyakov died right after releasing   wmBiff 0.2.  May your soul
 	rest in peace, Gennady.  (Dwayne C. Litzenberger)
 
-2001-06-16 Saturday 01:02 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
+2001-06-16 Saturday 01:02 UTC -- Jordi Mallach <jordi@sindominio.net>
 
 	* ChangeLog, wmbiff/Makefile, wmbiff/sample.wmbiffrc,
 	wmbiff/wmbiff.c: An FHS fix for wmbiff.c and use $(CC) in the
@@ -289,28 +288,28 @@
 	* ChangeLog, wmbiff/Makefile, wmbiff/charutil.c: Committing Mark
 	Hurley's patch
 
-2001-05-16 Wednesday 10:48 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
+2001-05-16 Wednesday 10:48 UTC -- Jordi Mallach <jordi@sindominio.net>
 
 	* ChangeLog, README: Updated some obsolete info in README
 
-2001-05-11 Friday 15:04 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
+2001-05-11 Friday 15:04 UTC -- Jordi Mallach <jordi@sindominio.net>
 
 	* ChangeLog, wmbiff/Imap4Client.c, wmbiff/Makefile,
 	wmbiff/charutil.c, wmbiff/charutil.h, wmbiff/wmbiff.c: Mark's
 	wmbiffrc parsing fix, small Makefile changes and bump version to
 	0.3.0.
 
-2001-05-11 Friday 14:49 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
+2001-05-11 Friday 14:49 UTC -- Jordi Mallach <jordi@sindominio.net>
 
 	* wmbiff/: .cvsignore, Makefile: Uncommitted stuff to deal with the
 	removal of the xmp link
 
-2001-05-04 Friday 11:01 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
+2001-05-04 Friday 11:01 UTC -- Jordi Mallach <jordi@sindominio.net>
 
 	* ChangeLog, wmbiff/Makefile: Updated Changelog and Makefile for
 	0.2r.
 
-2001-05-01 Tuesday 16:11 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
+2001-05-01 Tuesday 16:11 UTC -- Jordi Mallach <jordi@sindominio.net>
 
 	* README.licq, ChangeLog, README, wmgeneral/list.c,
 	wmgeneral/list.h, wmgeneral/misc.c, wmgeneral/misc.h,
@@ -321,7 +320,7 @@
 	wmbiff/LicqClient.c, wmbiff/Pop3Client.c, wmbiff/maildirClient.c,
 	wmbiff/wmbiffrc.5: Initial revision
 
-2001-05-01 Tuesday 16:11 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
+2001-05-01 Tuesday 16:11 UTC -- Jordi Mallach <jordi@sindominio.net>
 
 	* README.licq, ChangeLog, README, wmgeneral/list.c,
 	wmgeneral/list.h, wmgeneral/misc.c, wmgeneral/misc.h,
