@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.22 2002/04/15 01:58:35 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.23 2002/04/15 02:21:22 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -614,10 +614,10 @@ void parse_mbox_path(int item)
 	} else if (!strncasecmp(mbox[item].path, "gicu:", 5)) {	/* gnomeicu check */
 		char buf[255];
 		if (isdigit(mbox[item].path[5])) {
-			sprintf(buf, "shell:::gnomeicu-client -u%s msgcount",
+			sprintf(buf, "shell:::echo `gnomeicu-client -u%s msgcount` new",
 					mbox[item].path + 5);
 		} else {
-			sprintf(buf, "shell:::gnomeicu-client msgcount");
+			sprintf(buf, "shell:::echo `gnomeicu-client msgcount` new");
 		}
 		shellCreate((&mbox[item]), buf);
 	} else if (!strncasecmp(mbox[item].path, "finger:", 7)) {
