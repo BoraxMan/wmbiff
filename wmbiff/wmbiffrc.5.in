@@ -1,5 +1,5 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiffrc.5.in,v 1.15 2003/06/08 06:59:56 bluehal Exp $
+.\" $Id: wmbiffrc.5.in,v 1.16 2003/10/26 08:31:59 bluehal Exp $
 .\"
 .\" @configure_input@
 .\"
@@ -202,12 +202,14 @@ the special keyword "beep" to use the pc speaker.
 \fBaction.n\fP
 Command to be executed on left mouse click on a mailbox label.  
 Accepts
-the special keyword "msglst" to pop up a window of recent message headers.
+the special keyword "msglst" to pop up a window of recent message headers 
+from IMAP or POP3 mailboxes when the left mouse button is held.
 .TP
 \fBbuttontwo.n\fP
 Command to be executed on middle mouse click on a mailbox level.
 Accepts
-the special keyword "msglst" to pop up a window of recent message headers.
+the special keyword "msglst" to pop up a window of 
+recent message headers from IMAP or POP3 mailboxes when the middle mouse button is held.
 .TP
 \fBinterval.n\fP
 Per mailbox check interval. Value is the amount of seconds between
@@ -222,7 +224,8 @@ in seconds.
 Command to be executed to fetch mail. If not specified, fetching through
 wmbiff is disabled completely.
 Accepts
-the special keyword "msglst" to pop up a window of recent message headers,
+the special keyword "msglst" to pop up a window of recent message headers 
+from IMAP and POP3 mailboxes when the right mouse button is held down,
 though not when fetchinterval is nonzero.
 .TP
 \fBdebug.n\fP 

@@ -1,4 +1,4 @@
-/* $Id: Pop3Client.c,v 1.17 2003/03/02 02:17:14 bluehal Exp $ */
+/* $Id: Pop3Client.c,v 1.18 2003/10/26 08:31:59 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -17,6 +17,7 @@
 #include "Client.h"
 #include "charutil.h"
 #include "regulo.h"
+#include "MessageList.h"
 
 #ifdef USE_DMALLOC
 #include <dmalloc.h>
@@ -35,6 +36,14 @@ static FILE *authenticate_apop( /*@notnull@ */ Pop3 pc, FILE * fp,
 #endif
 static FILE *authenticate_plaintext( /*@notnull@ */ Pop3 pc, FILE * fp,
 									char *unused);
+
+void pop3_cacheHeaders( /*@notnull@ */ Pop3 pc);
+
+extern void imap_releaseHeaders(Pop3 pc
+								__attribute__ ((unused)),
+								struct msglst *h);
+
+extern struct connection_state *state_for_pcu(Pop3 pc);
 
 static struct authentication_method {
 	const char *name;
@@ -155,6 +164,18 @@ int pop3CheckMail( /*@notnull@ */ Pop3 pc)
 	return 0;
 }
 
+
+struct msglst *pop_getHeaders( /*@notnull@ */ Pop3 pc)
+{
+	if (pc->headerCache == NULL)
+		pop3_cacheHeaders(pc);
+	if (pc->headerCache != NULL)
+		pc->headerCache->in_use = 1;
+	return pc->headerCache;
+}
+
+
+
 int pop3Create(Pop3 pc, const char *str)
 {
 	/* POP3 format: pop3:user:password@server[:port] */
@@ -221,10 +242,12 @@ int pop3Create(Pop3 pc, const char *str)
 	POP_DM(pc, DEBUG_INFO, "authList= '%s'\n", PCU.authList);
 
 	pc->checkMail = pop3CheckMail;
+	pc->getHeaders = pop_getHeaders;
 	pc->TotalMsgs = 0;
 	pc->UnreadMsgs = 0;
 	pc->OldMsgs = -1;
 	pc->OldUnreadMsgs = -1;
+
 	return 0;
 }
 
@@ -366,6 +389,61 @@ static FILE *authenticate_plaintext( /*@notnull@ */ Pop3 pc,
 	};
 
 	return fp;
+}
+
+void pop3_cacheHeaders( /*@notnull@ */ Pop3 pc)
+{
+	char buf[BUF_SIZE];
+	FILE *f;
+	int i;
+
+	if (pc->headerCache != NULL) {
+		/* decrement the reference count, and free our version */
+		imap_releaseHeaders(pc, pc->headerCache);
+		pc->headerCache = NULL;
+	}
+
+	POP_DM(pc, DEBUG_INFO, "working headers\n");
+	/* login the server */
+	f = pop3Login(pc);
+	if (!f)
+		return;
+	/* pc->UnreadMsgs = pc->TotalMsgs - read; */
+	pc->headerCache = NULL;
+	for (i = pc->TotalMsgs - pc->UnreadMsgs + 1; i <= pc->TotalMsgs; ++i) {
+		struct msglst *m;
+		m = malloc(sizeof(struct msglst));
+
+		m->subj[0] = '\0';
+		m->from[0] = '\0';
+		POP_DM(pc, DEBUG_INFO, "search: %s", buf);
+
+		fprintf(f, "TOP %i 0\r\n", i);
+		fflush(f);
+		while (fgets(buf, 256, f) && buf[0] != '.') {
+			if (!strncmp(buf, "From: ", 6)) {
+				/* manage the from in heads */
+				strncpy(m->from, buf + 6, FROM_LEN - 1);
+				m->from[FROM_LEN - 1] = '\0';
+			} else if (!strncmp(buf, "Subject: ", 9)) {
+				/* manage subject */
+				strncpy(m->subj, buf + 9, SUBJ_LEN - 1);
+				m->subj[SUBJ_LEN - 1] = '\0';
+			}
+			if (!m->subj[0]) {
+				strncpy(m->subj, "[NO SUBJECT]", 14);
+			}
+			if (!m->from[0]) {
+				strncpy(m->from, "[ANONYMOUS]", 14);
+			}
+		}
+		m->next = pc->headerCache;
+		pc->headerCache = m;
+		pc->headerCache->in_use = 0;
+	}
+	fprintf(f, "QUIT\r\n");
+	fflush(f);
+	fclose(f);
 }
 
 /* vim:set ts=4: */
