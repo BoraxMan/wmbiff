@@ -190,7 +190,8 @@ int test_imap4creator(void)
 	CKINT(m.u.pop_imap.serverPort, 143);
 
 	if (imap4Create(&m, "imap:foo:@192.168.1.1/\"mybox\"")) {
-        printf("FAILED: to create IMAP box with IP address for servername\n");
+		printf
+			("FAILED: to create IMAP box with IP address for servername\n");
 		return 1;
 	}
 	CKSTRING(m.path, "\"mybox\"");
@@ -325,58 +326,60 @@ int test_getline_from_buffer(void)
 	return (0);
 }
 
-int test_charutil(void) {
-    
-    char *v = strdup("abc#def");
-    
-    StripComment(v);
-    if(strcmp(v, "abc#def") != 0) {
-        printf("FAILURE: comment stripper stripped when it shouldn't\n");
-        return 1;
-    }
+int test_charutil(void)
+{
 
-    v = strdup("abc #def");
-    
-    StripComment(v);
-    if(strcmp(v, "abc ") != 0) {
-        printf("FAILURE: comment stripper should've stripped\n");
-        return 1;
-    }
+	char *v = strdup("abc#def");
 
-    
-    return 0;
+	StripComment(v);
+	if (strcmp(v, "abc#def") != 0) {
+		printf("FAILURE: comment stripper stripped when it shouldn't\n");
+		return 1;
+	}
+
+	v = strdup("abc #def");
+
+	StripComment(v);
+	if (strcmp(v, "abc ") != 0) {
+		printf("FAILURE: comment stripper should've stripped\n");
+		return 1;
+	}
+
+
+	return 0;
 }
 
 #include <netinet/in.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-int test_sock_connect(void) {
-    struct sockaddr_in addr;
-    int s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    int addrlen = sizeof(struct sockaddr_in);
-    if( s < 0 ) {
-        perror("socket");
-        return 1;
-    }
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = 0;
-    addr.sin_port = 0;
-    if( bind(s, &addr, sizeof(struct sockaddr_in)) < 0 ) {
-        perror("bind");
-        return 1;
-    }
-    getsockname(s, &addr, &addrlen);
-    if( listen(s,5) < 0 ) {
-        perror("listen");
-        return 1;
-    }
-    if( sock_connect("127.0.0.1", htons(addr.sin_port)) < 0) {
-        return 1;
-    }
-    if( sock_connect("localhost", htons(addr.sin_port)) < 0) {
-        return 1;
-    }
-    return 0;
+int test_sock_connect(void)
+{
+	struct sockaddr_in addr;
+	int s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	int addrlen = sizeof(struct sockaddr_in);
+	if (s < 0) {
+		perror("socket");
+		return 1;
+	}
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = 0;
+	addr.sin_port = 0;
+	if (bind(s, &addr, sizeof(struct sockaddr_in)) < 0) {
+		perror("bind");
+		return 1;
+	}
+	getsockname(s, &addr, &addrlen);
+	if (listen(s, 5) < 0) {
+		perror("listen");
+		return 1;
+	}
+	if (sock_connect("127.0.0.1", htons(addr.sin_port)) < 0) {
+		return 1;
+	}
+	if (sock_connect("localhost", htons(addr.sin_port)) < 0) {
+		return 1;
+	}
+	return 0;
 }
 
 

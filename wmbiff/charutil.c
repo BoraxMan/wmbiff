@@ -1,4 +1,4 @@
-/* $Id: charutil.c,v 1.18 2004/04/20 04:55:46 bluehal Exp $ */
+/* $Id: charutil.c,v 1.19 2004/04/28 00:19:03 bluehal Exp $ */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -244,9 +244,10 @@ char *strdup_ordie(const char *c)
 	return (ret);
 }
 
-void StripComment(char *buf) {
-    char *p;
-    
+void StripComment(char *buf)
+{
+	char *p;
+
 	/* Strip comments at beginning of line, or after whitespace.  
 	   a kludgy way of avoiding problems with #'s in passwords. */
 	if (buf[0] == '#')

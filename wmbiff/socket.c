@@ -1,4 +1,4 @@
-/* $Id: socket.c,v 1.11 2004/04/28 00:18:18 bluehal Exp $ */
+/* $Id: socket.c,v 1.12 2004/04/28 00:19:03 bluehal Exp $ */
 /* Copyright (C) 1998 Trent Piepho  <xyzzy@u.washington.edu>
  *           (C) 1999 Trent Piepho  <xyzzy@speakeasy.org>
  *
@@ -42,15 +42,16 @@
 extern int Relax;
 static int sanity_check_hostname(const char *hostname)
 {
-    struct in_addr dummy;
+	struct in_addr dummy;
 	return (Relax
 			|| regulo_match("^[A-Za-z][-_A-Za-z0-9.]+$", hostname, NULL)
-            || inet_aton(hostname, &dummy));
+			|| inet_aton(hostname, &dummy));
 }
 
-static int ipv4_sock_connect(struct in_addr *address, short port) {
+static int ipv4_sock_connect(struct in_addr *address, short port)
+{
 	struct sockaddr_in addr;
-    int fd, i;
+	int fd, i;
 	fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (fd == -1) {
 		perror("Error opening socket");
@@ -83,7 +84,7 @@ int sock_connect(const char *hostname, int port)
 {
 #ifdef HAVE_GETADDRINFO
 	struct addrinfo hints, *res, *res0;
-    struct sockaddr_in addr;
+	struct sockaddr_in addr;
 	int fd;
 	char pbuf[NI_MAXSERV];
 	int error;
@@ -96,10 +97,10 @@ int sock_connect(const char *hostname, int port)
 		return -1;
 	}
 
-    /* we were given an IP address, no need to try getaddrinfo on it */
-    if(inet_aton(hostname, &addr.sin_addr)) {
-        return ipv4_sock_connect(&addr.sin_addr, port);
-    }
+	/* we were given an IP address, no need to try getaddrinfo on it */
+	if (inet_aton(hostname, &addr.sin_addr)) {
+		return ipv4_sock_connect(&addr.sin_addr, port);
+	}
 
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_socktype = SOCK_STREAM;
@@ -155,7 +156,7 @@ int sock_connect(const char *hostname, int port)
 		return (-1);
 	};
 
-    return ipv4_sock_connect(host->h_addr_list[0], port);
+	return ipv4_sock_connect(host->h_addr_list[0], port);
 
 #endif
 }

@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.62 2004/04/20 04:55:55 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.63 2004/04/28 00:19:03 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -162,7 +162,7 @@ static int ReadLine(FILE * fp, /*@out@ */ char *setting,
 		buf[len - 1] = '\0';	/* strip linefeed */
 	}
 
-    StripComment(buf);
+	StripComment(buf);
 
 	if (!(p = strtok(buf, "=")))
 		return -1;
