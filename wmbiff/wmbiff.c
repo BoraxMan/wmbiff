@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.15 2002/03/02 23:25:08 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.16 2002/03/06 07:15:08 bluehal Exp $ */
 
 #define	USE_POLL
 
@@ -480,6 +480,17 @@ void parse_mbox_path(int item)
 {
 	if (!strncasecmp(mbox[item].path, "pop3:", 5)) {	/* pop3 account */
 		pop3Create((&mbox[item]), mbox[item].path);
+	} else if (!strncasecmp(mbox[item].path, "shell:", 6)) {	/* generic cmd */
+		shellCreate((&mbox[item]), mbox[item].path);
+	} else if (!strncasecmp(mbox[item].path, "gicu:", 5)) {	/* gnomeicu check */
+		char buf[255];
+		if (isdigit(mbox[item].path[5])) {
+			sprintf(buf, "shell:::gnomeicu-client -u%s msgcount",
+					mbox[item].path + 5);
+		} else {
+			sprintf(buf, "shell:::gnomeicu-client msgcount");
+		}
+		shellCreate((&mbox[item]), buf);
 	} else if (!strncasecmp(mbox[item].path, "licq:", 5)) {	/* licq history file */
 		licqCreate((&mbox[item]), mbox[item].path);
 	} else if (!strncasecmp(mbox[item].path, "imap:", 5) ||	/* imap4 account */

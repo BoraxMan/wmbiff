@@ -1,6 +1,6 @@
 # Makefile for wmbiff
 #
-# $Id: Makefile,v 1.26 2002/03/02 23:25:08 bluehal Exp $
+# $Id: Makefile,v 1.27 2002/03/06 07:15:08 bluehal Exp $
 
 # Disable gnutls crypto?
 #WITHOUT_CRYPTO=	1
@@ -74,6 +74,7 @@ INSTALL_FILE?=	$(INSTALL) -p -o $(INSTALL_USER) -g $(INSTALL_GROUP) -m 644
 OBJS =	wmbiff.o socket.o \
 	Pop3Client.o LicqClient.o mboxClient.o \
 	maildirClient.o Imap4Client.o tlsComm.o \
+	ShellClient.o \
 	../wmgeneral/wmgeneral.o \
 	../wmgeneral/misc.o \
 	../wmgeneral/list.o \

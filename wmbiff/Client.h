@@ -1,9 +1,9 @@
-/* $Id: Client.h,v 1.10 2002/03/02 22:38:03 bluehal Exp $ */
+/* $Id: Client.h,v 1.11 2002/03/06 07:15:08 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
  *
- * Email Checker Pop3/Imap4/Licq/mbox/maildir
+ * Email Checker Pop3/Imap4/Licq/Gicu/mbox/maildir
  *
  * Last Updated : Mar 20, 05:32:35 CET 2001     
  *
@@ -83,6 +83,7 @@ int sock_connect(const char *hostname, int port);
 int pop3Create(Pop3 pc, const char *str);
 int imap4Create(Pop3 pc, const char *str);
 int licqCreate(Pop3 pc, char *str);
+int shellCreate(Pop3 pc, const char *str);
 int mboxCreate(Pop3 pc, char *str);
 int maildirCreate(Pop3 pc, char *str);
 FILE *openMailbox(Pop3 pc);
@@ -117,8 +118,8 @@ do { \
 /* technique used in apache to allow GCC's attribute tags,
    without requiring gcc as the compiler */
 #if !defined(__GNUC__) || __GNUC__ < 2 || \
-  (__GNUC__ == 2 && __GNUC_MINOR__ < 7) 
-#define __attribute__(__x)             
-#endif /* gnuc */
-#endif /* client.h */
+  (__GNUC__ == 2 && __GNUC_MINOR__ < 7)
+#define __attribute__(__x)
+#endif							/* gnuc */
+#endif							/* client.h */
 /* vim:set ts=4: */

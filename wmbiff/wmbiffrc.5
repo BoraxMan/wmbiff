@@ -1,5 +1,5 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiffrc.5,v 1.9 2002/03/01 08:41:29 bluehal Exp $
+.\" $Id: wmbiffrc.5,v 1.10 2002/03/06 07:15:08 bluehal Exp $
 .\"
 .\" wmbiff.1 and wmbiffrc.5 are copyright 1999-2002 by 
 .\" Jordi Mallach <jordi@debian.org>
@@ -105,6 +105,25 @@ number of messages in it. It just needs a path to a given licq history file.
 .RS
 licq:/path/to/.licq/history/file.history
 .RE
+.TP
+.I gicu
+With this box type, wmbiff will ask gnomeicu for the number
+of pending messages.  If gnomeicu is not running, nothing
+will be displayed.  gnomeicu-client must be in your path.
+The user's icq UIN is optional.
+.RS
+gicu:[UIN]
+.RE
+.TP
+.I shell
+With this EXPERIMENTAL keyword, wmbiff will launch the
+specified shell command and read its output (STDOUT)
+expecting an integer number to be displayed as a count
+of new messages.   The behavior of this experimental
+keyword is likely to change in future revisions.
+.RS
+shell:::/path/to/command
+.RE
 .RE
 .TP
 \fBnotify.n\fP
@@ -164,7 +183,7 @@ wmbiff(1) for details.
 .SH FILES
 .TP
 .I ~/.wmbiffrc
-peruser wmbiff configuration file.
+per-user wmbiff configuration file.
 
 .SH AUTHOR
 This manual page was written by Jordi Mallach <jordi@debian.org>,

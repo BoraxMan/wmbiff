@@ -1,4 +1,4 @@
-# $Id: sample.wmbiffrc,v 1.7 2001/11/23 15:53:17 jordi Exp $
+# $Id: sample.wmbiffrc,v 1.8 2002/03/06 07:15:08 bluehal Exp $
 #
 # See wmbiffrc(5) for more info.
 #
@@ -53,6 +53,12 @@ label.2=LICQ
 path.2=licq:/home/person/.licq/history/1111111.history
 notify.2=beep
 action.2=licq&
+
+#or if you use gnomeicu:
+#label.2=ICQ
+#path.2=gicu:USER_UIN
+#notify.2=beep
+#action.2=gnomeicu-client show
 
 label.3=POP3
 # pop3 format: pop3:user:password@server[:port] [auth]
