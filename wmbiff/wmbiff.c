@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.25 2002/04/16 07:37:38 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.26 2002/06/01 06:01:43 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -57,6 +57,8 @@ const char *skin_filename = "wmbiff-master-led.xpm";
 /* / is there in case a user wants to specify a complete path */
 /* . is there for development. */
 const char *skin_search_path = DEFAULT_SKIN_PATH;
+/* for gnutls */
+const char *certificate_filename = NULL;	/* not yet supported */
 
 int ReadLine(FILE *, char *, char *, int *);
 int Read_Config_File(char *, int *);
@@ -250,8 +252,6 @@ static int wmbiffrc_permissions_check(const char *wmbiffrc_fname)
 	return (1);
 }
 
-
-
 void do_biff(int argc, char **argv)
 {
 	int i;
@@ -267,6 +267,7 @@ void do_biff(int argc, char **argv)
 
 	if (skin_file_path != NULL) {
 		skin_xpm = (const char **) LoadXPM(skin_file_path);
+		free(skin_file_path);
 	}
 	if (skin_xpm == NULL) {
 		DMA(DEBUG_ERROR, "using built-in xpm; %s wasn't found in %s\n",
@@ -285,6 +286,8 @@ void do_biff(int argc, char **argv)
 	AddMouseRegion(2, 5, 26, 58, 36);
 	AddMouseRegion(3, 5, 36, 58, 46);
 	AddMouseRegion(4, 5, 46, 58, 56);
+
+	loadFont("-*-fixed-*-r-*-*-10-*-*-*-*-*-*-*");
 
 #if 0
 	copyXPMArea(39, 84, (3 * CHAR_WIDTH), 8, 39, 5);
@@ -503,6 +506,12 @@ static void BlitString(const char *name, int x, int y, int new)
 {
 	int i, c, k = x;
 
+#if 0
+	/* an alternate behavior - draw the string using a font
+	   instead of the pixmap.  should allow pretty colors */
+	drawString(x, y + CHAR_HEIGHT, name, new ? "yellow" : "cyan", 0);
+#else
+	/* normal, LED-like behavior. */
 	for (i = 0; name[i]; i++) {
 		c = toupper(name[i]);
 		if (c >= 'A' && c <= 'Z') {	/* it's a letter */
@@ -522,6 +531,7 @@ static void BlitString(const char *name, int x, int y, int new)
 			k += (CHAR_WIDTH + 1);
 		}
 	}
+#endif
 }
 
 /* Blits number to give coordinates.. two 0's, right justified */
@@ -537,7 +547,12 @@ void BlitNum(int num, int x, int y, int new)
 
 	sprintf(buf, "%02i", num);
 
+#if 1
+	drawString(x + (CHAR_WIDTH * 2 + 4), y + CHAR_HEIGHT, buf,
+			   new ? "yellow" : "cyan", 1);
+#else
 	BlitString(buf, newx, y, new);
+#endif
 }
 
 void ClearDigits(int i)
@@ -669,6 +684,8 @@ int Read_Config_File(char *filename, int *loopinterval)
 			}
 		} else if (!strcmp(setting, "skinfile")) {
 			skin_filename = strdup(value);
+		} else if (!strcmp(setting, "certfile")) {	/* not yet supported */
+			certificate_filename = strdup(value);
 		} else if (mbox_index == -1)
 			continue;			/* Didn't read any setting.[0-5] value */
 		/* now only local settings */
@@ -839,3 +856,10 @@ void printversion(void)
 }
 
 /* vim:set ts=4: */
+/*
+ * Local Variables:
+ * tab-width: 4
+ * c-indent-level: 4
+ * c-basic-offset: 4
+ * End:
+ */
