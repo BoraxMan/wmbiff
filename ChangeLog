@@ -6,13 +6,40 @@ The latest changelog entry is in a different format, because it's inserted by
 CVS on commit.
 
   $Log: ChangeLog,v $
-  Revision 1.25  2002/04/15 01:47:09  bluehal
-  0.4.0pre4 - finger support, text from shell support, minor code reorganization
+  Revision 1.26  2002/04/15 08:15:18  bluehal
+  try to make the distcheck target work correctly.  voodoo.
 
   Revision 1.1  2002/04/07 05:08:23  bluehal
   use automake / autoconf; after checkout run ./FromCVS.sh
 
 
+
+2002-04-15 Monday 02:21 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiff.c: treat  all gicu messages as new (they're unread)
+
+2002-04-15 Monday 02:10 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* configure.in: chmod 0444 wmbiffrc.5 to remind me not to try to
+	edit it.
+
+2002-04-15 Monday 02:09 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiffrc.5.in: document finger, changes to shell
+
+2002-04-15 Monday 01:58 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: ShellClient.c, wmbiff.c: waitpid until done
+
+2002-04-15 Monday 01:48 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* configure.in: slightly nicer message
+
+2002-04-15 Monday 01:47 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* ChangeLog, configure.in, wmbiff/wmbiff-master-contrast.xpm:
+	0.4.0pre4 - finger support, text from shell support, minor code
+	reorganization
 
 2002-04-15 Monday 01:38 UTC -- Neil Spring <nspring@cs.washington.edu>
 

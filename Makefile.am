@@ -1,5 +1,5 @@
-SUBDIRS = wmgeneral wmbiff 
-EXTRA_DIST = autoconf README.licq TODO
+SUBDIRS = wmgeneral wmbiff autoconf
+EXTRA_DIST = README.licq TODO
 
 AUTOHEADER = @AUTOHEADER@ -l autoconf
 
@@ -32,8 +32,9 @@ ChangeLog: stamp-h Makefile configure.in
 		exit 1; \
 	  fi; \
 	else \
-      echo "ChangeLog doesn't seem like a good target. touching anyway."; \
-      touch $@; \
+      echo "ChangeLog doesn't seem like a good target. not touching anyway."; \
     fi
+
+#      touch $@; \
 
 

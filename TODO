@@ -1,9 +1,8 @@
 - Store and verify server certificates.
-- Add a FAQ (sighup, app size, deleted messages)
-- Make the shell method support old messages too
+- Runtime back-tick expansion
+- \ line continuations in configuration file.
+- Remove (*open)() from mbox_t
 - Add more shell "recipes" besides gicu.
-- Support "skins" or soft-configurable xpms for,
-   for example, 8bpp displays or non 64x64 appsizes.
 - Support on/off status LED's, for, for example,
    grep eth0 /proc/net/dev | wc -l
 - Add a failure-expect case in tlsComm. For example,
@@ -11,4 +10,4 @@
    and a bad response (a003 NO STATUS).  As soon as 
    one of them is received, we're done.
 
-$Id: TODO,v 1.5 2002/04/07 05:08:23 bluehal Exp $
+$Id: TODO,v 1.6 2002/04/15 08:15:18 bluehal Exp $
