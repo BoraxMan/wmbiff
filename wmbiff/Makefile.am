@@ -8,7 +8,7 @@ man_MANS = wmbiff.1 wmbiffrc.5
 skindir = $(datadir)/wmbiff/skins
 skin_DATA = wmbiff-master-led.xpm wmbiff-master-contrast.xpm
 
-EXTRA_DIST = $(man_MANS) sample.wmbiffrc
+EXTRA_DIST = $(man_MANS) sample.wmbiffrc $(skin_DATA)
 
 MAINTAINERCLEANFILES = Makefile.in
 
