@@ -169,15 +169,15 @@ FILE *imap_open(Pop3 pc)
 		IMAP_DM(pc, DEBUG_ERROR, "Couldn't connect to %s:%d: %s\n",
 				PCU.serverName, PCU.serverPort, strerror(errno));
 		if (errno == ETIMEDOUT) {
-          /* temporarily bump the interval, in a crude way:
-           fast forward time so that the mailbox isn't
-           checked for a while. */
-           pc->prevtime = time(0) + 60 * 5; /* now + 60 seconds * 5 minutes */
-          /* TCP's retry (how much time has elapsed while
-             the connect times out) is around 3 minutes;
-             here we just try to allow checking local
-             mailboxes more often while remote things are
-             unavailable or disconnected.  */
+			/* temporarily bump the interval, in a crude way:
+			   fast forward time so that the mailbox isn't
+			   checked for a while. */
+			pc->prevtime = time(0) + 60 * 5;	/* now + 60 seconds * 5 minutes */
+			/* TCP's retry (how much time has elapsed while
+			   the connect times out) is around 3 minutes;
+			   here we just try to allow checking local
+			   mailboxes more often while remote things are
+			   unavailable or disconnected.  */
 		}
 		return NULL;
 	}
@@ -442,8 +442,7 @@ static int authenticate_plaintext( /*@notnull@ */ Pop3 pc,
 
 #ifdef HAVE_GCRYPT_H
 static int authenticate_md5(Pop3 pc,
-							struct connection_state *scs,
-							const char *capabilities)
+				 struct connection_state *scs, const char *capabilities)
 {
 	char buf[BUF_SIZE];
 	char buf2[BUF_SIZE];
