@@ -1,6 +1,13 @@
 This is not a prioritized list.  Patches that accomplish
 these todo items are welcome.
 
+* Font support
+** Allow a new color other than yellow
+** Allow a background color other than black
+** Allow a different label color
+** Erase counts > 1000 successfully (redraw the whole line)
+** Discover height of the font, scale appropriately.
+** Draw relative to symbolic width, height.
 * Finish checking .wmbiffrc permissions.
   With shell command execution support, it is even more
   important to protect against other/group writability.
@@ -78,7 +85,7 @@ these todo items are welcome.
   If it works, tell us.  Optionally the patch at sourceforge
   could be integrated.
 
-$Id: TODO,v 1.15 2002/06/01 05:52:35 bluehal Exp $
+$Id: TODO,v 1.16 2002/06/13 07:15:46 bluehal Exp $
 
 Local Variables:
 mode: outline
