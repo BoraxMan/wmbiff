@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.50 2003/03/02 02:17:15 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.51 2003/03/06 21:15:15 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -328,7 +328,7 @@ static void init_biff(char *config_file)
 	int loopinterval = DEFAULT_LOOP;
 	unsigned int i;
 
-	for (i = 0; i < num_mailboxes; i++) {
+	for (i = 0; i < MAX_NUM_MAILBOXES; i++) {
 		mbox[i].label[0] = '\0';
 		mbox[i].path[0] = '\0';
 		mbox[i].notify[0] = '\0';
