@@ -1,3 +1,24 @@
+  $Log: ChangeLog,v $
+  Revision 1.21  2002/02/03 22:48:19  jordi
+  Released WMBiff 0.3.7.
+
+
+2002-02-03 Sunday 22:43 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* wmbiff/Makefile: Bumped WMBIFF_VERSION to 0.3.7.
+
+2002-02-02 Saturday 18:04 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* NEWS, wmbiff/Client.h, wmbiff/Imap4Client.c, wmbiff/Makefile,
+	wmbiff/Pop3Client.c, wmbiff/charutil.h: Makefile fixes from Simon
+	L. Nielsen, which help building wmbiff in FreeBSD.  Fixed the
+	previous IMAP regex patch.
+
+2002-01-27 Sunday 20:20 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, maint/changelog.sed, maint/prerelease.sh: Some fixes
+	for the maint scripts.
+
 2002-01-27 Sunday 19:59 UTC -- Jordi Mallach <jordi@sindominio.net>
 
 	* ChangeLog, NEWS: Released WMBiff 0.3.6.
