@@ -1,10 +1,10 @@
-/* $Id: LicqClient.c,v 1.7 2002/04/16 07:37:38 bluehal Exp $ */
+/* $Id: LicqClient.c,v 1.8 2002/04/20 07:53:20 bluehal Exp $ */
 /* Author : Yong-iL Joh ( tolkien@mizi.com )
    Modified: Jorge García ( Jorge.Garcia@uv.es )
  * 
  * LICQ checker.
  *
- * Last Updated : Mar 20, 05:32:35 CET 2001     
+ * Last Updated : $Date: 2002/04/20 07:53:20 $
  *
  */
 
@@ -20,51 +20,40 @@
 
 int licqCheckHistory(Pop3 pc)
 {
-	struct stat st;
 	struct utimbuf ut;
-	FILE *F;
-	int count_status = 0;
-	char buf[1024];
 
 	DM(pc, DEBUG_INFO, ">Mailbox: '%s'\n", pc->path);
 
-	/* licq file */
-	if (stat(pc->path, &st)) {
-		DM(pc, DEBUG_ERROR, "Can't stat mailbox '%s': %s\n",
-		   pc->path, strerror(errno));
-		return -1;				/* Error stating mailbox */
-	}
+    if(fileHasChanged(pc->path, &ut.actime, &PCM.mtime, &PCM.size) 
+       || pc->OldMsgs < 0) {
+        FILE *F;
+        char buf[1024];
+        int count_status = 0;
 
-	if (st.st_mtime != PCM.mtime || st.st_size != PCM.size
-		|| pc->OldMsgs < 0) {
 		/* file was changed OR initially read */
-		DM(pc, DEBUG_INFO,
-		   "  was changed,"
-		   " TIME: old %lu, new %lu"
-		   " SIZE: old %lu, new %lu\n",
-		   PCM.mtime, (unsigned long) st.st_mtime,
-		   (unsigned long) PCM.size, (unsigned long) st.st_size);
-		ut.actime = st.st_atime;
-		ut.modtime = st.st_mtime;
-		F = openMailbox(pc);
+		DM(pc, DEBUG_INFO, "  was changed,"
+		   " TIME: new %lu SIZE: new %lu\n",
+		   PCM.mtime, (unsigned long) PCM.size);
 
+        F = openMailbox(pc, pc->path);
 		/* count message */
 		while (fgets(buf, BUF_SIZE, F)) {
 			if ((buf[0] == '[') || (buf[0] == '-')) {	/* new, or old licq */
 				count_status++;
 			}
 		}
+		fclose(F);
+
 		pc->TotalMsgs = count_status * 2;
 		pc->UnreadMsgs = pc->TotalMsgs - count_status;
 		DM(pc, DEBUG_INFO, "from: %d status: %d\n", pc->TotalMsgs,
 		   pc->UnreadMsgs);
 
-		fclose(F);
-
+		/* Not clear that resetting the mtime is useful, as mutt
+           is not involved.  Unfortunately, I can't tell whether
+           this cut-and-pasted code is useful */
+		ut.modtime = PCM.mtime;
 		utime(pc->path, &ut);
-		/* Reset atime for MUTT and something others correctly work */
-		PCM.mtime = st.st_mtime;	/* Store new mtime */
-		PCM.size = st.st_size;	/* Store new size */
 	}
 
 	return 0;
@@ -89,3 +78,10 @@ int licqCreate(Pop3 pc, char *str)
 }
 
 /* vim:set ts=4: */
+/*
+ * Local Variables:
+ * tab-width: 4
+ * c-indent-level: 4
+ * c-basic-offset: 4
+ * End:
+ */
