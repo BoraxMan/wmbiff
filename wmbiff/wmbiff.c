@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.55 2003/06/08 06:59:45 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.56 2003/07/03 00:53:32 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -907,7 +907,7 @@ static void restart_wmbiff(int sig
 static void do_biff(int argc, const char **argv)
 {
 	unsigned int i;
-	int but_pressed_region = -1;
+	static int but_pressed_region = -1;	/* static so click can be determined */
 	int but_released_region = -1;
 	time_t curtime;
 	int Sleep_Interval;
@@ -1019,8 +1019,8 @@ static void do_biff(int argc, const char **argv)
 			case ButtonRelease:
 				but_released_region =
 					CheckMouseRegion(Event.xbutton.x, Event.xbutton.y);
-				if (but_pressed_region == (int) i
-					&& but_pressed_region >= 0) {
+				if (but_released_region == but_pressed_region
+					&& but_released_region >= 0) {
 					const char *click_action;
 
 					switch (Event.xbutton.button) {
@@ -1044,6 +1044,8 @@ static void do_biff(int argc, const char **argv)
 					}
 					if (click_action != NULL && click_action[0] != '\0'
 						&& strcmp(click_action, "msglst")) {
+						DM(&mbox[but_released_region], DEBUG_INFO,
+						   "running: %s", click_action);
 						(void) execCommand(click_action);
 					}
 				}
