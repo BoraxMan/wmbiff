@@ -1,4 +1,4 @@
-WMBIFF_VERSION="0.3.0"
+WMBIFF_VERSION="0.3.1"
 DESTDIR=
 prefix=/usr/local
 bindir=${prefix}/bin
@@ -28,7 +28,7 @@ INSTALL_FILE 	= $(INSTALL) -p -o root -g root -m 644
 
 
 .c.o:
-	gcc  $(CFLAGS) $(EXTRAFLAGS) -c $< -o $*.o
+	gcc $(CFLAGS) $(EXTRAFLAGS) -c $< -o $*.o
 
 all: wmbiff-master.xpm wmbiff
 
