@@ -38,7 +38,7 @@ void asprintf( /*@out@ */ char **out, char *fmt, ...);
    number of different mailboxes displayed. */
 #define FDMAP_SIZE 5
 static struct fdmap_struct {
-	const char *user_password_server_port;	/* tuple, in string form */
+	char *user_password_server_port;	/* tuple, in string form */
 	/*@owned@ */ struct connection_state *cs;
 } fdmap[FDMAP_SIZE];
 
@@ -121,7 +121,7 @@ struct connection_state *unbind( /*@returned@ */ struct connection_state
 
 	for (i = 0; i < FDMAP_SIZE && fdmap[i].cs != scs; i++);
 	if (i < FDMAP_SIZE) {
-		free((char *) fdmap[i].user_password_server_port);
+		free(fdmap[i].user_password_server_port);
 		retval = fdmap[i].cs;
 		fdmap[i].cs = NULL;
 	}

@@ -1,6 +1,6 @@
 # Makefile for wmbiff
 #
-# $Id: Makefile,v 1.25 2002/03/02 06:31:38 bluehal Exp $
+# $Id: Makefile,v 1.26 2002/03/02 23:25:08 bluehal Exp $
 
 # Disable gnutls crypto?
 #WITHOUT_CRYPTO=	1
@@ -34,7 +34,7 @@ INSTALL_GROUP=	root
 # Debugging
 ifdef DEBUG
 CFLAGS=		-g -Wall -Wpointer-arith -Wwrite-strings \
--W -Wtraditional
+-W -Wtraditional -Wshadow -Wcast-qual
 #-pedantic  -Wmissing-noreturn
 endif
 

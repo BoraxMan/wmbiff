@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.14 2002/03/02 06:36:33 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.15 2002/03/02 23:25:08 bluehal Exp $ */
 
 #define	USE_POLL
 
@@ -426,7 +426,7 @@ void ClearDigits(int i)
 	index takes its value... if not index will get -1 
 	Returns -1 if no setting=value
 */
-int ReadLine(FILE * fp, char *setting, char *value, int *index)
+int ReadLine(FILE * fp, char *setting, char *value, int *mbox_index)
 {
 	char buf[BUF_SIZE];
 	char *p, *q;
@@ -467,12 +467,12 @@ int ReadLine(FILE * fp, char *setting, char *value, int *index)
 		aux = setting[len] - 48;
 		if (aux > -1 && aux < 5) {
 			setting[len] = 0;
-			*index = aux;
+			*mbox_index = aux;
 		}
 	} else
-		*index = -1;
+		*mbox_index = -1;
 
-	DMA(DEBUG_INFO, "@%s.%d=%s@\n", setting, *index, value);
+	DMA(DEBUG_INFO, "@%s.%d=%s@\n", setting, *mbox_index, value);
 	return 1;
 }
 
