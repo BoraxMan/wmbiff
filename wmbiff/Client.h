@@ -1,4 +1,4 @@
-/* $Id: Client.h,v 1.9 2002/03/02 05:58:16 bluehal Exp $ */
+/* $Id: Client.h,v 1.10 2002/03/02 22:38:03 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -114,5 +114,11 @@ do { \
   } \
 } while(0)
 
-#endif
+/* technique used in apache to allow GCC's attribute tags,
+   without requiring gcc as the compiler */
+#if !defined(__GNUC__) || __GNUC__ < 2 || \
+  (__GNUC__ == 2 && __GNUC_MINOR__ < 7) 
+#define __attribute__(__x)             
+#endif /* gnuc */
+#endif /* client.h */
 /* vim:set ts=4: */
