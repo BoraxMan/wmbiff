@@ -1,6 +1,8 @@
 SUBDIRS = wmgeneral wmbiff autoconf
 EXTRA_DIST = README.licq TODO FAQ
 
+ACLOCAL_FLAGS = -I autoconf
+
 ## no longer needed AUTOHEADER = @AUTOHEADER@ -l autoconf
 
 # make maintainer-clean is all about returning to CVS.

@@ -36,16 +36,22 @@ else
     fi
 fi
 
-if [ -e /usr/share/aclocal/libgnutls.m4 ]; then
-   ${ACLOCAL};
-else 
-   ${ACLOCAL} -I autoconf;
-fi
- ${AUTOHEADER} && \
- ${AUTOMAKE} -a && \
- ${AUTOCONF} && \
+ACLOCAL=${ACLOCAL} AUTOHEADER=${AUTOHEADER} \
+AUTOCONF=${AUTOCONF} AUTOMAKE=${AUTOMAKE}  \
+autoreconf --install && \
  ./configure && \
  make
+
+#if [ -e /usr/share/aclocal/libgnutls.m4 ]; then
+   #${ACLOCAL};
+#else 
+   #${ACLOCAL} -I autoconf;
+#fi
+# ${AUTOHEADER} && \
+# ${AUTOMAKE} -a && \
+# ${AUTOCONF} && \
+# ./configure && \
+# make
 
    # when adding gnome support, integrate:
    #aclocal -I /usr/share/aclocal/gnome-macros;
