@@ -1,5 +1,5 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiffrc.5,v 1.6 2001/11/02 08:53:55 bluehal Exp $
+.\" $Id: wmbiffrc.5,v 1.7 2001/11/16 00:39:13 bluehal Exp $
 .\"
 .\" wmbiff.1 and wmbiffrc.5 are copyright 1999-2001 by 
 .\" Jordi Mallach <jordi@debian.org>
@@ -25,7 +25,7 @@ Comment must be preceeded by pound signs (#).
 
 The supported configuration options are:
 
-.TP
+.TP 4
 \fBinterval\fP
 Global interval between mailbox checking. Value is the number of seconds, 5
 is the default.
@@ -62,19 +62,23 @@ maildir:/path/to/mail/bugtraq/
 .I pop3
 Using this type, wmbiff will fetch mail from a pop3 server, using the
 specified username, password, host and an optional port number (defaulting
-to 110). If your passwd contained special character, eg. '@' or ':',
-use another path format.
+to 110). If your password contained special character, eg. '@' or ':',
+use another path format.  See Authentication below for a description of 
+the auth field. 
 .RS
-pop3:user:password@server[:port]
-pop3:user password server[ port] (another format)
+pop3:user:passwd@server[:port] [auth]
+.RE
+.RS
+pop3:user passwd server[ port] [auth] 
 .RE
 .TP
 .I imap
 These are IMAP4 boxes. As with pop3, wmbiff will read a imap4 mbox using
 the given values and will display info about the remote mail. This type
 accepts user, password, host and optional path to mailbox and port number.
+See Authentication below for a description of the auth field.
 .RS
-imap:user:password@server[/mailbox][:port]
+imap:user:passwd@server[/mailbox][:port] [auth]
 .RE
 .TP
 .I imaps
@@ -86,7 +90,7 @@ IMAP's STARTTLS command.  TLS support uses gnutls, which is under development
 and may be insecure.  TLS support is only for encryption: since certificates
 are not yet checked, it is vulnerable to man-in-the-middle attack.
 .RS
-imaps:user:password@server[/mailbox][:port]
+imaps:user:passwd@server[/mailbox][:port] [auth]
 .RE
 .TP
 .I licq
@@ -116,6 +120,23 @@ in seconds.
 \fBfetchcmd.n\fP
 Command to be executed to fetch mail. If not specified, fetching through
 wmbiff is disabled completely.
+
+.SH AUTHENTICATION
+
+Authentication methods include "cram-md5", "apop" (for
+Pop3), and "plaintext".  "cram-md5" and "apop" are only
+available when wmbiff is compiled with libgcrypt.
+Authentication methods are tried in the following order:
+cram-md5, apop, plaintext.
+
+Each authentication method will be tried unless a list is
+included in the [auth] field.  For example, append "cram-md5
+apop" if you don't want your password to be sent in
+cleartext over the network.  Conversely, append "plaintext"
+if you don't want wmbiff to bother with other authentication
+methods.  Leaving authentication methods unspecified should
+be reasonably safe.  The order of entries in the [auth] list
+is not currently considered.
 
 .SH FILES
 .TP
