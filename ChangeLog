@@ -1,3 +1,30 @@
+  $Log: ChangeLog,v $
+  Revision 1.18  2002/01/14 01:51:14  jordi
+  Released WMBiff 0.3.5.
+
+
+2002-01-12 Saturday 19:18 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Imap4Client.c: quote patch from Nick Mitchell, ref debian
+	#128863
+
+2002-01-12 Saturday 06:17 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/tlsComm.c: debugging for gnutls3
+
+2002-01-12 Saturday 05:50 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Makefile: clarify what to do with gnutls version define
+
+2002-01-12 Saturday 05:30 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Makefile, charutil.c, tlsComm.c: update for the
+	interface change in gnutls 0.3.0
+
+2001-11-23 Friday 15:57 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog: Released WMBiff 0.3.4.
+
 2001-11-23 Friday 15:55 UTC -- Jordi Mallach <jordi@sindominio.net>
 
 	* NEWS, wmbiff/Makefile: Bumped version to 0.3.4, and release.
