@@ -1,5 +1,9 @@
 Release Notes
 ~~~~~~~~~~~~~
+Release 0.4.16 - 
+  * Check TLS certificates.  See wmbiffrc(5) for 
+    details on the certfile option.  
+
 Release 0.4.15 - Mar 30, 2003
   * Frobnicate internally stored passwords, partially 
     obfuscating them in memory.  Not actually more 
@@ -413,4 +417,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.42 2003/03/30 11:23:34 bluehal Exp $
+$Id: NEWS,v 1.43 2003/04/07 09:59:01 bluehal Exp $
