@@ -191,7 +191,7 @@ static void get_password_from_command(Pop3 pc, const char *username,
 		if (password[*password_len - 1] != '\0') {
 			DM(pc, DEBUG_ERROR,
 			   "passmgr: warning: your password appears longer (%lu) than expected (%d)\n",
-			   strlen(password_ptr), *password_len - 1);
+			   (unsigned long) strlen(password_ptr), *password_len - 1);
 		}
 		free(password_ptr);
 		password[*password_len - 1] = '\0';
