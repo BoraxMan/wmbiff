@@ -1,5 +1,8 @@
 Release Notes
 ~~~~~~~~~~~~~
+Release 0.4.2 - June 1, 2002
+  * Bugfix: accidentally released a partial feature.
+
 Release 0.4.1 - June 1, 2002
 
   * This release is by Neil Spring <nspring@cs.washington.edu>.
@@ -314,4 +317,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.22 2002/06/01 07:01:18 bluehal Exp $
+$Id: NEWS,v 1.23 2002/06/01 18:10:28 bluehal Exp $

@@ -6,13 +6,35 @@ The latest changelog entry is in a different format, because it's inserted by
 CVS on commit.
 
   $Log: ChangeLog,v $
-  Revision 1.31  2002/06/01 07:03:59  bluehal
-  release 0.4.1
+  Revision 1.32  2002/06/01 18:10:28  bluehal
+  0.4.2
 
   Revision 1.1  2002/04/07 05:08:23  bluehal
   use automake / autoconf; after checkout run ./FromCVS.sh
 
 
+
+2002-06-01 Saturday 17:58 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* configure.in, wmbiff/wmbiff.c: oops, didn't really want to
+	release with the crazy font stuff quite yet
+
+2002-06-01 Saturday 07:03 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* ChangeLog, configure.in, wmbiff/test-wmbiffrc.shell: release
+	0.4.1
+
+2002-06-01 Saturday 07:01 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* AUTHORS, NEWS: release preparation
+
+2002-06-01 Saturday 06:47 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmgeneral/wmgeneral.h: prototypes for basic font support
+
+2002-06-01 Saturday 06:47 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmgeneral/wmgeneral.c: indent run
 
 2002-06-01 Saturday 06:02 UTC -- Neil Spring <nspring@cs.washington.edu>
 
