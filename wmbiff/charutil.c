@@ -1,4 +1,4 @@
-/* $Id: charutil.c,v 1.17 2004/03/28 00:28:58 bluehal Exp $ */
+/* $Id: charutil.c,v 1.18 2004/04/20 04:55:46 bluehal Exp $ */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -243,6 +243,21 @@ char *strdup_ordie(const char *c)
 	}
 	return (ret);
 }
+
+void StripComment(char *buf) {
+    char *p;
+    
+	/* Strip comments at beginning of line, or after whitespace.  
+	   a kludgy way of avoiding problems with #'s in passwords. */
+	if (buf[0] == '#')
+		buf[0] = '\0';
+	for (p = (char *) buf + 1; *p && !(*p == '#' && isspace(*(p - 1)));
+		 p++);
+	if (*p) {
+		*p = '\0';
+	}
+}
+
 
 /* vim:set ts=4: */
 /*

@@ -21,6 +21,7 @@
 #include "Client.h"
 #include "passwordMgr.h"
 #include "tlsComm.h"
+#include "charutil.h"
 
 int debug_default = DEBUG_INFO;
 int Relax = 1;
@@ -324,6 +325,28 @@ int test_getline_from_buffer(void)
 	return (0);
 }
 
+int test_charutil(void) {
+    
+    char *v = strdup("abc#def");
+    
+    StripComment(v);
+    if(strcmp(v, "abc#def") != 0) {
+        printf("FAILURE: comment stripper stripped when it shouldn't\n");
+        return 1;
+    }
+
+    v = strdup("abc #def");
+    
+    StripComment(v);
+    if(strcmp(v, "abc ") != 0) {
+        printf("FAILURE: comment stripper should've stripped\n");
+        return 1;
+    }
+
+    
+    return 0;
+}
+
 
 int print_info(UNUSED(void *state))
 {
@@ -367,6 +390,11 @@ int main(UNUSED(int argc), UNUSED(char *argv[]))
 	}
 
 	if (test_getline_from_buffer()) {
+		printf("SOME TESTS FAILED!\n");
+		exit(EXIT_FAILURE);
+	}
+
+	if (test_charutil()) {
 		printf("SOME TESTS FAILED!\n");
 		exit(EXIT_FAILURE);
 	}

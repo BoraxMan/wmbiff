@@ -1,4 +1,4 @@
-/* $Id: charutil.h,v 1.11 2003/01/28 11:12:43 bluehal Exp $ */
+/* $Id: charutil.h,v 1.12 2004/04/20 04:55:55 bluehal Exp $ */
 /* Author: Mark Hurley  (debian4tux@telocity.com)
  *
  * Character / string manipulation utilities. 
@@ -41,4 +41,6 @@ void chomp(char *s);
 
 /* same as xstrdup, just better named ;) */
 char *strdup_ordie(const char *c);
+
+void StripComment(char *buf);
 #endif
