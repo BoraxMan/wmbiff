@@ -1,4 +1,4 @@
-# $Id: sample.wmbiffrc,v 1.12 2002/04/20 08:13:39 bluehal Exp $
+# $Id: sample.wmbiffrc,v 1.13 2002/05/03 05:42:44 bluehal Exp $
 #
 # See wmbiffrc(5) for more info.
 #
@@ -118,3 +118,7 @@ interval.4=300		# 5 minutes
 # Shell expansion.  (can't be nested.)
 # path.4=mbox:/home/me/Mail/`ls -t1 /home/me/Mail/list-archive-* | head -1`
 # label.4=tick
+
+# Shell method
+# path.4=shell:::lpq | grep Queue | awk '{print $2}'
+

@@ -1,5 +1,5 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiffrc.5.in,v 1.3 2002/04/20 08:12:55 bluehal Exp $
+.\" $Id: wmbiffrc.5.in,v 1.4 2002/05/03 05:42:44 bluehal Exp $
 .\"
 .\" wmbiff.1 and wmbiffrc.5 are copyright 1999-2002 by 
 .\" Jordi Mallach <jordi@debian.org>
@@ -158,6 +158,7 @@ experimental keyword is likely to change in future
 revisions.
 .RS
 shell:::/path/to/command
+shell:::lpq | grep Queue | awk '{print $2}'
 .RE
 .RE
 .TP
