@@ -44,14 +44,17 @@ static struct fdmap_struct {
 	/*@owned@ */ struct connection_state *cs;
 } fdmap[FDMAP_SIZE];
 
-static void ask_user_for_password(Pop3 pc, int bFlushCache);
+static void ask_user_for_password( /*@notnull@ */ Pop3 pc,
+								  int bFlushCache);
 
 /* authentication callbacks */
 #ifdef HAVE_GCRYPT_H
-static int authenticate_md5(Pop3 pc, struct connection_state *scs,
+static int authenticate_md5( /*@notnull@ */ Pop3 pc,
+							struct connection_state *scs,
 							const char *capabilities);
 #endif
-static int authenticate_plaintext(Pop3 pc, struct connection_state *scs,
+static int authenticate_plaintext( /*@notnull@ */ Pop3 pc,
+								  struct connection_state *scs,
 								  const char *capabilities);
 
 /* the auth_methods array maps authentication identifiers
@@ -59,7 +62,8 @@ static int authenticate_plaintext(Pop3 pc, struct connection_state *scs,
 static struct imap_authentication_method {
 	const char *name;
 	/* callback returns 1 if successful, 0 if failed */
-	int (*auth_callback) (Pop3 pc, struct connection_state * scs,
+	int (*auth_callback) ( /*@notnull@ */ Pop3 pc,
+						  struct connection_state * scs,
 						  const char *capabilities);
 } auth_methods[] = {
 	{
@@ -177,13 +181,14 @@ FILE *imap_open(Pop3 pc)
 	}
 
 	/* build the connection using STARTTLS */
-	if (PCU.dossl && (PCU.serverPort == 143)) {
+	if (PCU.dossl != 0 && (PCU.serverPort == 143)) {
 		/* setup an unencrypted binding long enough to invoke STARTTLS */
 		scs = initialize_unencrypted(sd, connection_name, pc);
 
 		/* can we? */
 		tlscomm_printf(scs, "a000 CAPABILITY\r\n");
-		if (!tlscomm_expect(scs, "* CAPABILITY", capabilities, BUF_SIZE))
+		if (tlscomm_expect(scs, "* CAPABILITY", capabilities, BUF_SIZE) ==
+			0)
 			goto communication_failure;
 
 		if (!strstr(capabilities, "STARTTLS")) {
@@ -196,10 +201,11 @@ FILE *imap_open(Pop3 pc)
 		IMAP_DM(pc, DEBUG_INFO, "Negotiating TLS within IMAP");
 		tlscomm_printf(scs, "a001 STARTTLS\r\n");
 
-		if (!tlscomm_expect(scs, "a001 ", buf, BUF_SIZE))
+		if (tlscomm_expect(scs, "a001 ", buf, BUF_SIZE) == 0)
 			goto communication_failure;
 
-		if (!strstr(buf, "a001 OK")) {
+		if (strstr(buf, "a001 OK") == 0) {
+			/* we didn't see the success message in the response */
 			IMAP_DM(pc, DEBUG_ERROR, "couldn't negotiate tls. :(\n");
 			goto communication_failure;
 		}
@@ -212,7 +218,7 @@ FILE *imap_open(Pop3 pc)
 
 	/* either we've negotiated ssl from starttls, or
 	   we're starting an encrypted connection now */
-	if (PCU.dossl) {
+	if (PCU.dossl != 0) {
 		scs = initialize_gnutls(sd, connection_name, pc);
 		if (scs == NULL) {
 			IMAP_DM(pc, DEBUG_ERROR, "Failed to initialize TLS\n");
@@ -228,7 +234,7 @@ FILE *imap_open(Pop3 pc)
 	   server will allow plain password login within an 
 	   encrypted session. */
 	tlscomm_printf(scs, "a000 CAPABILITY\r\n");
-	if (!tlscomm_expect(scs, "* CAPABILITY", capabilities, BUF_SIZE)) {
+	if (tlscomm_expect(scs, "* CAPABILITY", capabilities, BUF_SIZE) == 0) {
 		IMAP_DM(pc, DEBUG_ERROR, "unable to query capability string");
 		goto communication_failure;
 	}
@@ -236,7 +242,8 @@ FILE *imap_open(Pop3 pc)
 	/* try each authentication method in turn. */
 	for (a = auth_methods; a->name != NULL; a++) {
 		/* was it specified or did the user leave it up to us? */
-		if (PCU.authList[0] == '\0' || strstr(PCU.authList, a->name))
+		if (PCU.authList[0] == '\0'
+			|| strstr(PCU.authList, a->name) != NULL)
 			/* try the authentication method */
 			if ((a->auth_callback(pc, scs, capabilities)) != 0) {
 				/* store this well setup connection in the cache */
@@ -256,7 +263,7 @@ FILE *imap_open(Pop3 pc)
 
 }
 
-int imap_checkmail(Pop3 pc)
+int imap_checkmail( /*@notnull@ */ Pop3 pc)
 {
 	/* recover connection state from the cache */
 	struct connection_state *scs = state_for_pcu(pc);
@@ -273,14 +280,14 @@ int imap_checkmail(Pop3 pc)
 		return -1;
 	}
 
-	if (tlscomm_is_blacklisted(scs)) {
+	if (tlscomm_is_blacklisted(scs) != 0) {
 		/* unresponsive server, don't bother. */
 		return -1;
 	}
 
 	/* if we've got it by now, try the status query */
 	tlscomm_printf(scs, "a003 STATUS %s (MESSAGES UNSEEN)\r\n", pc->path);
-	if (tlscomm_expect(scs, "* STATUS", buf, 127)) {
+	if (tlscomm_expect(scs, "* STATUS", buf, 127) != 0) {
 		/* a valid response? */
 		(void) sscanf(buf, "* STATUS %*s (MESSAGES %d UNSEEN %d)",
 					  &(pc->TotalMsgs), &(pc->UnreadMsgs));
@@ -293,7 +300,7 @@ int imap_checkmail(Pop3 pc)
 }
 
 /* parse the config line to setup the Pop3 structure */
-int imap4Create(Pop3 pc, const char *const str)
+int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 {
 	struct re_registers regs;
 	int i, matchedchars;
@@ -352,13 +359,13 @@ int imap4Create(Pop3 pc, const char *const str)
 	if (regs.start[5] != -1)
 		PCU.serverPort = atoi(str + regs.start[5] + 1);
 	else
-		PCU.serverPort = (PCU.dossl) ? 993 : 143;
+		PCU.serverPort = (PCU.dossl != 0) ? 993 : 143;
 
 	grab_authList(str + regs.end[0], PCU.authList);
 
 	IMAP_DM(pc, DEBUG_INFO, "userName= '%s'\n", PCU.userName);
 	IMAP_DM(pc, DEBUG_INFO, "password is %d characters long\n",
-			strlen(PCU.password));
+			(int) strlen(PCU.password));
 	IMAP_DM(pc, DEBUG_INFO, "serverName= '%s'\n", PCU.serverName);
 	IMAP_DM(pc, DEBUG_INFO, "serverPath= '%s'\n", pc->path);
 	IMAP_DM(pc, DEBUG_INFO, "serverPort= '%d'\n", PCU.serverPort);
@@ -372,7 +379,7 @@ int imap4Create(Pop3 pc, const char *const str)
 	return 0;
 }
 
-static int authenticate_plaintext(Pop3 pc,
+static int authenticate_plaintext( /*@notnull@ */ Pop3 pc,
 								  struct connection_state *scs,
 								  const char *capabilities)
 {
@@ -392,7 +399,7 @@ static int authenticate_plaintext(Pop3 pc,
 		/* login */
 		tlscomm_printf(scs, "a001 LOGIN %s \"%s\"\r\n", PCU.userName,
 					   PCU.password);
-		if (!tlscomm_expect(scs, "a001 ", buf, BUF_SIZE)) {
+		if (tlscomm_expect(scs, "a001 ", buf, BUF_SIZE) == 0) {
 			IMAP_DM(pc, DEBUG_ERROR,
 					"Did not get a response to the LOGIN command.\n");
 			goto plaintext_failed;
@@ -474,7 +481,7 @@ static int authenticate_md5(Pop3 pc,
 }
 #endif
 
-static void ask_user_for_password(Pop3 pc, int bFlushCache)
+static void ask_user_for_password( /*@notnull@ */ Pop3 pc, int bFlushCache)
 {
 	/* see if we already have a password, as provided in the config file, or
 	   already requested from the user. */
@@ -492,3 +499,12 @@ static void ask_user_for_password(Pop3 pc, int bFlushCache)
 		}
 	}
 }
+
+/* vim:set ts=4: */
+/*
+ * Local Variables:
+ * tab-width: 4
+ * c-indent-level: 4
+ * c-basic-offset: 4
+ * End:
+ */
