@@ -1,5 +1,10 @@
 Release Notes
 ~~~~~~~~~~~~~
+Release 0.4.6 - July 19, 2002
+  * Ignore sigpipe so that apm suspend works with IMAP/TLS.
+  * Memory handling bugfixes to appease valgrind.
+  * GNUTLS v0.4.3, gcrypt v1.17 expected
+
 Release 0.4.4 - June 27, 2002
   * GNUTLS version 0.4.3 required.  The API has changed, and 
     wmbiff is no longer compatible with GNUTLS versions prior
@@ -340,4 +345,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.26 2002/07/04 08:00:17 bluehal Exp $
+$Id: NEWS,v 1.27 2002/07/19 18:51:18 bluehal Exp $

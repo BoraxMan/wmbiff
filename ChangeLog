@@ -6,13 +6,45 @@ The latest changelog entry is in a different format, because it's inserted by
 CVS on commit.
 
   $Log: ChangeLog,v $
-  Revision 1.37  2002/07/04 08:00:16  bluehal
-  last minute changes for 0.4.5
+  Revision 1.38  2002/07/19 18:51:18  bluehal
+  release version 0.4.6
 
   Revision 1.1  2002/04/07 05:08:23  bluehal
   use automake / autoconf; after checkout run ./FromCVS.sh
 
 
+
+2002-07-18 Thursday 02:55 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiff.c: ignore sigpipe, possible bugfix for abnormal
+	termination during suspend for imap/gnutls
+
+2002-07-04 Thursday 08:00 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* ChangeLog, NEWS, configure.ac: last minute changes for 0.4.5
+
+2002-07-04 Thursday 01:07 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Imap4Client.c, Makefile.am, Pop3Client.c, charutil.c,
+	tlsComm.c, wmbiff.c: valgrind debugging, and support for -exit. 
+	some bugs were probably fixed, but since nobody has noticed yet, I
+	don't know if they mattered
+
+2002-07-04 Thursday 00:45 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmgeneral/wmgeneral.c: reminder in where valgrind complains
+
+2002-07-04 Thursday 00:45 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* Makefile.am: add a top-level 'indent' rule
+
+2002-07-03 Wednesday 02:28 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/tlsComm.c: doubled the timeout to 40 seconds.
+
+2002-06-28 Friday 00:11 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* .cvsignore: Added autom4te.cache.
 
 2002-06-26 Wednesday 19:04 UTC -- Neil Spring <nspring@cs.washington.edu>
 
