@@ -1,7 +1,30 @@
   $Log: ChangeLog,v $
-  Revision 1.18  2002/01/14 01:51:14  jordi
-  Released WMBiff 0.3.5.
+  Revision 1.19  2002/01/27 19:59:01  jordi
+  Released WMBiff 0.3.6.
 
+
+2002-01-27 Sunday 19:56 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* wmbiff/Imap4Client.c: Indent fixes.
+
+2002-01-27 Sunday 19:52 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* wmbiff/Makefile: Bump WMBIFF_VERSION to 0.3.6.
+
+2002-01-27 Sunday 12:46 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* NEWS, README, wmbiff/Imap4Client.c, wmbiff/Makefile,
+	wmbiff/wmbiffrc.5: Alternate regex for imap/imaps which allows "@"
+	in passwords.  Fix to correctly handle the auth list in imap. 
+	Patch from David Smith <davidsmith@acm.org>.
+
+2002-01-14 Monday 01:51 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, NEWS: Released WMBiff 0.3.5.
+
+2002-01-14 Monday 01:50 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* wmbiff/Makefile: Bump WMBIFF_VERSION to 0.3.5.
 
 2002-01-12 Saturday 19:18 UTC -- Neil Spring <nspring@cs.washington.edu>
 

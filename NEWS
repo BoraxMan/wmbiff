@@ -1,7 +1,7 @@
 Release Notes
 ~~~~~~~~~~~~~
 
-Release 0.3.6 - [UNRELEASED]
+Release 0.3.6 - Sun, 27 Jan 2002 20:49:52 +0100
 
   * Added a new syntax for IMAP, which allows using a "@" in
     the password field. See wmbiffrc(5) for details.
@@ -264,4 +264,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.12 2002/01/27 12:46:38 jordi Exp $
+$Id: NEWS,v 1.13 2002/01/27 19:59:01 jordi Exp $
