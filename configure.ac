@@ -85,8 +85,8 @@ AC_SUBST(GCRYPT_MAN_STATUS)
 AC_SUBST(GNUTLS_COMMON_O)
 
 dnl regex stuff.
-AC_CHECK_HEADERS(regex.h gnuregex.h) dnl linux has regex.h, BSD gnuregex
-AC_CHECK_LIB(gnuregex, re_search) dnl BSD.
+AC_CHECK_HEADERS(regex.h) dnl gnuregex.h 
+dnl no longer needed AC_CHECK_LIB(gnuregex, re_search) dnl BSD.
 
 dnl X11 stuff.
 AC_PATH_XTRA
