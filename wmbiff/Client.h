@@ -1,11 +1,11 @@
-/* $Id: Client.h,v 1.30 2003/01/19 13:13:04 bluehal Exp $ */
+/* $Id: Client.h,v 1.31 2003/04/16 08:16:48 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
  *
  * Email Checker Pop3/Imap4/Licq/Gicu/mbox/maildir/finger
  *
- * Last Updated : $Date: 2003/01/19 13:13:04 $
+ * Last Updated : $Date: 2003/04/16 08:16:48 $
  *
  */
 
@@ -24,13 +24,19 @@
 #include <gcrypt.h>
 #endif
 
+#ifdef __LCLINT__
+typedef unsigned int off_t;
+#endif
+
+struct msglst;
 typedef struct _mbox_t *Pop3;
 typedef struct _mbox_t {
 	char label[32];				/* Printed at left; max 5 chars */
 	char path[256];				/* Path to mailbox */
 	char notify[256];			/* Program to notify mail arrivation */
-	char action[256];			/* Action to execute on mouse click */
-	char fetchcmd[256];			/* Action for mail fetching for pop3/imap */
+	char action[256];			/* Action to execute on mouse click, reduces to what happens on button1 */
+	char button2[256];			/* What to run on button2. (middle) */
+	char fetchcmd[256];			/* Action for mail fetching for pop3/imap, reduces to what happens on button3 */
 	int fetchinterval;
 	int TotalMsgs;				/* Total messages in mailbox */
 	int UnreadMsgs;				/* New (unread) messages in mailbox */
@@ -67,6 +73,7 @@ typedef struct _mbox_t {
 	} u;
 
 	int (*checkMail) ( /*@notnull@ */ Pop3);
+    struct msglst *(*getHeaders) ( /*@notnull@ */ Pop3);
 
 	time_t prevtime;
 	time_t prevfetch_time;

@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.52 2003/03/30 10:38:38 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.53 2003/04/16 08:14:34 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -29,6 +29,7 @@
 
 #include "Client.h"
 #include "charutil.h"
+#include "MessageList.h"
 
 #ifdef USE_DMALLOC
 #include <dmalloc.h>
@@ -73,8 +74,8 @@ static const char *font = NULL;
 int debug_default = DEBUG_ERROR;
 
 /* color from wmbiff's xpm, down to 24 bits. */
-static const char *foreground = "#21B3AF";	/* foreground cyan */
-static const char *background = "#202020";	/* background gray */
+const char *foreground = "#21B3AF";	/* foreground cyan */
+const char *background = "#202020";	/* background gray */
 static const char *highlight = "yellow";
 int SkipCertificateCheck = 0;
 int Relax = 0;					/* be not paranoid */
@@ -296,6 +297,8 @@ static int Read_Config_File(char *filename, int *loopinterval)
 			strcpy(mbox[mbox_index].action, value);
 		} else if (!strcmp(setting, "interval.")) {
 			mbox[mbox_index].loopinterval = atoi(value);
+		} else if (!strcmp(setting, "buttontwo.")) {
+			strcpy(mbox[mbox_index].button2, value);
 		} else if (!strcmp(setting, "fetchcmd.")) {
 			strcpy(mbox[mbox_index].fetchcmd, value);
 		} else if (!strcmp(setting, "fetchinterval.")) {
@@ -334,8 +337,10 @@ static void init_biff(char *config_file)
 		mbox[i].path[0] = '\0';
 		mbox[i].notify[0] = '\0';
 		mbox[i].action[0] = '\0';
+		mbox[i].button2[0] = '\0';
 		mbox[i].fetchcmd[0] = '\0';
 		mbox[i].loopinterval = 0;
+		mbox[i].getHeaders = NULL;
 		mbox[i].debug = debug_default;
 		mbox[i].askpass = DEFAULT_ASKPASS;
 	}
@@ -878,11 +883,14 @@ static void restart_wmbiff(int sig
 	exit(EXIT_FAILURE);
 }
 
+extern Window win;
+extern Window iconwin;
 
 static void do_biff(int argc, const char **argv)
 {
 	unsigned int i;
 	int but_pressed_region = -1;
+	int but_released_region = -1;
 	time_t curtime;
 	int Sleep_Interval;
 	const char **skin_xpm = NULL;
@@ -944,12 +952,18 @@ static void do_biff(int argc, const char **argv)
 		/* X Events */
 		while (XPending(display)) {
 			XEvent Event;
+            const char *press_action;
 
 			XNextEvent(display, &Event);
 
 			switch (Event.type) {
 			case Expose:
-				RedrawWindow();
+                if(Event.xany.window != win && 
+                   Event.xany.window != iconwin ) {
+                    msglst_redraw();
+                } else {
+                    RedrawWindow();
+                }
 				break;
 			case DestroyNotify:
 				XCloseDisplay(display);
@@ -958,28 +972,58 @@ static void do_biff(int argc, const char **argv)
 			case ButtonPress:
 				but_pressed_region =
 					CheckMouseRegion(Event.xbutton.x, Event.xbutton.y);
+                switch (Event.xbutton.button) {
+                case 1:
+                    press_action = mbox[but_pressed_region].action;
+                    break;
+                case 2:
+                    press_action = mbox[but_pressed_region].button2;
+                    break;
+                case 3:
+                    press_action = mbox[but_pressed_region].fetchcmd;
+                    break;
+                default:
+                    press_action = NULL;
+                    break;
+                        
+                }
+                if(press_action && strcmp(press_action, "msglst") == 0) {
+					msglst_show(&mbox[but_pressed_region], Event.xbutton.x_root, Event.xbutton.y_root);
+                }
 				break;
 			case ButtonRelease:
-				i = CheckMouseRegion(Event.xbutton.x, Event.xbutton.y);
+				but_released_region = CheckMouseRegion(Event.xbutton.x, Event.xbutton.y);
 				if (but_pressed_region == (int) i
 					&& but_pressed_region >= 0) {
+                    const char *click_action;
+
 					switch (Event.xbutton.button) {
 					case 1:	/* Left mouse-click */
 						/* C-S-left will restart wmbiff. */
 						if ((Event.xbutton.state & ControlMask) &&
 							(Event.xbutton.state & ShiftMask)) {
 							restart_wmbiff(0);
-						} else if (mbox[i].action[0] != '\0') {
-							(void) execCommand(mbox[i].action);
 						}
+                        click_action = mbox[but_released_region].action;
 						break;
+					case 2:	/* Middle mouse-click */
+                        click_action = mbox[but_released_region].button2;
+                        break;
 					case 3:	/* Right mouse-click */
-						if (mbox[i].fetchcmd[0] != '\0') {
-							(void) execCommand(mbox[i].fetchcmd);
-						}
+                        click_action = mbox[but_released_region].fetchcmd;
 						break;
+                    default:
+                        click_action = NULL;
+                        break;
 					}
+                    if(click_action != NULL && click_action[0] != '\0' && strcmp(click_action, "msglst")) {
+                        (void) execCommand(click_action);
+                    }
 				}
+
+                /* a button was released, hide the message list if open */
+                msglst_hide();
+
 				but_pressed_region = -1;
 				/* RedrawWindow(); */
 				break;
