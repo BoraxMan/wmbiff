@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.8 2001/10/28 22:22:09 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.9 2001/10/29 13:54:00 jordi Exp $ */
 
 #define	USE_POLL
 
@@ -84,17 +84,20 @@ void init_biff(char *uconfig_file)
 		strcpy(mbox[0].path, "/var/mail/");
 		strcat(mbox[0].path, m);
 	}
-
 #ifdef WITH_GCRYPT
 	/* gcrypt is a little strange, in that it doesn't 
 	 * seem to initialize it's memory pool by itself. 
 	 * I believe we *expect* "Warning: using insecure memory!"
 	 */
-	if((i=gcry_control( GCRYCTL_INIT_SECMEM, 16384, 0 )) != 0) {
-	  fprintf(stderr, "Error: gcry_control() to initialize secure memory returned non-zero: %d\n", i);
-	  fprintf(stderr, "Message: %s\n", gcry_strerror(gcry_errno()));
-	  fprintf(stderr, "libgcrypt version: %s\n", gcry_check_version(NULL));
-	  fprintf(stderr, "attempting to recover: will fail later if using CRAM-MD5 or APOP authentication. \n");
+	if ((i = gcry_control(GCRYCTL_INIT_SECMEM, 16384, 0)) != 0) {
+		fprintf(stderr,
+				"Error: gcry_control() to initialize secure memory returned non-zero: %d\n",
+				i);
+		fprintf(stderr, "Message: %s\n", gcry_strerror(gcry_errno()));
+		fprintf(stderr, "libgcrypt version: %s\n",
+				gcry_check_version(NULL));
+		fprintf(stderr,
+				"attempting to recover: will fail later if using CRAM-MD5 or APOP authentication. \n");
 	};
 #endif
 

@@ -79,8 +79,9 @@ static void bind_state_to_pcu(Pop3 pc,
 	asprintf(&connection_id, "%s|%s|%s|%d", PCU.userName,
 			 PCU.password, PCU.serverName, PCU.serverPort);
 	for (i = 0; i < FDMAP_SIZE && fdmap[i].cs != NULL; i++);
-	if(i==FDMAP_SIZE) {
-		printf("wmbiff: Tried to open too many IMAP connections. Sorry!\n");
+	if (i == FDMAP_SIZE) {
+		printf
+			("wmbiff: Tried to open too many IMAP connections. Sorry!\n");
 		exit(EXIT_FAILURE);
 	}
 	fdmap[i].user_password_server_port = connection_id;
