@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.41 2002/12/29 01:36:12 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.42 2002/12/29 03:25:31 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -22,6 +22,7 @@
 #include <X11/xpm.h>
 
 #include <errno.h>
+#include <string.h>
 
 #include "../wmgeneral/wmgeneral.h"
 #include "../wmgeneral/misc.h"
@@ -34,8 +35,8 @@
 #endif
 
 #include "wmbiff-master-led.xpm"
-char wmbiff_mask_bits[64 * 64];
-const int wmbiff_mask_width = 64;
+static char wmbiff_mask_bits[64 * 64];
+static const int wmbiff_mask_width = 64;
 // const int wmbiff_mask_height = 64;
 
 #define CHAR_WIDTH  5
@@ -47,12 +48,13 @@ const int wmbiff_mask_width = 64;
 #define DEFAULT_LOOP 5
 
 #define MAX_NUM_MAILBOXES 40
-mbox_t mbox[MAX_NUM_MAILBOXES];
+static mbox_t mbox[MAX_NUM_MAILBOXES];
 
 /* this is the normal pixmap. */
-const char *skin_filename = "wmbiff-master-led.xpm";
+static const char *skin_filename = "wmbiff-master-led.xpm";
 /* global notify action taken (if globalnotify option is set) */
-const char *globalnotify = NULL;
+/*@null@*/
+static const char *globalnotify = NULL;
 /* path to search for pixmaps */
 /* /usr/share/wmbiff should have the default pixmap. */
 /* /usr/local/share/wmbiff if compiled locally. */
@@ -60,13 +62,13 @@ const char *globalnotify = NULL;
 /* . is there for development. */
 static const char *skin_search_path = DEFAULT_SKIN_PATH;
 /* for gnutls */
+/*@null@*/
 const char *certificate_filename = NULL;	/* not yet supported */
 
 /* it could be argued that a better default exists. */
 #define DEFAULT_FONT  "-*-fixed-*-r-*-*-10-*-*-*-*-*-*-*"
-const char *font = NULL;
-
-// static void BlitString(const char *name, int x, int y, int new);
+/*@null@*/
+static const char *font = NULL;
 
 int debug_default = DEBUG_ERROR;
 
@@ -76,19 +78,29 @@ static const char *highlight = "yellow";
 int SkipCertificateCheck = 0;
 static int notWithdrawn = 0;
 
-static int num_mailboxes = 1;
+static unsigned int num_mailboxes = 1;
 static const int x_origin = 5;
 static const int y_origin = 5;
 static int forever = 1;
 
+static __inline /*@out@ */ void *malloc_ordie(size_t len)
+{
+	void *ret = malloc(len);
+	if (ret == NULL) {
+		fprintf(stderr, "unable to allocate %d bytes\n", (int) len);
+		abort();
+	}
+	return (ret);
+}
+
 /* where vertically the mailbox sits for blitting characters. */
-static int mbox_y(int mboxnum)
+static int mbox_y(unsigned int mboxnum)
 {
 	return ((11 * mboxnum) + y_origin);
 }
 
 /* special shortcuts for longer shell client commands */
-static int gicuCreate(Pop3 pc, const char *path)
+static int gicuCreate( /*@notnull@ */ Pop3 pc, const char *path)
 {
 	char buf[255];
 	if (isdigit(path[5])) {
@@ -101,7 +113,7 @@ static int gicuCreate(Pop3 pc, const char *path)
 	return (shellCreate(pc, buf));
 }
 
-static int fingerCreate(Pop3 pc, const char *path)
+static int fingerCreate( /*@notnull@ */ Pop3 pc, const char *path)
 {
 	char buf[255];
 	sprintf(buf, "shell:::finger -lm %s | "
@@ -117,7 +129,8 @@ static int fingerCreate(Pop3 pc, const char *path)
 	index takes its value... if not index will get -1
 	Returns -1 if no setting=value
 */
-static int ReadLine(FILE * fp, char *setting, char *value, int *mbox_index)
+static int ReadLine(FILE * fp, /*@out@ */ char *setting,
+					/*@out@ */ char *value, /*@out@ */ int *mbox_index)
 {
 	char buf[BUF_SIZE];
 	char *p, *q;
@@ -127,16 +140,19 @@ static int ReadLine(FILE * fp, char *setting, char *value, int *mbox_index)
 	*value = '\0';
 	*mbox_index = -1;
 
-	if (!fp || feof(fp) || !fgets(buf, BUF_SIZE - 1, fp))
+	if (!fp || feof(fp))
+		return -1;
+
+	if (!fgets(buf, BUF_SIZE - 1, fp))
 		return -1;
 
 	len = strlen(buf);
 
 	if (buf[len - 1] == '\n') {
-		buf[len - 1] = 0;		/* strip linefeed */
+		buf[len - 1] = '\0';	/* strip linefeed */
 	}
 	for (p = (char *) buf; *p != '#' && *p; p++);
-	*p = 0;						/* Strip comments */
+	*p = '\0';					/* Strip comments */
 	if (!(p = strtok(buf, "=")))
 		return -1;
 	if (!(q = strtok(NULL, "\n")))
@@ -176,7 +192,7 @@ static int ReadLine(FILE * fp, char *setting, char *value, int *mbox_index)
 
 struct path_demultiplexer {
 	const char *id;				/* followed by a colon */
-	int (*creator) (Pop3 pc, const char *path);
+	int (*creator) ( /*@notnull@ */ Pop3 pc, const char *path);
 };
 
 static struct path_demultiplexer paths[] = {
@@ -195,7 +211,7 @@ static struct path_demultiplexer paths[] = {
 };
 
 
-static void parse_mbox_path(int item)
+static void parse_mbox_path(unsigned int item)
 {
 	int i;
 	/* find the creator */
@@ -206,7 +222,7 @@ static void parse_mbox_path(int item)
 	/* if found, execute */
 	if (paths[i].id != NULL) {
 		if (paths[i].creator((&mbox[item]), mbox[item].path) != 0) {
-			DMA(DEBUG_ERROR, "creator for mailbox %d returned failure",
+			DMA(DEBUG_ERROR, "creator for mailbox %u returned failure",
 				item);
 		}
 	} else {
@@ -220,6 +236,7 @@ static int Read_Config_File(char *filename, int *loopinterval)
 	FILE *fp;
 	char setting[17], value[BUF_SIZE];
 	int mbox_index;
+	unsigned int i;
 
 	if (!(fp = fopen(filename, "r"))) {
 		DMA(DEBUG_ERROR, "Unable to open %s, no settings read: %s\n",
@@ -235,9 +252,8 @@ static int Read_Config_File(char *filename, int *loopinterval)
 			*loopinterval = atoi(value);
 			continue;
 		} else if (!strcmp(setting, "askpass")) {
-			const char *askpass = strdup(value);
+			const char *askpass = strdup_ordie(value);
 			if (mbox_index == -1) {
-				int i;
 				DMA(DEBUG_INFO, "setting all to askpass %s\n", askpass);
 				for (i = 0; i < MAX_NUM_MAILBOXES; i++)
 					mbox[i].askpass = askpass;
@@ -246,13 +262,13 @@ static int Read_Config_File(char *filename, int *loopinterval)
 			}
 			continue;
 		} else if (!strcmp(setting, "skinfile")) {
-			skin_filename = strdup(value);
+			skin_filename = strdup_ordie(value);
 			continue;
 		} else if (!strcmp(setting, "certfile")) {	/* not yet supported */
-			certificate_filename = strdup(value);
+			certificate_filename = strdup_ordie(value);
 			continue;
 		} else if (!strcmp(setting, "globalnotify")) {
-			globalnotify = strdup(value);
+			globalnotify = strdup_ordie(value);
 			continue;
 		} else if (mbox_index == -1) {
 			DMA(DEBUG_INFO, "Unknown global setting '%s'\n", setting);
@@ -263,9 +279,9 @@ static int Read_Config_File(char *filename, int *loopinterval)
 			DMA(DEBUG_ERROR, "Don't have %d mailboxes.\n", mbox_index);
 			continue;
 		}
-		if (mbox_index + 1 > num_mailboxes
+		if (1U + mbox_index > num_mailboxes
 			&& mbox_index + 1 <= MAX_NUM_MAILBOXES) {
-			num_mailboxes = mbox_index + 1;
+			num_mailboxes = 1U + mbox_index;
 		}
 		/* now only local settings */
 		if (!strcmp(setting, "label.")) {
@@ -295,17 +311,18 @@ static int Read_Config_File(char *filename, int *loopinterval)
 			DMA(DEBUG_INFO, "Unknown setting '%s'\n", setting);
 		}
 	}
-	fclose(fp);
-	for (mbox_index = 0; mbox_index < num_mailboxes; mbox_index++)
-		if (mbox[mbox_index].label[0] != 0)
-			parse_mbox_path(mbox_index);
+	(void) fclose(fp);
+	for (i = 0; i < num_mailboxes; i++)
+		if (mbox[i].label[0] != '\0')
+			parse_mbox_path(i);
 	return 1;
 }
 
 
 static void init_biff(char *config_file)
 {
-	int i, loopinterval = DEFAULT_LOOP;
+	int zok, loopinterval = DEFAULT_LOOP;
+	unsigned int i;
 
 	for (i = 0; i < num_mailboxes; i++) {
 		mbox[i].label[0] = '\0';
@@ -319,17 +336,17 @@ static void init_biff(char *config_file)
 	}
 
 #ifdef HAVE_GCRYPT_H
-	/* gcrypt is a little strange, in that it doesn't 
-	 * seem to initialize its memory pool by itself. 
+	/* gcrypt is a little strange, in that it doesn't
+	 * seem to initialize its memory pool by itself.
 	 * I believe we *expect* "Warning: using insecure memory!"
 	 */
-	if ((i = gcry_control(GCRYCTL_INIT_SECMEM, 16384, 0)) != 0) {
+	if ((zok = gcry_control(GCRYCTL_INIT_SECMEM, 16384, 0)) != 0) {
 		DMA(DEBUG_ERROR,
 			"Error: gcry_control() to initialize secure memory returned non-zero: %d\n"
 			" Message: %s\n"
 			" libgcrypt version: %s\n"
 			" recovering: will fail later if using CRAM-MD5 or APOP authentication.\n",
-			i, gcry_strerror(gcry_errno()), gcry_check_version(NULL));
+			zok, gcry_strerror(gcry_errno()), gcry_check_version(NULL));
 	};
 #endif
 
@@ -362,7 +379,7 @@ static void init_biff(char *config_file)
 
 	/* Make labels look right */
 	for (i = 0; i < num_mailboxes; i++) {
-		if (mbox[i].label[0] != 0) {
+		if (mbox[i].label[0] != '\0') {
 			/* append a colon, but skip if we're using fonts. */
 			if (font == NULL) {
 				int j = strlen(mbox[i].label);
@@ -372,7 +389,7 @@ static void init_biff(char *config_file)
 				mbox[i].label[5] = ':';
 			}
 			/* but always end after 5 characters */
-			mbox[i].label[6] = 0;
+			mbox[i].label[6] = '\0';
 			/* set global loopinterval to boxes with 0 loop */
 			if (!mbox[i].loopinterval) {
 				mbox[i].loopinterval = loopinterval;
@@ -416,17 +433,18 @@ int exists(const char *filename)
 
 /* acts like execvp, with code inspired by it */
 /* mustfree */
-static char *search_path(const char *path, const char *find_me)
+static char *search_path(const char *path, /*@notnull@ */
+						 const char *find_me)
 {
 	char *buf;
 	const char *p;
 	int len, pathlen;
 	if (strchr(find_me, '/') != NULL) {
-		return (strdup(find_me));
+		return (strdup_ordie(find_me));
 	}
 	pathlen = strlen(path);
 	len = strlen(find_me) + 1;
-	buf = malloc(pathlen + len + 1);
+	buf = malloc_ordie(pathlen + len + 1);
 	memcpy(buf + pathlen + 1, find_me, len);
 	buf[pathlen] = '/';
 
@@ -444,8 +462,8 @@ static char *search_path(const char *path, const char *find_me)
 			/* copy the part between the colons to the buffer */
 			startp = memcpy(buf + pathlen - (p - path), path, p - path);
 		}
-		if (exists(startp)) {
-			char *ret = strdup(startp);
+		if (exists(startp) != 0) {
+			char *ret = strdup_ordie(startp);
 			free(buf);
 			return (ret);
 		}
@@ -460,7 +478,7 @@ static char *search_path(const char *path, const char *find_me)
 static int wmbiffrc_permissions_check(const char *wmbiffrc_fname)
 {
 	struct stat st;
-	if (stat(wmbiffrc_fname, &st)) {
+	if (stat(wmbiffrc_fname, &st) != 0) {
 		DMA(DEBUG_ERROR, "Can't stat wmbiffrc: '%s'\n", wmbiffrc_fname);
 		return (1);				/* well, it's not a bad permission
 								   problem: if you can't find it,
@@ -475,13 +493,13 @@ static int wmbiffrc_permissions_check(const char *wmbiffrc_fname)
 			wmbiffrc_fname);
 		return (0);
 	}
-	if (st.st_mode & S_IWOTH) {
+	if ((st.st_mode & S_IWOTH) != 0) {
 		DMA(DEBUG_ERROR, ".wmbiffrc '%s' is world writable.\n"
 			"Verify its contents, then 'chmod 0600 %s'\n",
 			wmbiffrc_fname, wmbiffrc_fname);
 		return (0);
 	}
-	if (st.st_mode & S_IROTH) {
+	if ((st.st_mode & S_IROTH) != 0) {
 		DMA(DEBUG_ERROR, ".wmbiffrc '%s' is world readable.\n"
 			"Please run 'chmod 0600 %s' and consider changing your passwords.\n",
 			wmbiffrc_fname, wmbiffrc_fname);
@@ -490,7 +508,7 @@ static int wmbiffrc_permissions_check(const char *wmbiffrc_fname)
 	return (1);
 }
 
-static void ClearDigits(int i)
+static void ClearDigits(unsigned int i)
 {
 	if (font) {
 		eraseRect(39, mbox_y(i), 58, mbox_y(i + 1) - 1);
@@ -516,7 +534,7 @@ static void BlitString(const char *name, int x, int y, int new)
 	} else {
 		/* normal, LED-like behavior. */
 		int i, c, k = x;
-		for (i = 0; name[i]; i++) {
+		for (i = 0; name[i] != '\0'; i++) {
 			c = toupper(name[i]);
 			if (c >= 'A' && c <= 'Z') {	/* it's a letter */
 				c -= 'A';
@@ -563,7 +581,7 @@ static void BlitNum(int num, int x, int y, int new)
 }
 
 /* helper function for displayMsgCounters, which has outgrown its name */
-static void blitMsgCounters(int i)
+static void blitMsgCounters(unsigned int i)
 {
 	int y_row = mbox_y(i);		/* constant for each mailbox */
 	ClearDigits(i);				/* Clear digits */
@@ -580,9 +598,9 @@ static void blitMsgCounters(int i)
 }
 
 /*
- * void execnotify(1) : runs notify command (if given)
+ * void execnotify(1) : runs notify command, if given (not null)
  */
-static void execnotify(const char *notifycmd)
+static void execnotify( /*@null@ */ const char *notifycmd)
 {
 	if (notifycmd != NULL) {	/* need to call notify() ? */
 		if (!strcasecmp(notifycmd, "beep")) {	/* Internal keyword ? */
@@ -591,29 +609,27 @@ static void execnotify(const char *notifycmd)
 		} else if (!strcasecmp(notifycmd, "true")) {
 			/* Yes, nothing */
 		} else {
-			/* Else call external notifyer */
-			execCommand(notifycmd);
+			/* Else call external notifyer, ignoring the pid */
+			(void) execCommand(notifycmd);
 		}
 	}
 }
 
 
 static void
-displayMsgCounters(int i, int mail_stat, int *Sleep_Interval,
-				   int *Blink_Mode)
+displayMsgCounters(unsigned int i, int mail_stat, int *Blink_Mode)
 {
 	switch (mail_stat) {
 	case 2:					/* New mail has arrived */
 		/* Enter blink-mode for digits */
 		mbox[i].blink_stat = BLINK_TIMES * 2;
-		*Sleep_Interval = BLINK_SLEEP_INTERVAL;
 		*Blink_Mode |= (1 << i);	/* Global blink flag set for this mailbox */
 		blitMsgCounters(i);
 		execnotify(mbox[i].notify);
 
 		/* Autofetch on new mail arrival? */
-		if (mbox[i].fetchinterval == -1 && mbox[i].fetchcmd[0] != 0) {
-			execCommand(mbox[i].fetchcmd);	/* yes */
+		if (mbox[i].fetchinterval == -1 && mbox[i].fetchcmd[0] != '\0') {
+			(void) execCommand(mbox[i].fetchcmd);	/* yes */
 		}
 		break;
 	case 1:					/* mailbox has been rescanned/changed */
@@ -635,7 +651,7 @@ displayMsgCounters(int i, int mail_stat, int *Sleep_Interval,
    1  : mailbox was changed (NO new mail)
    2  : mailbox was changed AND new mail has arrived
 **/
-static int count_mail(int item)
+static int count_mail(unsigned int item)
 {
 	int rc = 0;
 
@@ -672,21 +688,21 @@ static int count_mail(int item)
 static int periodic_mail_check(void)
 {
 	int NeedRedraw = 0;
-	static int Blink_Mode = 0;	/* Bit mask, digits are in blinking 
-								   mode or not. Each bit for separate 
+	static int Blink_Mode = 0;	/* Bit mask, digits are in blinking
+								   mode or not. Each bit for separate
 								   mailbox */
 	int Sleep_Interval;			/* either DEFAULT_SLEEP_INTERVAL or
 								   BLINK_SLEEP_INTERVAL */
 	int NewMail = 0;			/* flag for global notify */
-	int i;
+	unsigned int i;
 	time_t curtime = time(0);
 	for (i = 0; i < num_mailboxes; i++) {
-		if (mbox[i].label[0] != 0) {
+		if (mbox[i].label[0] != '\0') {
 			if (curtime >= mbox[i].prevtime + mbox[i].loopinterval) {
 				int mailstat = 0;
 				NeedRedraw = 1;
 				DM(&mbox[i], DEBUG_INFO,
-				   "working on [%d].label=>%s< [%d].path=>%s<\n", i,
+				   "working on [%u].label=>%s< [%u].path=>%s<\n", i,
 				   mbox[i].label, i, mbox[i].path);
 				DM(&mbox[i], DEBUG_INFO,
 				   "curtime=%d, prevtime=%d, interval=%d\n",
@@ -694,12 +710,11 @@ static int periodic_mail_check(void)
 				   mbox[i].loopinterval);
 				mbox[i].prevtime = curtime;
 				mailstat = count_mail(i);
-				if ((mailstat == 2) && (mbox[i].notify[0] == 0)) {
+				if ((mailstat == 2) && (mbox[i].notify[0] == '\0')) {
 					/* for global notify */
 					NewMail = 1;
 				}
-				displayMsgCounters(i, mailstat, &Sleep_Interval,
-								   &Blink_Mode);
+				displayMsgCounters(i, mailstat, &Blink_Mode);
 				/* update our idea of current time, as it
 				   may have changed as we check. */
 				curtime = time(0);
@@ -709,13 +724,13 @@ static int periodic_mail_check(void)
 					Blink_Mode &= ~(1 << i);
 					mbox[i].blink_stat = 0;
 				}
-				displayMsgCounters(i, 1, &Sleep_Interval, &Blink_Mode);
+				displayMsgCounters(i, 1, &Blink_Mode);
 				NeedRedraw = 1;
 			}
-			if (mbox[i].fetchinterval > 0 && mbox[i].fetchcmd[0] != 0
+			if (mbox[i].fetchinterval > 0 && mbox[i].fetchcmd[0] != '\0'
 				&& curtime >=
 				mbox[i].prevfetch_time + mbox[i].fetchinterval) {
-				execCommand(mbox[i].fetchcmd);
+				(void) execCommand(mbox[i].fetchcmd);
 				mbox[i].prevfetch_time = curtime;
 			}
 		}
@@ -758,14 +773,14 @@ static int findTopOfMasterXPM(const char **skin_xpm)
 static char **CreateBackingXPM(int width, int height,
 							   const char **skin_xpm)
 {
-	char **ret = malloc(sizeof(char *) * (height + 6)
-						+ sizeof(void *) /* trailing null space */ );
+	char **ret = malloc_ordie(sizeof(char *) * (height + 6)
+							  + sizeof(void *) /* trailing null space */ );
 	const int colors = 5;
 	const int base = colors + 1;
 	const int margin = 4;
 	int i;
 	int top = findTopOfMasterXPM(skin_xpm);
-	ret[0] = malloc(30);
+	ret[0] = malloc_ordie(30);
 	sprintf(ret[0], "%d %d %d %d", width, height, colors, 1);
 	ret[1] = (char *) " \tc #0000FF";	/* no color */
 	ret[2] = (char *) ".\tc #202020";	/* background gray */
@@ -773,7 +788,7 @@ static char **CreateBackingXPM(int width, int height,
 	ret[4] = (char *) "@\tc #C7C3C7";	/* highlight */
 	ret[5] = (char *) ":\tc #004941";	/* led off */
 	for (i = base; i < base + height; i++) {
-		ret[i] = malloc(width);
+		ret[i] = malloc_ordie(width);
 	}
 	for (i = base; i < base + margin; i++) {
 		memset(ret[i], ' ', width);
@@ -801,7 +816,7 @@ static char **CreateBackingXPM(int width, int height,
 	for (i = base + height - margin; i < height + base; i++) {
 		memset(ret[i], ' ', width);
 	}
-	ret[i] = NULL;				/* not sure if this is necessary, it just
+	ret[height + base] = NULL;	/* not sure if this is necessary, it just
 								   seemed like a good idea  */
 	return (ret);
 }
@@ -842,16 +857,16 @@ static void XSleep(int millisec)
 
 static void do_biff(int argc, char **argv)
 {
-	int i;
+	unsigned int i;
 	int but_pressed_region = -1;
 	time_t curtime;
-	int Sleep_Interval = DEFAULT_SLEEP_INTERVAL;	/* in msec */
+	int Sleep_Interval;
 	const char **skin_xpm = NULL;
 	const char **bkg_xpm = NULL;
 	char *skin_file_path = search_path(skin_search_path, skin_filename);
 	int wmbiff_mask_height = mbox_y(num_mailboxes) + 4;
 
-	DMA(DEBUG_INFO, "running %d mailboxes w %d h %d\n", num_mailboxes,
+	DMA(DEBUG_INFO, "running %u mailboxes w %d h %d\n", num_mailboxes,
 		wmbiff_mask_width, wmbiff_mask_height);
 
 	if (skin_file_path != NULL) {
@@ -889,7 +904,7 @@ static void do_biff(int argc, char **argv)
 	for (i = 0; i < num_mailboxes; i++) {
 		/* make it easy to recover the mbox index from a mouse click */
 		AddMouseRegion(i, x_origin, mbox_y(i), 58, mbox_y(i + 1) - 1);
-		if (mbox[i].label[0] != 0) {
+		if (mbox[i].label[0] != '\0') {
 			mbox[i].prevtime = mbox[i].prevfetch_time = 0;
 			BlitString(mbox[i].label, x_origin, mbox_y(i), 0);
 		}
@@ -915,21 +930,22 @@ static void do_biff(int argc, char **argv)
 				exit(EXIT_SUCCESS);
 				break;
 			case ButtonPress:
-				i = CheckMouseRegion(Event.xbutton.x, Event.xbutton.y);
-				but_pressed_region = i;
+				but_pressed_region =
+					CheckMouseRegion(Event.xbutton.x, Event.xbutton.y);
 				break;
 			case ButtonRelease:
 				i = CheckMouseRegion(Event.xbutton.x, Event.xbutton.y);
-				if (but_pressed_region == i && but_pressed_region >= 0) {
+				if (but_pressed_region == (int) i
+					&& but_pressed_region >= 0) {
 					switch (Event.xbutton.button) {
 					case 1:	/* Left mouse-click */
-						if (mbox[i].action[0] != 0) {
-							execCommand(mbox[i].action);
+						if (mbox[i].action[0] != '\0') {
+							(void) execCommand(mbox[i].action);
 						}
 						break;
 					case 3:	/* Right mouse-click */
-						if (mbox[i].fetchcmd[0] != 0) {
-							execCommand(mbox[i].fetchcmd);
+						if (mbox[i].fetchcmd[0] != '\0') {
+							(void) execCommand(mbox[i].fetchcmd);
 						}
 						break;
 					}
@@ -942,8 +958,11 @@ static void do_biff(int argc, char **argv)
 		XSleep(Sleep_Interval);
 	} while (forever);			/* forever is usually true,
 								   but not when debugging with -exit */
-	if (skin_xpm != NULL) {
+	if (skin_xpm != NULL && skin_xpm != wmbiff_master_xpm) {
 		free(skin_xpm);			// added 3 jul 02, appeasing valgrind
+	}
+	if (bkg_xpm != NULL) {
+		free(bkg_xpm);
 	}
 }
 
@@ -988,7 +1007,7 @@ static void parse_cmd(int argc, char **argv, /*@out@ */ char *config_file)
 {
 	int i;
 
-	config_file[0] = 0;
+	config_file[0] = '\0';
 
 	/* Parse Command Line */
 
@@ -1000,7 +1019,9 @@ static void parse_cmd(int argc, char **argv, /*@out@ */ char *config_file)
 			case 'd':
 				if (strcmp(arg + 1, "debug") == 0) {
 					debug_default = DEBUG_ALL;
-				} else if (strcmp(arg + 1, "display")) {
+				} else if (strcmp(arg + 1, "display") == 0) {
+					/* passed to X's command line parser */
+				} else {
 					usage();
 					exit(EXIT_FAILURE);
 				}
@@ -1008,7 +1029,7 @@ static void parse_cmd(int argc, char **argv, /*@out@ */ char *config_file)
 			case 'f':
 				if (strcmp(arg + 1, "fg") == 0) {
 					if (argc > (i + 1)) {
-						foreground = strdup(argv[i + 1]);
+						foreground = strdup_ordie(argv[i + 1]);
 						DMA(DEBUG_INFO, "new foreground: %s", foreground);
 						i++;
 						if (font == NULL)
@@ -1019,7 +1040,7 @@ static void parse_cmd(int argc, char **argv, /*@out@ */ char *config_file)
 						if (strcmp(argv[i + 1], "default") == 0) {
 							font = DEFAULT_FONT;
 						} else {
-							font = strdup(argv[i + 1]);
+							font = strdup_ordie(argv[i + 1]);
 						}
 						DMA(DEBUG_INFO, "new font: %s", font);
 						i++;
@@ -1030,7 +1051,7 @@ static void parse_cmd(int argc, char **argv, /*@out@ */ char *config_file)
 				}
 				break;
 			case 'g':
-				if (strcmp(arg + 1, "geometry")) {
+				if (strcmp(arg + 1, "geometry") != 0) {
 					usage();
 					exit(EXIT_FAILURE);
 				}
@@ -1038,7 +1059,7 @@ static void parse_cmd(int argc, char **argv, /*@out@ */ char *config_file)
 			case 'h':
 				if (strcmp(arg + 1, "hi") == 0) {
 					if (argc > (i + 1)) {
-						highlight = strdup(argv[i + 1]);
+						highlight = strdup_ordie(argv[i + 1]);
 						DMA(DEBUG_INFO, "new highlight: %s", highlight);
 						i++;
 						if (font == NULL)
@@ -1103,7 +1124,13 @@ int main(int argc, char *argv[])
 		DMA(DEBUG_INFO, "Using user-specified config file '%s'.\n",
 			uconfig_file);
 	} else {
-		sprintf(uconfig_file, "%s/.wmbiffrc", getenv("HOME"));
+		const char *home = getenv("HOME");
+		if (home == NULL) {
+			DMA(DEBUG_ERROR,
+				"$HOME undefined. Use the -c option to specify a wmbiffrc\n");
+			exit(EXIT_FAILURE);
+		}
+		sprintf(uconfig_file, "%s/.wmbiffrc", home);
 	}
 
 	if (wmbiffrc_permissions_check(uconfig_file) == 0) {
