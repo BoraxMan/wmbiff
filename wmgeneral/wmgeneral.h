@@ -14,35 +14,36 @@
 typedef struct _rckeys rckeys;
 
 struct _rckeys {
-	const char	*label;
-	char		**var;
+	const char *label;
+	char **var;
 };
 
 typedef struct _rckeys2 rckeys2;
 
 struct _rckeys2 {
-	const char	*family;
-	const char	*label;
-	char		**var;
+	const char *family;
+	const char *label;
+	char **var;
 };
 
 typedef struct {
-	Pixmap			pixmap;
-	Pixmap			mask;
-	XpmAttributes	attributes;
+	Pixmap pixmap;
+	Pixmap mask;
+	XpmAttributes attributes;
 } XpmIcon;
 
   /*******************/
  /* Global variable */
 /*******************/
 
-Display		*display;
+Display *display;
 
   /***********************/
  /* Function Prototypes */
 /***********************/
 
-void AddMouseRegion(int rgn_index, int left, int top, int right, int bottom);
+void AddMouseRegion(int rgn_index, int left, int top, int right,
+					int bottom);
 int CheckMouseRegion(int x, int y);
 
 void openXwindow(int argc, char *argv[], const char **, char *, int, int);

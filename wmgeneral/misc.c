@@ -24,14 +24,12 @@
 #include "list.h"
 #include "misc.h"
 
-extern pid_t
-execCommand(char *command)
+extern pid_t execCommand(char *command)
 {
-    pid_t pid;
+	pid_t pid;
 
-    if ((pid=fork())==0)
-    {
-        execl("/bin/sh", "sh", "-c", command, (char *)0);
-    }
-    return pid;
+	if ((pid = fork()) == 0) {
+		execl("/bin/sh", "sh", "-c", command, (char *) 0);
+	}
+	return pid;
 }
