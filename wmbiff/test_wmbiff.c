@@ -370,10 +370,10 @@ int test_sock_connect(void) {
         perror("listen");
         return 1;
     }
-    if( sock_connect("127.0.0.1", addr.sin_port) < 0) {
+    if( sock_connect("127.0.0.1", htons(addr.sin_port)) < 0) {
         return 1;
     }
-    if( sock_connect("localhost", addr.sin_port) < 0) {
+    if( sock_connect("localhost", htons(addr.sin_port)) < 0) {
         return 1;
     }
     return 0;
@@ -411,6 +411,11 @@ int main(UNUSED(int argc), UNUSED(char *argv[]))
 
 	Relax = 0;
 	if (test_imap4creator()) {
+		printf("SOME TESTS FAILED!\n");
+		exit(EXIT_FAILURE);
+	}
+
+	if (test_sock_connect()) {
 		printf("SOME TESTS FAILED!\n");
 		exit(EXIT_FAILURE);
 	}

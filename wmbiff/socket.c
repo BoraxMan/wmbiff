@@ -1,4 +1,4 @@
-/* $Id: socket.c,v 1.10 2003/10/26 07:42:29 bluehal Exp $ */
+/* $Id: socket.c,v 1.11 2004/04/28 00:18:18 bluehal Exp $ */
 /* Copyright (C) 1998 Trent Piepho  <xyzzy@u.washington.edu>
  *           (C) 1999 Trent Piepho  <xyzzy@speakeasy.org>
  *
@@ -42,8 +42,35 @@
 extern int Relax;
 static int sanity_check_hostname(const char *hostname)
 {
+    struct in_addr dummy;
 	return (Relax
-			|| regulo_match("^[A-Za-z][-_A-Za-z0-9.]+$", hostname, NULL));
+			|| regulo_match("^[A-Za-z][-_A-Za-z0-9.]+$", hostname, NULL)
+            || inet_aton(hostname, &dummy));
+}
+
+static int ipv4_sock_connect(struct in_addr *address, short port) {
+	struct sockaddr_in addr;
+    int fd, i;
+	fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (fd == -1) {
+		perror("Error opening socket");
+		printf("socket() failed.\n");
+		return (-1);
+	};
+
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = *(u_long *) address;
+	addr.sin_port = htons(port);
+	i = connect(fd, (struct sockaddr *) &addr, sizeof(struct sockaddr));
+	if (i == -1) {
+		int saved_errno = errno;
+		perror("Error connecting");
+		printf("connect(%s:%d) failed: %s\n", inet_ntoa(addr.sin_addr),
+			   port, strerror(saved_errno));
+		close(fd);
+		return (-1);
+	};
+	return (fd);
 }
 
 /* nspring/blueHal, 10 Apr 2002; added some extra error
@@ -56,6 +83,7 @@ int sock_connect(const char *hostname, int port)
 {
 #ifdef HAVE_GETADDRINFO
 	struct addrinfo hints, *res, *res0;
+    struct sockaddr_in addr;
 	int fd;
 	char pbuf[NI_MAXSERV];
 	int error;
@@ -67,6 +95,11 @@ int sock_connect(const char *hostname, int port)
 		printf("if you really want this, use wmbiff's -relax option.\n");
 		return -1;
 	}
+
+    /* we were given an IP address, no need to try getaddrinfo on it */
+    if(inet_aton(hostname, &addr.sin_addr)) {
+        return ipv4_sock_connect(&addr.sin_addr, port);
+    }
 
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_socktype = SOCK_STREAM;
@@ -106,8 +139,6 @@ int sock_connect(const char *hostname, int port)
 #else
 #warning "This build will not support IPv6"
 	struct hostent *host;
-	struct sockaddr_in addr;
-	int fd, i;
 
 	if (!sanity_check_hostname(hostname)) {
 		printf
@@ -124,26 +155,8 @@ int sock_connect(const char *hostname, int port)
 		return (-1);
 	};
 
-	fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (fd == -1) {
-		perror("Error opening socket");
-		printf("socket() failed.\n");
-		return (-1);
-	};
+    return ipv4_sock_connect(host->h_addr_list[0], port);
 
-	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = *(u_long *) host->h_addr_list[0];
-	addr.sin_port = htons(port);
-	i = connect(fd, (struct sockaddr *) &addr, sizeof(struct sockaddr));
-	if (i == -1) {
-		int saved_errno = errno;
-		perror("Error connecting");
-		printf("connect(%s:%d) failed: %s\n", inet_ntoa(addr.sin_addr),
-			   port, strerror(saved_errno));
-		close(fd);
-		return (-1);
-	};
-	return (fd);
 #endif
 }
 
