@@ -156,6 +156,8 @@ struct connection_state *unbind(
 /*@null@*/
 FILE *imap_open(Pop3 pc)
 {
+	static int complained_already;	/* we have to succeed once before 
+									   complaining again about failure */
 	struct connection_state *scs;
 	struct imap_authentication_method *a;
 	char *connection_name;
@@ -179,13 +181,16 @@ FILE *imap_open(Pop3 pc)
 	/* no cached connection */
 	sd = sock_connect((const char *) PCU.serverName, PCU.serverPort);
 	if (sd == -1) {
-		IMAP_DM(pc, DEBUG_ERROR, "Couldn't connect to %s:%d: %s\n",
-				PCU.serverName, PCU.serverPort, strerror(errno));
+		if (complained_already == 0) {
+			IMAP_DM(pc, DEBUG_ERROR, "Couldn't connect to %s:%d: %s\n",
+					PCU.serverName, PCU.serverPort, strerror(errno));
+			complained_already = 1;
+		}
 		if (errno == ETIMEDOUT) {
 			/* temporarily bump the interval, in a crude way:
 			   fast forward time so that the mailbox isn't
 			   checked for a while. */
-			pc->prevtime = time(0) + 60 * 5;	/* now + 60 seconds * 5 minutes */
+			pc->prevtime = time(0) + 60 * 5;	/* now + 60 seconds per min * 5 minutes */
 			/* TCP's retry (how much time has elapsed while
 			   the connect times out) is around 3 minutes;
 			   here we just try to allow checking local
@@ -263,6 +268,7 @@ FILE *imap_open(Pop3 pc)
 			if ((a->auth_callback(pc, scs, capabilities)) != 0) {
 				/* store this well setup connection in the cache */
 				bind_state_to_pcu(pc, scs);
+				complained_already = 0;
 				return NULL;
 			}
 	}
