@@ -1,4 +1,4 @@
-/* $Id: Pop3Client.c,v 1.6 2002/02/02 18:04:19 jordi Exp $ */
+/* $Id: Pop3Client.c,v 1.7 2002/03/01 08:41:29 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -20,20 +20,11 @@
 
 #define	PCU	(pc->u).pop
 
-/* emulates what 'variadic macros' are great for */
-#ifdef DEBUG_POP3
-#define DM printf
-#else
-#define DM nullie
-static void nullie(const char *format, ...)
-{
-	return;
-}
-#endif
-
 static FILE *authenticate_md5(Pop3 pc, FILE * fp, char *unused);
 static FILE *authenticate_apop(Pop3 pc, FILE * fp, char *apop_str);
 static FILE *authenticate_plaintext(Pop3 pc, FILE * fp, char *unused);
+
+#define POP_DM(pc, lvl, args...) DM(pc, lvl, "pop3: " ##args)
 
 static struct authentication_method {
 	const char *name;
@@ -60,15 +51,15 @@ FILE *pop3Login(Pop3 pc)
 	apop_str[0] = '\0';			/* if defined, server supports apop */
 
 	if ((fd = sock_connect(PCU.serverName, PCU.serverPort)) == -1) {
-		fprintf(stderr, "Not Connected To Server '%s:%d'\n",
-				PCU.serverName, PCU.serverPort);
+		POP_DM(pc, DEBUG_ERROR, "Not Connected To Server '%s:%d'\n",
+		   PCU.serverName, PCU.serverPort);
 		return NULL;
 	}
 
 	fp = fdopen(fd, "r+");
 	fgets(buf, BUF_SIZE, fp);
 	fflush(fp);
-	DM("%s", buf);
+	POP_DM(pc, DEBUG_INFO, "%s", buf);
 
 	/* Detect APOP, copy challenge into apop_str */
 	for (ptr1 = buf + strlen(buf), ptr2 = NULL; ptr1 > buf; --ptr1) {
@@ -93,9 +84,9 @@ FILE *pop3Login(Pop3 pc)
 	}
 
 	/* if authentication worked, we won't get here */
-	fprintf(stderr,
-			"All Pop3 authentication methods failed for '%s@%s:%d'\n",
-			PCU.userName, PCU.serverName, PCU.serverPort);
+	POP_DM(pc, DEBUG_ERROR,
+	   "All Pop3 authentication methods failed for '%s@%s:%d'\n",
+	   PCU.userName, PCU.serverName, PCU.serverPort);
 	fprintf(fp, "QUIT\r\n");
 	fclose(fp);
 	return NULL;
@@ -116,8 +107,10 @@ int pop3CheckMail(Pop3 pc)
 	fflush(f);
 	fgets(buf, 256, f);
 	if (buf[0] != '+') {
-		fprintf(stderr, "Error Receiving Stats '%s@%s:%d'\n",
-				PCU.userName, PCU.serverName, PCU.serverPort);
+		POP_DM(pc, DEBUG_ERROR,
+		   "Error Receiving Stats '%s@%s:%d'\n",
+		   PCU.userName, PCU.serverName, PCU.serverPort);
+		POP_DM(pc, DEBUG_INFO, "It said: %s\n", buf);
 		return -1;
 	} else {
 		sscanf(buf, "+OK %d", &(pc->TotalMsgs));
@@ -180,8 +173,8 @@ int pop3Create(Pop3 pc, const char *str)
 	/* failed to match either regex */
 	if (matchedchars <= 0) {
 		pc->label[0] = '\0';
-		fprintf(stderr, "Couldn't parse line %s (%d)\n", str,
-				matchedchars);
+		POP_DM(pc, DEBUG_ERROR, "Couldn't parse line %s (%d)\n", str,
+		   matchedchars);
 		return -1;
 	}
 
@@ -196,11 +189,13 @@ int pop3Create(Pop3 pc, const char *str)
 
 	grab_authList(str + regs.end[0], PCU.authList);
 
-	DM("pop3: userName= '%s'\n", PCU.userName);
-	DM("pop3: password= '%s'\n", PCU.password);
-	DM("pop3: serverName= '%s'\n", PCU.serverName);
-	DM("pop3: serverPort= '%d'\n", PCU.serverPort);
-	DM("pop3: authList= '%s'\n", PCU.authList);
+	POP_DM(pc, DEBUG_INFO, "pop3: userName= '%s'\n", PCU.userName);
+	POP_DM(pc, DEBUG_INFO, "pop3: password= is %d characters long\n",
+	   strlen(PCU.password));
+	POP_DM(pc, DEBUG_INFO, "pop3: password= '%s'\n", PCU.password);
+	POP_DM(pc, DEBUG_INFO, "pop3: serverName= '%s'\n", PCU.serverName);
+	POP_DM(pc, DEBUG_INFO, "pop3: serverPort= '%d'\n", PCU.serverPort);
+	POP_DM(pc, DEBUG_INFO, "pop3: authList= '%s'\n", PCU.authList);
 
 	pc->open = pop3Login;
 	pc->checkMail = pop3CheckMail;
@@ -224,7 +219,7 @@ static FILE *authenticate_md5(Pop3 pc, FILE * fp, char *apop_str)
 	fprintf(fp, "AUTH CRAM-MD5\r\n");
 	fflush(fp);
 	fgets(buf, BUF_SIZE, fp);
-	DM("%s", buf);
+	POP_DM(pc, DEBUG_INFO, "%s", buf);
 
 	if (buf[0] != '+' || buf[1] != ' ') {
 		/* nope, not supported. */
@@ -232,7 +227,7 @@ static FILE *authenticate_md5(Pop3 pc, FILE * fp, char *apop_str)
 	}
 
 	Decode_Base64(buf + 2, buf2);
-	DM("POP3 CRAM-MD5 challenge: %s\n", buf2);
+	POP_DM(pc, DEBUG_INFO, "CRAM-MD5 challenge: %s\n", buf2);
 
 	strcpy(buf, PCU.userName);
 	strcat(buf, " ");
@@ -249,7 +244,7 @@ static FILE *authenticate_md5(Pop3 pc, FILE * fp, char *apop_str)
 	gcry_md_close(gmh);
 
 	strcat(buf, buf2);
-	DM("POP3 CRAM-MD5 response: %s\n", buf);
+	POP_DM(pc, DEBUG_INFO, "CRAM-MD5 response: %s\n", buf);
 	Encode_Base64(buf, buf2);
 
 	fprintf(fp, "%s\r\n", buf2);
@@ -259,9 +254,9 @@ static FILE *authenticate_md5(Pop3 pc, FILE * fp, char *apop_str)
 	if (!strncmp(buf, "+OK", 3))
 		return fp;				/* AUTH successful */
 	else {
-		fprintf(stderr,
-				"POP3 CRAM-MD5 AUTH failed for user '%s@%s:%d'\n",
-				PCU.userName, PCU.serverName, PCU.serverPort);
+		POP_DM(pc, DEBUG_ERROR,
+		   "CRAM-MD5 AUTH failed for user '%s@%s:%d'\n",
+		   PCU.userName, PCU.serverName, PCU.serverPort);
 		fprintf(stderr, "It said %s", buf);
 		return NULL;
 	}
@@ -281,7 +276,7 @@ static FILE *authenticate_apop(Pop3 pc, FILE * fp, char *apop_str)
 		/* server doesn't support apop. */
 		return (NULL);
 	}
-	DM("POP3 APOP challenge: %s\n", apop_str);
+	POP_DM(pc, DEBUG_INFO, "APOP challenge: %s\n", apop_str);
 	strcat(apop_str, PCU.password);
 
 	gmh = gcry_md_open(GCRY_MD_MD5, 0);
@@ -291,7 +286,7 @@ static FILE *authenticate_apop(Pop3 pc, FILE * fp, char *apop_str)
 	Bin2Hex(md5, 16, buf);
 	gcry_md_close(gmh);
 
-	DM("POP3 APOP response: %s %s\n", PCU.userName, buf);
+	POP_DM(pc, DEBUG_INFO, "APOP response: %s %s\n", PCU.userName, buf);
 	fprintf(fp, "APOP %s %s\r\n", PCU.userName, buf);
 	fflush(fp);
 	fgets(buf, BUF_SIZE, fp);
@@ -299,9 +294,10 @@ static FILE *authenticate_apop(Pop3 pc, FILE * fp, char *apop_str)
 	if (!strncmp(buf, "+OK", 3))
 		return fp;				/* AUTH successful */
 	else {
-		fprintf(stderr, "POP3 APOP AUTH failed for user '%s@%s:%d'\n",
-				PCU.userName, PCU.serverName, PCU.serverPort);
-		fprintf(stderr, "It said %s", buf);
+		POP_DM(pc, DEBUG_ERROR,
+		   "APOP AUTH failed for user '%s@%s:%d'\n",
+		   PCU.userName, PCU.serverName, PCU.serverPort);
+		POP_DM(pc, DEBUG_INFO, "It said %s", buf);
 		return NULL;
 	}
 #else
@@ -315,22 +311,34 @@ static FILE *authenticate_plaintext(Pop3 pc, FILE * fp, char *apop_str)
 
 	fprintf(fp, "USER %s\r\n", PCU.userName);
 	fflush(fp);
-	fgets(buf, BUF_SIZE, fp);
+	if (fgets(buf, BUF_SIZE, fp) == NULL) {
+		POP_DM(pc, DEBUG_ERROR,
+		   "Error reading from server authenticating '%s@%s:%d'\n",
+		   PCU.userName, PCU.serverName, PCU.serverPort);
+		return NULL;
+	}
 	if (buf[0] != '+') {
-		fprintf(stderr, "Invalid User Name '%s@%s:%d'\n",
-				PCU.userName, PCU.serverName, PCU.serverPort);
-		DM("%s\n", buf);
+		POP_DM(pc, DEBUG_ERROR,
+		   "Failed user name when authenticating '%s@%s:%d'\n",
+		   PCU.userName, PCU.serverName, PCU.serverPort);
+		/* deb #128863 might be easier if we printed: */
+		POP_DM(pc, DEBUG_ERROR, "The server's error message was: %s\n", buf);
 		return NULL;
 	};
 
-	fflush(fp);
 	fprintf(fp, "PASS %s\r\n", PCU.password);
 	fflush(fp);
-	fgets(buf, BUF_SIZE, fp);
+	if (fgets(buf, BUF_SIZE, fp) == NULL) {
+		POP_DM(pc, DEBUG_ERROR,
+		   "Error reading from server (2) authenticating '%s@%s:%d'\n",
+		   PCU.userName, PCU.serverName, PCU.serverPort);
+		return NULL;
+	}
 	if (buf[0] != '+') {
-		fprintf(stderr, "Incorrect Password for user '%s@%s:%d'\n",
-				PCU.userName, PCU.serverName, PCU.serverPort);
-		fprintf(stderr, "It said %s", buf);
+		POP_DM(pc, DEBUG_ERROR,
+		   "Failed password when authenticating '%s@%s:%d'\n",
+		   PCU.userName, PCU.serverName, PCU.serverPort);
+		POP_DM(pc, DEBUG_ERROR, "The server's error message was: %s\n", buf);
 		return NULL;
 	};
 

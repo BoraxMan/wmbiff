@@ -1,12 +1,9 @@
 # Makefile for wmbiff
 #
-# $Id: Makefile,v 1.22 2002/02/03 22:43:54 jordi Exp $
+# $Id: Makefile,v 1.23 2002/03/01 08:41:29 bluehal Exp $
 
 # Disable gnutls crypto?
 #WITHOUT_CRYPTO=	1
-
-# If using v0.2.x of gnutls change the variabel below to 2
-GNUTLS_MINOR_VERSION=3
 
 # Use external GNU regexp lib?
 #EXT_GNU_REGEX_LIB=1
@@ -58,20 +55,11 @@ ifndef WITHOUT_CRYPTO
 EXTRAFLAGS+=	-DWITH_TLS -DWITH_GCRYPT
 LIBS+=		-lgnutls -lgcrypt
 endif
-ifeq ($(GNUTLS_MINOR_VERSION),3)
-EXTRAFLAGS+=	-DGNUTLS_VER=3 
-endif
 
 INSTALL?=	/usr/bin/install
 INSTALL_DIR?=	$(INSTALL) -d -o $(INSTALL_USER) -g $(INSTALL_GROUP) -m 755
 INSTALL_PRG?=	$(INSTALL) -p -o $(INSTALL_USER) -g $(INSTALL_GROUP) -m 755 -s
 INSTALL_FILE?=	$(INSTALL) -p -o $(INSTALL_USER) -g $(INSTALL_GROUP) -m 644
-
-
-# Misc debug stuff :
-#EXTRAFLAGS+=	-DDEBUG_POP3 -DDEBUG_IMAP4 -DDEBUG_LICQ \
-#	-DDEBUG_MBOX -DDEBUG_MAILDIR -DDEBUG -DDEBUG_MAIL_COUNT \
-#	-DDEBUG_COMM
 
 # For malloc debug :
 #CFLAGS	+= -DUSE_DMALLOC
@@ -93,8 +81,8 @@ OBJS =	wmbiff.o socket.o \
 all: wmbiff
 
 Imap4Client.o: Imap4Client.c Client.h Makefile
-
-wmbiff.o: wmbiff-master.xpm wmbiff.c
+Pop3Client.o: Pop3Client.c Client.h Makefile
+wmbiff.o: wmbiff-master.xpm wmbiff.c Client.h
 
 .c.o:
 	$(CC) $(CFLAGS) $(EXTRAFLAGS) -c $< -o $*.o
@@ -131,7 +119,7 @@ install: wmbiff
 # everyone may be happy with this, but has been determined to be necessary for
 # consistency and legibility.
 #
-# In other words, make sure you run "make clean" or "make indent", and do not
+# In other words, make sure you run "make clean" and "make indent", and do not
 # change the options on the indent command, before you submit patches against
 # wmbiff.  This will make everyone's life easier.
 #

@@ -24,23 +24,13 @@
 #include <dmalloc.h>
 #endif
 
-/* emulates what 'variadic macros' are great for */
-#ifdef DEBUG_IMAP4
-#define DM printf
-#else
-#define DM nullie
-/*@unused@*/
-static void nullie( /*@unused@ */ const char *format, ...)
-{
-	return;
-}
-#endif
-
 #define	PCU	(pc->u).imap
 
 #ifdef __LCLINT__
 void asprintf( /*@out@ */ char **out, char *fmt, ...);
 #endif
+
+#define IMAP_DM(pc, lvl, args...) DM(pc, lvl, "imap4: " ##args)
 
 /* this array maps server:port pairs to file descriptors, so
    that when more than one mailbox is queried from a server,
@@ -107,8 +97,8 @@ static void bind_state_to_pcu(Pop3 pc,
 	for (i = 0; i < FDMAP_SIZE && fdmap[i].cs != NULL; i++);
 	if (i == FDMAP_SIZE) {
 		/* should never happen */
-		printf
-			("wmbiff: Tried to open too many IMAP connections. Sorry!\n");
+		IMAP_DM(pc, DEBUG_ERROR,
+				"Tried to open too many IMAP connections. Sorry!\n");
 		exit(EXIT_FAILURE);
 	}
 	fdmap[i].user_password_server_port = connection_id;
@@ -156,20 +146,20 @@ FILE *imap_open(Pop3 pc)
 	   structure, although it might be a blacklist entry */
 	asprintf(&connection_name, "%s:%d", PCU.serverName, PCU.serverPort);
 
+	assert(pc != NULL);
+
 	/* no cached connection */
 	sd = sock_connect((const char *) PCU.serverName, PCU.serverPort);
 	if (sd == -1) {
-		fprintf(stderr, "Couldn't connect to %s:%d: %s\n",
+		IMAP_DM(pc, DEBUG_ERROR, "Couldn't connect to %s:%d: %s\n",
 				PCU.serverName, PCU.serverPort, strerror(errno));
 		if (errno == ETIMEDOUT) {
 			/* only give up if it was a time-consuming error */
 			/* try again later if it was just a connection refused */
-			fprintf(stderr,
-					"Will not retry because this attempt to connect timed out.\n");
-			fprintf(stderr,
-					"This is done so that other mailboxes can be updated in a timely manner.\n");
-			fprintf(stderr,
-					"To try again to connect to %s:%d, restart wmbiff.\n",
+			IMAP_DM(pc, DEBUG_ERROR,
+					"Will not retry because this attempt to connect timed out.\n"
+					" This is done so that other mailboxes can be updated in a timely manner.\n"
+					" To try again to connect to %s:%d, restart wmbiff.\n",
 					PCU.serverName, PCU.serverPort);
 			bind_state_to_pcu(pc, initialize_blacklist(connection_name));
 		}
@@ -179,7 +169,7 @@ FILE *imap_open(Pop3 pc)
 	/* build the connection using STARTTLS */
 	if (PCU.dossl && (PCU.serverPort == 143)) {
 		/* setup an unencrypted binding long enough to invoke STARTTLS */
-		scs = initialize_unencrypted(sd, connection_name);
+		scs = initialize_unencrypted(sd, connection_name, pc);
 
 		/* can we? */
 		tlscomm_printf(scs, "a000 CAPABILITY\r\n");
@@ -187,19 +177,20 @@ FILE *imap_open(Pop3 pc)
 			goto communication_failure;
 
 		if (!strstr(capabilities, "STARTTLS")) {
-			printf("server doesn't support ssl imap on port 143.");
+			IMAP_DM(pc, DEBUG_ERROR,
+					"server doesn't support ssl imap on port 143.");
 			goto communication_failure;
 		}
 
 		/* we sure can! */
-		DM("Negotiating TLS within IMAP");
+		IMAP_DM(pc, DEBUG_INFO, "Negotiating TLS within IMAP");
 		tlscomm_printf(scs, "a001 STARTTLS\r\n");
 
 		if (!tlscomm_expect(scs, "a001 ", buf, BUF_SIZE))
 			goto communication_failure;
 
 		if (!strstr(buf, "a001 OK")) {
-			printf("couldn't negotiate tls. :(\n");
+			IMAP_DM(pc, DEBUG_ERROR, "couldn't negotiate tls. :(\n");
 			goto communication_failure;
 		}
 
@@ -212,13 +203,13 @@ FILE *imap_open(Pop3 pc)
 	/* either we've negotiated ssl from starttls, or
 	   we're starting an encrypted connection now */
 	if (PCU.dossl) {
-		scs = initialize_gnutls(sd, connection_name);
+		scs = initialize_gnutls(sd, connection_name, pc);
 		if (scs == NULL) {
-			fprintf(stderr, "Failed to initialize TLS\n");
+			IMAP_DM(pc, DEBUG_ERROR, "Failed to initialize TLS\n");
 			return NULL;
 		}
 	} else {
-		scs = initialize_unencrypted(sd, connection_name);
+		scs = initialize_unencrypted(sd, connection_name, pc);
 	}
 
 	/* authenticate; first find out how */
@@ -228,7 +219,7 @@ FILE *imap_open(Pop3 pc)
 	   encrypted session. */
 	tlscomm_printf(scs, "a000 CAPABILITY\r\n");
 	if (!tlscomm_expect(scs, "* CAPABILITY", capabilities, BUF_SIZE)) {
-		printf("unable to query capability string");
+		IMAP_DM(pc, DEBUG_ERROR, "unable to query capability string");
 		goto communication_failure;
 	}
 
@@ -245,8 +236,8 @@ FILE *imap_open(Pop3 pc)
 	}
 
 	/* if authentication worked, we won't get here */
-	fprintf(stderr,
-			"All Imap4 authentication methods failed for '%s@%s:%d'\n",
+	IMAP_DM(pc, DEBUG_ERROR,
+			"All authentication methods failed for '%s@%s:%d'\n",
 			PCU.userName, PCU.serverName, PCU.serverPort);
   communication_failure:
 	tlscomm_printf(scs, "a002 LOGOUT\r\n");
@@ -331,7 +322,7 @@ int imap4Create(Pop3 pc, const char *const str)
 	/* failed to match either regex */
 	if (matchedchars <= 0) {
 		pc->label[0] = '\0';
-		fprintf(stderr, "Couldn't parse line %s (%d)\n", str,
+		IMAP_DM(pc, DEBUG_ERROR, "Couldn't parse line %s (%d)\n", str,
 				matchedchars);
 		return -1;
 	}
@@ -351,12 +342,13 @@ int imap4Create(Pop3 pc, const char *const str)
 
 	grab_authList(str + regs.end[0], PCU.authList);
 
-	DM("imap4: userName= '%s'\n", PCU.userName);
-	DM("imap4: password= '%s'\n", PCU.password);
-	DM("imap4: serverName= '%s'\n", PCU.serverName);
-	DM("imap4: serverPath= '%s'\n", pc->path);
-	DM("imap4: serverPort= '%d'\n", PCU.serverPort);
-	DM("imap4: authList= '%s'\n", PCU.authList);
+	IMAP_DM(pc, DEBUG_INFO, "userName= '%s'\n", PCU.userName);
+	IMAP_DM(pc, DEBUG_INFO, "password is %d characters long\n",
+			strlen(PCU.password));
+	IMAP_DM(pc, DEBUG_INFO, "serverName= '%s'\n", PCU.serverName);
+	IMAP_DM(pc, DEBUG_INFO, "serverPath= '%s'\n", pc->path);
+	IMAP_DM(pc, DEBUG_INFO, "serverPort= '%d'\n", PCU.serverPort);
+	IMAP_DM(pc, DEBUG_INFO, "authList= '%s'\n", PCU.authList);
 
 	pc->open = imap_open;
 	pc->checkMail = imap_checkmail;
@@ -377,7 +369,8 @@ static int authenticate_plaintext(Pop3 pc,
 	 *  MUST NOT issue the LOGIN command if this capability is present.
 	 */
 	if (strstr(capabilities, "LOGINDISABLED")) {
-		printf("Plaintext auth prohibited by server: (LOGINDISABLED).\n");
+		IMAP_DM(pc, DEBUG_ERROR,
+				"Plaintext auth prohibited by server: (LOGINDISABLED).\n");
 		goto plaintext_failed;
 	}
 
@@ -385,12 +378,13 @@ static int authenticate_plaintext(Pop3 pc,
 	tlscomm_printf(scs, "a001 LOGIN %s \"%s\"\r\n", PCU.userName,
 				   PCU.password);
 	if (!tlscomm_expect(scs, "a001 ", buf, BUF_SIZE)) {
-		printf("unable to login");
+		IMAP_DM(pc, DEBUG_ERROR,
+				"Did not get a response to the LOGIN command.\n");
 		goto plaintext_failed;
 	}
 
 	if (buf[5] != 'O') {
-		printf("login failed\n");
+		IMAP_DM(pc, DEBUG_ERROR, "IMAP Login failed.\n");
 		goto plaintext_failed;
 	}
 	return (1);
@@ -418,7 +412,7 @@ static int authenticate_md5(Pop3 pc,
 		goto expect_failure;
 
 	Decode_Base64(buf + 2, buf2);
-	DM("IMAP4 CRAM-MD5 challenge: %s\n", buf2);
+	IMAP_DM(pc, DEBUG_INFO, "CRAM-MD5 challenge: %s\n", buf2);
 
 	strcpy(buf, PCU.userName);
 	strcat(buf, " ");
@@ -431,7 +425,7 @@ static int authenticate_md5(Pop3 pc,
 	gcry_md_close(gmh);
 
 	strcat(buf, buf2);
-	DM("IMAP4 CRAM-MD5 response: %s\n", buf);
+	IMAP_DM(pc, DEBUG_INFO, "CRAM-MD5 response: %s\n", buf);
 	Encode_Base64(buf, buf2);
 
 	tlscomm_printf(scs, "%s\r\n", buf2);
@@ -441,14 +435,16 @@ static int authenticate_md5(Pop3 pc,
 	if (!strncmp(buf, "a007 OK", 7))
 		return 1;				/* AUTH successful */
 
-	fprintf(stderr,
-			"IMAP4 CRAM-MD5 AUTH failed for user '%s@%s:%d'\n",
+	IMAP_DM(pc, DEBUG_ERROR,
+			"CRAM-MD5 AUTH failed for user '%s@%s:%d'\n",
 			PCU.userName, PCU.serverName, PCU.serverPort);
-	fprintf(stderr, "It said %s", buf);
+	IMAP_DM(pc, DEBUG_INFO, "It said %s", buf);
 	return 0;
 
   expect_failure:
-	fprintf(stderr, "tlscomm_expect failed during cram-md5 auth: %s", buf);
+	IMAP_DM(pc, DEBUG_ERROR,
+			"tlscomm_expect failed during cram-md5 auth: %s", buf);
+	IMAP_DM(pc, DEBUG_ERROR, "failed to authenticate using cram-md5.");
 	return 0;
 #else
 	/* not compiled with gcrypt. */

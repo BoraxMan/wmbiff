@@ -25,17 +25,11 @@
 
 #include "tlsComm.h"
 
-/* emulates what 'variadic macros' are great for */
-#ifdef DEBUG_COMM
-#define DM printf
-#else
-#define DM nullie
-/*@unused@*/
-static void nullie( /*@unused@ */ const char *format, ...)
-{
-	return;
-}
-#endif
+#include "Client.h"				/* debugging messages */
+
+/* WARNING: implcitly uses scs to gain access to the mailbox
+   that holds the per-mailbox debug flag. */
+#define TDM(lvl, args...) DM(scs->pc, lvl, "comm: " ##args)
 
 /* this is the per-connection state that is maintained for
    each connection; BIG variables are for ssl (null if not
@@ -52,6 +46,7 @@ struct connection_state {
 	/*@null@ */ void *xcred;
 #endif
 	char unprocessed[BUF_SIZE];
+	Pop3 pc;					/* mailbox handle for debugging messages */
 };
 
 /* gotta do our own line buffering, sigh */
@@ -61,18 +56,14 @@ void handle_gnutls_read_error(int readbytes, struct connection_state *scs);
 
 void tlscomm_close(struct connection_state *scs)
 {
-	DM("%s: closing.\n", (scs->name != NULL) ? scs->name : "null");
+	TDM(DEBUG_INFO, "%s: closing.\n",
+		(scs->name != NULL) ? scs->name : "null");
 
 	/* not ok to call this more than once */
 	if (scs->state) {
 #ifdef WITH_TLS
-#if GNUTLS_VER >= 3
 		gnutls_bye(scs->state, GNUTLS_SHUT_RDWR);
 		gnutls_x509pki_free_sc(scs->xcred);
-#else
-		gnutls_bye(scs->sd, scs->state, GNUTLS_SHUT_RDWR);
-		gnutls_free_x509_client_sc(scs->xcred);
-#endif
 		gnutls_deinit(scs->state);
 		scs->xcred = NULL;
 #endif
@@ -97,8 +88,9 @@ static int wait_for_it(int sd, int timeoutseconds)
 	FD_ZERO(&readfds);
 	FD_SET(sd, &readfds);
 	if (select(sd + 1, &readfds, NULL, NULL, &tv) == 0) {
-		DM("select timed out after %d seconds on socket: %d\n",
-		   timeoutseconds, sd);
+		DMA(DEBUG_INFO,
+			"select timed out after %d seconds on socket: %d\n",
+			timeoutseconds, sd);
 		return (0);
 	}
 	return (FD_ISSET(sd, &readfds));
@@ -146,18 +138,13 @@ int tlscomm_expect(struct connection_state *scs,
 {
 	int prefixlen = (int) strlen(prefix);
 	memset(buf, 0, buflen);
-	DM("%s: expecting: %s\n", scs->name, prefix);
+	TDM(DEBUG_INFO, "%s: expecting: %s\n", scs->name, prefix);
 	while (wait_for_it(scs->sd, 10)) {
 		int readbytes;
 #ifdef WITH_TLS
 		if (scs->state) {
 			readbytes =
-#if GNUTLS_VER >= 3
 				gnutls_read(scs->state, scs->unprocessed, BUF_SIZE);
-#else
-				gnutls_read(scs->sd, scs->state, scs->unprocessed,
-							BUF_SIZE);
-#endif
 			if (readbytes < 0) {
 				handle_gnutls_read_error(readbytes, scs);
 				return 0;
@@ -167,8 +154,8 @@ int tlscomm_expect(struct connection_state *scs,
 		{
 			readbytes = read(scs->sd, scs->unprocessed, BUF_SIZE);
 			if (readbytes < 0) {
-				fprintf(stderr, "%s: error reading: %s\n", scs->name,
-						strerror(errno));
+				TDM(DEBUG_ERROR, "%s: error reading: %s\n", scs->name,
+					strerror(errno));
 				return 0;
 			}
 		}
@@ -184,16 +171,17 @@ int tlscomm_expect(struct connection_state *scs,
 				} else {
 					readbytes -= linebytes;
 					if (strncmp(buf, prefix, prefixlen) == 0) {
-						DM("%s: got: %*s", scs->name, readbytes, buf);
+						TDM(DEBUG_INFO, "%s: got: %*s", scs->name,
+							readbytes, buf);
 						return 1;	/* got it! */
 					}
-					DM("%s: dumped(%d/%d): %.*s", scs->name,
-					   linebytes, readbytes, linebytes, buf);
+					TDM(DEBUG_INFO, "%s: dumped(%d/%d): %.*s", scs->name,
+						linebytes, readbytes, linebytes, buf);
 				}
 			}
 	}
-	fprintf(stderr, "%s: expecting: '%s', saw: %s", scs->name, prefix,
-			buf);
+	TDM(DEBUG_ERROR, "%s: expecting: '%s', saw: %s", scs->name, prefix,
+		buf);
 	return 0;					/* wait_for_it failed */
 }
 
@@ -209,7 +197,7 @@ void tlscomm_printf(struct connection_state *scs, const char *format, ...)
 	int bytes;
 
 	if (scs == NULL) {
-		fprintf(stderr, "null connection to tlscomm_printf\n");
+		DMA(DEBUG_ERROR, "null connection to tlscomm_printf\n");
 		abort();
 	}
 	va_start(args, format);
@@ -219,37 +207,31 @@ void tlscomm_printf(struct connection_state *scs, const char *format, ...)
 	if (scs->sd != -1) {
 #ifdef WITH_TLS
 		if (scs->state) {
-#if GNUTLS_VER>=3
 			int written = gnutls_write(scs->state, buf, bytes);
-#else
-			int written = gnutls_write(scs->sd, scs->state, buf, bytes);
-#endif
 			if (written < bytes) {
-				fprintf(stderr, "Error %s prevented writing: %*s\n",
-						gnutls_strerror(written), bytes, buf);
+				TDM(DEBUG_ERROR,
+					"Error %s prevented writing: %*s\n",
+					gnutls_strerror(written), bytes, buf);
 				return;
 			}
 		} else
 #endif
 			(void) write(scs->sd, buf, bytes);
 	} else {
-		fprintf(stderr,
-				"warning: tlscomm_printf called with an invalid socket descriptor\n");
+		printf
+			("warning: tlscomm_printf called with an invalid socket descriptor\n");
 		return;
 	}
-	DM("wrote %*s", bytes, buf);
+	TDM(DEBUG_INFO, "wrote %*s", bytes, buf);
 }
 
 /* most of this file only makes sense if using TLS. */
 #ifdef WITH_TLS
 
-#ifdef DEBUG_COMM
-/* taken from the GNUTLS documentation, version 0.3.0 and 0.2.10; this
-   may need to be updated from gnutls's cli.c if the gnutls interface
-   changes, but that is only necessary if you want
-   debug_comm. */
-#if GNUTLS_VER>=3
-
+/* taken from the GNUTLS documentation, version 0.3.0 and
+   0.2.10; this may need to be updated from gnutls's cli.c
+   (now common.h) if the gnutls interface changes, but that
+   is only necessary if you want debug_comm. */
 #define PRINTX(x,y) if (y[0]!=0) printf(" -   %s %s\n", x, y)
 #define PRINT_DN(X) PRINTX( "CN:", X.common_name); \
 	PRINTX( "OU:", X.organizational_unit_name); \
@@ -315,6 +297,8 @@ static int print_info(GNUTLS_STATE state)
 			printf(" - Certificate Issuer's info:\n");
 			PRINT_DN(dn);
 		}
+    default:
+      printf(" - Other.\n");
 	}
 
 	tmp = gnutls_protocol_get_name(gnutls_protocol_get_version(state));
@@ -332,101 +316,13 @@ static int print_info(GNUTLS_STATE state)
 	return 0;
 }
 
-#else
-
-#define PRINTX(x,y) if (y[0]!=0) printf(" -   %s %s\n", x, y)
-#define PRINT_DN(X) PRINTX( "CN:", X->common_name); \
-	PRINTX( "OU:", X->organizational_unit_name); \
-	PRINTX( "O:", X->organization); \
-	PRINTX( "L:", X->locality_name); \
-	PRINTX( "S:", X->state_or_province_name); \
-	PRINTX( "C:", X->country); \
-	PRINTX( "E:", X->email); \
-	PRINTX( "SAN:", gnutls_x509pki_client_get_subject_dns_name(state))
-
-
-static int print_info(GNUTLS_STATE state)
-{
-	const char *tmp;
-	CredType cred;
-	const gnutls_DN *dn;
-	CertificateStatus status;
-
-
-	tmp = gnutls_kx_get_name(gnutls_get_current_kx(state));
-	printf("- Key Exchange: %s\n", tmp);
-
-	cred = gnutls_get_auth_type(state);
-	switch (cred) {
-	case GNUTLS_ANON:
-		printf("- Anonymous DH using prime of %d bits\n",
-			   gnutls_anon_client_get_dh_bits(state));
-
-	case GNUTLS_X509PKI:
-		status = gnutls_x509pki_client_get_peer_certificate_status(state);
-		switch (status) {
-		case GNUTLS_CERT_NOT_TRUSTED:
-			printf("- Peer's X509 Certificate was NOT verified\n");
-			break;
-		case GNUTLS_CERT_EXPIRED:
-			printf
-				("- Peer's X509 Certificate was verified but is expired\n");
-			break;
-		case GNUTLS_CERT_TRUSTED:
-			printf("- Peer's X509 Certificate was verified\n");
-			break;
-		case GNUTLS_CERT_NONE:
-			printf("- Peer did not send any X509 Certificate.\n");
-			break;
-		case GNUTLS_CERT_INVALID:
-			printf("- Peer's X509 Certificate was invalid\n");
-			break;
-		}
-
-		if (status != GNUTLS_CERT_NONE && status != GNUTLS_CERT_INVALID) {
-			printf(" - Certificate info:\n");
-			printf(" - Certificate version: #%d\n",
-				   gnutls_x509pki_client_get_peer_certificate_version
-				   (state));
-
-			dn = gnutls_x509pki_client_get_peer_dn(state);
-			PRINT_DN(dn);
-
-			dn = gnutls_x509pki_client_get_issuer_dn(state);
-			printf(" - Certificate Issuer's info:\n");
-			PRINT_DN(dn);
-		}
-	default:
-	}
-
-	tmp = gnutls_version_get_name(gnutls_get_current_version(state));
-	printf("- Version: %s\n", tmp);
-
-	tmp =
-		gnutls_compression_get_name(gnutls_get_current_compression_method
-									(state));
-	printf("- Compression: %s\n", tmp);
-
-	tmp = gnutls_cipher_get_name(gnutls_get_current_cipher(state));
-	printf("- Cipher: %s\n", tmp);
-
-	tmp = gnutls_mac_get_name(gnutls_get_current_mac_algorithm(state));
-	printf("- MAC: %s\n", tmp);
-
-	return 0;
-}
-
-#endif
-
-#endif
-
-
-
-struct connection_state *initialize_gnutls(int sd, char *name)
+struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc)
 {
 	static int gnutls_initialized;
 	int zok;
-	struct connection_state *ret = malloc(sizeof(struct connection_state));
+	struct connection_state *scs = malloc(sizeof(struct connection_state));
+
+	scs->pc = pc;
 
 	assert(sd >= 0);
 
@@ -435,8 +331,7 @@ struct connection_state *initialize_gnutls(int sd, char *name)
 		gnutls_initialized = 1;
 	}
 
-	assert(gnutls_init(&ret->state, GNUTLS_CLIENT) == 0);
-#if GNUTLS_VER>=3
+	assert(gnutls_init(&scs->state, GNUTLS_CLIENT) == 0);
 	{
 		const int protocols[] = { GNUTLS_TLS1, GNUTLS_SSL3, 0 };
 		const int ciphers[] =
@@ -444,73 +339,44 @@ struct connection_state *initialize_gnutls(int sd, char *name)
 		const int compress[] = { GNUTLS_COMP_ZLIB, GNUTLS_COMP_NULL, 0 };
 		const int key_exch[] = { GNUTLS_KX_X509PKI_RSA, 0 };
 		const int mac[] = { GNUTLS_MAC_SHA, GNUTLS_MAC_MD5, 0 };
-		assert(gnutls_protocol_set_priority(ret->state, protocols) == 0);
-		assert(gnutls_cipher_set_priority(ret->state, ciphers) == 0);
-		assert(gnutls_compression_set_priority(ret->state, compress) == 0);
-		assert(gnutls_kx_set_priority(ret->state, key_exch) == 0);
-		assert(gnutls_mac_set_priority(ret->state, mac) == 0);
+		assert(gnutls_protocol_set_priority(scs->state, protocols) == 0);
+		assert(gnutls_cipher_set_priority(scs->state, ciphers) == 0);
+		assert(gnutls_compression_set_priority(scs->state, compress) == 0);
+		assert(gnutls_kx_set_priority(scs->state, key_exch) == 0);
+		assert(gnutls_mac_set_priority(scs->state, mac) == 0);
 		/* no client private key */
-		if (gnutls_x509pki_allocate_sc(&ret->xcred, 0) < 0) {
-			fprintf(stderr, "gnutls memory error\n");
+		if (gnutls_x509pki_allocate_sc(&scs->xcred, 0) < 0) {
+			DMA(DEBUG_ERROR, "gnutls memory error\n");
 			exit(1);
 		}
-		gnutls_cred_set(ret->state, GNUTLS_X509PKI, ret->xcred);
-		gnutls_transport_set_ptr(ret->state, sd);
+		gnutls_cred_set(scs->state, GNUTLS_X509PKI, scs->xcred);
+		gnutls_transport_set_ptr(scs->state, sd);
 		do {
-			zok = gnutls_handshake(ret->state);
+			zok = gnutls_handshake(scs->state);
 		} while (zok == GNUTLS_E_INTERRUPTED || zok == GNUTLS_E_AGAIN);
 	}
-#else
-	assert(gnutls_set_protocol_priority(ret->state, GNUTLS_TLS1,
-										GNUTLS_SSL3, 0) == 0);
-	assert(gnutls_set_cipher_priority(ret->state, GNUTLS_3DES_CBC,
-									  GNUTLS_ARCFOUR, 0) == 0);
-	assert(gnutls_set_compression_priority(ret->state, GNUTLS_ZLIB,
-										   GNUTLS_NULL_COMPRESSION,
-										   0) == 0);
-	assert(gnutls_set_kx_priority(ret->state, GNUTLS_KX_RSA, 0) == 0);
-	assert(gnutls_set_mac_priority(ret->state, GNUTLS_MAC_SHA,
-								   GNUTLS_MAC_MD5, 0) == 0);
-	/* no client private key */
-	if (gnutls_allocate_x509_client_sc(&ret->xcred, 0) < 0) {
-		fprintf(stderr, "gnutls memory error\n");
-		exit(1);
-	}
-	gnutls_set_cred(ret->state, GNUTLS_X509PKI, ret->xcred);
-	zok = gnutls_handshake(sd, ret->state);
-#endif
-
-	/* TODO: 
-	   zok =
-	   gnutls_set_x509_client_trust(ret->xcred, "cafile.pem",
-	   "crlfile.pem");
-	   if (zok != 0) {
-	   // printf("error setting client trust\n");
-	   }
-	 */
 
 	if (zok < 0) {
-		fprintf(stderr, "%s: Handshake failed\n", name);
-		fprintf(stderr, "%s: This may be a problem in gnutls, "
-				"which is under development\n", name);
-		fprintf(stderr,
-				"%s: Specifically, problems have been found where the extnValue \n"
-				"  buffer in _gnutls_get_ext_type() in lib/x509_extensions.c is too small in\n"
-				"  gnutls versions up to 0.2.3.  This copy of wmbiff was compiled with \n"
-				"  gnutls version %s.\n", name, LIBGNUTLS_VERSION);
+		TDM(DEBUG_ERROR, "%s: Handshake failed\n", name);
+		TDM(DEBUG_ERROR, "%s: This may be a problem in gnutls, "
+			"which is under development\n", name);
+		TDM(DEBUG_ERROR,
+			"%s: Specifically, problems have been found where the extnValue \n"
+			"  buffer in _gnutls_get_ext_type() in lib/x509_extensions.c is too small in\n"
+			"  gnutls versions up to 0.2.3.  This copy of wmbiff was compiled with \n"
+			"  gnutls version %s.\n", name, LIBGNUTLS_VERSION);
 		gnutls_perror(zok);
-		gnutls_deinit(ret->state);
-		free(ret);
+		gnutls_deinit(scs->state);
+		free(scs);
 		return (NULL);
 	} else {
-		DM("%s: Handshake was completed\n", name);
-#ifdef DEBUG_COMM
-		print_info(ret->state);
-#endif
-		ret->sd = sd;
-		ret->name = name;
+		TDM(DEBUG_INFO, "%s: Handshake was completed\n", name);
+		if (scs->pc->debug >= DEBUG_INFO)
+			print_info(scs->state);
+		scs->sd = sd;
+		scs->name = name;
 	}
-	return (ret);
+	return (scs);
 }
 
 /* moved down here, to keep from interrupting the flow with
@@ -518,23 +384,19 @@ struct connection_state *initialize_gnutls(int sd, char *name)
 void handle_gnutls_read_error(int readbytes, struct connection_state *scs)
 {
 	if (gnutls_is_fatal_error(readbytes) == 1) {
-		fprintf(stderr,
-				"%s: Received corrupted data(%d) - server has terminated the connection abnormally\n",
-				scs->name, readbytes);
+		TDM(DEBUG_ERROR,
+			"%s: Received corrupted data(%d) - server has terminated the connection abnormally\n",
+			scs->name, readbytes);
 	} else {
 		if (readbytes == GNUTLS_E_WARNING_ALERT_RECEIVED
 			|| readbytes == GNUTLS_E_FATAL_ALERT_RECEIVED)
-			fprintf(stderr, "* Received alert [%d]\n",
-#if GNUTLS_VER>=3
-					gnutls_alert_get_last(scs->state));
-#else
-					gnutls_get_last_alert(scs->state));
-#endif
+			TDM(DEBUG_ERROR, "* Received alert [%d]\n",
+				gnutls_alert_get_last(scs->state));
 		if (readbytes == GNUTLS_E_REHANDSHAKE)
-			fprintf(stderr, "* Received HelloRequest message\n");
+			TDM(DEBUG_ERROR, "* Received HelloRequest message\n");
 	}
-	fprintf(stderr, "%s: error reading: %s\n",
-			scs->name, gnutls_strerror(readbytes));
+	TDM(DEBUG_ERROR,
+		"%s: error reading: %s\n", scs->name, gnutls_strerror(readbytes));
 }
 
 #else
@@ -542,15 +404,16 @@ void handle_gnutls_read_error(int readbytes, struct connection_state *scs)
 struct connection_state *initialize_gnutls( /*@unused@ */ int sd,
 										   /*@unused@ */ char *name)
 {
-	fprintf(stderr,
-			"FATAL: tried to initialize ssl when ssl wasn't compiled in.\n");
+	DMA(DEBUG_ERROR,
+		"FATAL: tried to initialize ssl when ssl wasn't compiled in.\n");
 	exit(EXIT_FAILURE);
 }
 #endif
 
 /* either way: */
 struct connection_state *initialize_unencrypted(int sd,
-												/*@only@ */ char *name)
+												/*@only@ */ char *name,
+												Pop3 pc)
 {
 	struct connection_state *ret = malloc(sizeof(struct connection_state));
 	assert(sd >= 0);
@@ -559,6 +422,7 @@ struct connection_state *initialize_unencrypted(int sd,
 	ret->name = name;
 	ret->state = NULL;
 	ret->xcred = NULL;
+	ret->pc = pc;
 	return (ret);
 }
 
@@ -572,6 +436,7 @@ struct connection_state *initialize_blacklist( /*@only@ */ char *name)
 	ret->name = name;
 	ret->state = NULL;
 	ret->xcred = NULL;
+	ret->pc = NULL;
 	return (ret);
 }
 

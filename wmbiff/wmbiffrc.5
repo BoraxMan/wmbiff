@@ -1,5 +1,5 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiffrc.5,v 1.8 2002/01/27 12:46:38 jordi Exp $
+.\" $Id: wmbiffrc.5,v 1.9 2002/03/01 08:41:29 bluehal Exp $
 .\"
 .\" wmbiff.1 and wmbiffrc.5 are copyright 1999-2002 by 
 .\" Jordi Mallach <jordi@debian.org>
@@ -126,6 +126,12 @@ in seconds.
 \fBfetchcmd.n\fP
 Command to be executed to fetch mail. If not specified, fetching through
 wmbiff is disabled completely.
+.TP
+\fBdebug.n\fP 
+Show debugging messages from this mailbox.  Currently
+supported values are "all" and "none".  The \-debug option
+to wmbiff overrides this setting.  Since IMAP uses a single
+connection per server, per-mailbox debugging may not
 
 .SH AUTHENTICATION
 
@@ -143,6 +149,17 @@ if you don't want wmbiff to bother with other authentication
 methods.  Leaving authentication methods unspecified should
 be reasonably safe.  The order of entries in the [auth] list
 is not currently considered.
+
+.SH TROUBLESHOOTING
+
+For problems authenticating to servers, try specifying the
+authentication method explicitly as described above:
+sometimes a failed attempt to authenticate can cause later
+failures.  Some servers claim to support cram-md5 but fail:
+telling wmbiff not totry can help.
+
+For other problems, run wmbiff with the -debug option.  See
+wmbiff(1) for details.
 
 .SH FILES
 .TP

@@ -1,4 +1,4 @@
-/* $Id: mboxClient.c,v 1.3 2001/10/04 09:50:59 jordi Exp $ */
+/* $Id: mboxClient.c,v 1.4 2002/03/01 08:41:29 bluehal Exp $ */
 /* Author:		Yong-iL Joh <tolkien@mizi.com>
    Modified:	Jorge García <Jorge.Garcia@uv.es>
    			 	Rob Funk <rfunk@funknet.net>
@@ -26,8 +26,8 @@ FILE *openMailbox(Pop3 pc)
 	FILE *mailbox;
 
 	if ((mailbox = fopen(pc->path, "r")) == NULL) {
-		fprintf(stderr, "wmbiff: Error opening mailbox '%s': %s\n",
-				pc->path, strerror(errno));
+		DM(pc, DEBUG_ERROR, "Error opening mailbox '%s': %s\n",
+		   pc->path, strerror(errno));
 	}
 	return (mailbox);
 }
@@ -45,9 +45,7 @@ int mboxCheckHistory(Pop3 pc)
 	int count_from = 0, count_status = 0;
 	int len_from = strlen(FROM_STR), len_status = strlen(STATUS_STR);
 
-#ifdef DEBUG_MAIL_COUNT
-	printf(">Mailbox: '%s'\n", pc->path);
-#endif
+	DM(pc, DEBUG_INFO, ">Mailbox: '%s'\n", pc->path);
 
 	/* mbox file */
 	if (stat(pc->path, &st)) {
@@ -59,13 +57,11 @@ int mboxCheckHistory(Pop3 pc)
 	if (st.st_mtime != PCM.mtime || st.st_size != PCM.size
 		|| pc->OldMsgs < 0) {
 		/* file was changed OR initially read */
-#ifdef DEBUG_MAIL_COUNT
-		printf("  was changed,"
-			   " TIME: old %lu, new %lu"
-			   " SIZE: old %lu, new %lu\n",
-			   PCM.mtime, st.st_mtime, (unsigned long) PCM.size,
-			   st.st_size);
-#endif
+		DM(pc, DEBUG_INFO,
+		   "  was changed,"
+		   " TIME: old %lu, new %lu"
+		   " SIZE: old %lu, new %lu\n",
+		   PCM.mtime, st.st_mtime, (unsigned long) PCM.size, st.st_size);
 		ut.actime = st.st_atime;
 		ut.modtime = st.st_mtime;
 		F = pc->open(pc);
@@ -91,9 +87,6 @@ int mboxCheckHistory(Pop3 pc)
 				next_from_is_start_of_header = 0;
 				if (!strncmp(buf, STATUS_STR, len_status)) {
 					if (strrchr(buf, 'R')) {
-#ifdef DEBUG_MAIL_COUNT
-						/*  printf ("Got a status: %s",buf); */
-#endif
 						if (is_header)
 							count_status++;
 					}
@@ -101,9 +94,8 @@ int mboxCheckHistory(Pop3 pc)
 			}
 		}
 
-#ifdef DEBUG_MAIL_COUNT
-		printf("from: %d status: %d\n", count_from, count_status);
-#endif
+		DM(pc, DEBUG_INFO, "from: %d status: %d\n", count_from,
+		   count_status);
 		pc->TotalMsgs = count_from;
 		pc->UnreadMsgs = count_from - count_status;
 		fclose(F);
@@ -132,10 +124,8 @@ int mboxCreate(Pop3 pc, char *str)
 	if (!strncasecmp(pc->path, "mbox:", 5))
 		strcpy(pc->path, str + 5);	/* cut off ``mbox:'' */
 
-#ifdef DEBUG_MBOX
-	printf("mbox: str = '%s'\n", str);
-	printf("mbox: path= '%s'\n", pc->path);
-#endif
+	DM(pc, DEBUG_INFO, "mbox: str = '%s'\n", str);
+	DM(pc, DEBUG_INFO, "mbox: path= '%s'\n", pc->path);
 
 	return 0;
 }

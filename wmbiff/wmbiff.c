@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.11 2001/11/16 00:37:46 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.12 2002/03/01 08:41:29 bluehal Exp $ */
 
 #define	USE_POLL
 
@@ -60,6 +60,7 @@ void ClearDigits(int i);
 void XSleep(int millisec);
 void sigchld_handler(int sig);
 
+int debug_default = DEBUG_ERROR;
 
 void init_biff(char *uconfig_file)
 {
@@ -74,6 +75,7 @@ void init_biff(char *uconfig_file)
 		mbox[i].action[0] = 0;
 		mbox[i].fetchcmd[0] = 0;
 		mbox[i].loopinterval = 0;
+		mbox[i].debug = debug_default;
 	}
 
 	/* Some defaults, if config file is unavailable */
@@ -86,42 +88,38 @@ void init_biff(char *uconfig_file)
 	}
 #ifdef WITH_GCRYPT
 	/* gcrypt is a little strange, in that it doesn't 
-	 * seem to initialize it's memory pool by itself. 
+	 * seem to initialize its memory pool by itself. 
 	 * I believe we *expect* "Warning: using insecure memory!"
 	 */
 	if ((i = gcry_control(GCRYCTL_INIT_SECMEM, 16384, 0)) != 0) {
-		fprintf(stderr,
-				"Error: gcry_control() to initialize secure memory returned non-zero: %d\n",
-				i);
-		fprintf(stderr, "Message: %s\n", gcry_strerror(gcry_errno()));
-		fprintf(stderr, "libgcrypt version: %s\n",
-				gcry_check_version(NULL));
-		fprintf(stderr,
-				"attempting to recover: will fail later if using CRAM-MD5 or APOP authentication. \n");
+		DMA(DEBUG_ERROR,
+			"Error: gcry_control() to initialize secure memory returned non-zero: %d\n"
+			" Message: %s\n"
+			" libgcrypt version: %s\n"
+			" recovering: will fail later if using CRAM-MD5 or APOP authentication.\n",
+			i, gcry_strerror(gcry_errno()), gcry_check_version(NULL));
 	};
 #endif
 
 	/* Read config file */
 	if (uconfig_file[0] != 0) {
 		/* user-specified config file */
-		fprintf(stderr, "Using user-specified config file '%s'.\n",
-				uconfig_file);
+		DMA(DEBUG_INFO, "Using user-specified config file '%s'.\n",
+			uconfig_file);
 		strcpy(config_file, uconfig_file);
 	} else
 		sprintf(config_file, "%s/.wmbiffrc", getenv("HOME"));
 
-#ifdef DEBUG
-	printf("config_file = %s.\n", config_file);
-#endif
+	DMA(DEBUG_INFO, "config_file = %s.\n", config_file);
 
 	if (!Read_Config_File(config_file, &loopinterval)) {
 		if (m == NULL) {
-			fprintf(stderr, "Cannot open '%s' nor use the "
-					"MAIL environment var.\n", uconfig_file);
+			DMA(DEBUG_ERROR, "Cannot open '%s' nor use the "
+				"MAIL environment var.\n", uconfig_file);
 			exit(1);
 		}
 		/* we are using MAIL environment var. type mbox */
-		fprintf(stderr, "Using MAIL environment var '%s'.\n", m);
+		DMA(DEBUG_INFO, "Using MAIL environment var '%s'.\n", m);
 		mboxCreate((&mbox[0]), mbox[0].path);
 	}
 
@@ -187,12 +185,11 @@ void do_biff(int argc, char **argv)
 		if (mbox[i].label[0] != 0) {
 			mbox[i].prevtime = mbox[i].prevfetch_time = curtime;
 			BlitString(mbox[i].label, 5, (11 * i) + 5, 0);
+			DM(&mbox[i], DEBUG_INFO,
+			   "working on [%d].label=>%s< [%d].path=>%s<\n", i,
+			   mbox[i].label, i, mbox[i].path);
 			displayMsgCounters(i, count_mail(i), &Sleep_Interval,
 							   &Blink_Mode);
-#ifdef DEBUG
-			printf("[%d].label=>%s<\n[%d].path=>%s<\n\n", i,
-				   mbox[i].label, i, mbox[i].path);
-#endif
 		}
 	}
 
@@ -207,16 +204,16 @@ void do_biff(int argc, char **argv)
 				curtime = time(0);
 				if (curtime >= mbox[i].prevtime + mbox[i].loopinterval) {
 					NeedRedraw = 1;
+					DM(&mbox[i], DEBUG_INFO,
+					   "working on [%d].label=>%s< [%d].path=>%s<\n", i,
+					   mbox[i].label, i, mbox[i].path);
+					DM(&mbox[i], DEBUG_INFO,
+					   "curtime=%d, prevtime=%d, interval=%d\n",
+					   (int) curtime, (int) mbox[i].prevtime,
+					   mbox[i].loopinterval);
 					mbox[i].prevtime = curtime;
 					displayMsgCounters(i, count_mail(i), &Sleep_Interval,
 									   &Blink_Mode);
-#ifdef DEBUG
-					printf("[%d].label=>%s<\n[%d].path=>%s<\n\n",
-						   i, mbox[i].label, i, mbox[i].path);
-					printf("curtime=%d, prevtime=%d, interval=%d\n",
-						   (int) curtime,
-						   (int) mbox[i].prevtime, mbox[i].loopinterval);
-#endif
 				}
 			}
 			if (mbox[i].blink_stat > 0) {
@@ -226,9 +223,6 @@ void do_biff(int argc, char **argv)
 				}
 				displayMsgCounters(i, 1, &Sleep_Interval, &Blink_Mode);
 				NeedRedraw = 1;
-#ifdef DEBUG
-				/*printf("i= %d, Sleep_Interval= %d\n", i, Sleep_Interval); */
-#endif
 			}
 			if (Blink_Mode == 0) {
 				mbox[i].blink_stat = 0;
@@ -476,9 +470,7 @@ int ReadLine(FILE * fp, char *setting, char *value, int *index)
 	} else
 		*index = -1;
 
-#ifdef DEBUG
-	printf("@%s.%d=%s@\n", setting, *index, value);
-#endif
+	DMA(DEBUG_INFO, "@%s.%d=%s@\n", setting, *index, value);
 	return 1;
 }
 
@@ -506,8 +498,8 @@ int Read_Config_File(char *filename, int *loopinterval)
 
 	if (!(fp = fopen(filename, "r"))) {
 		perror("Read_Config_File");
-		fprintf(stderr, "Unable to open %s, no settings read.\n",
-				filename);
+		DMA(DEBUG_ERROR, "Unable to open %s, no settings read.\n",
+			filename);
 		return 0;
 	}
 	while (!feof(fp)) {
@@ -531,6 +523,15 @@ int Read_Config_File(char *filename, int *loopinterval)
 			strcpy(mbox[index].fetchcmd, value);
 		} else if (!strcmp(setting, "fetchinterval.")) {
 			mbox[index].fetchinterval = atoi(value);
+		} else if (!strcmp(setting, "debug.")) {
+			int debug_value = debug_default;
+			if (strcasecmp(value, "all") == 0) {
+				debug_value = DEBUG_ALL;
+			}
+			/* could disable debugging, but I want the command
+			   line argument to provide all information
+			   possible. */
+			mbox[index].debug = debug_value;
 		}
 	}
 	for (index = 0; index < 5; index++)
@@ -605,20 +606,22 @@ void parse_cmd(int argc, char **argv, char *config_file)
 		if (*arg == '-') {
 			switch (arg[1]) {
 			case 'd':
-				if (strcmp(arg + 1, "display")) {
+				if (strcmp(arg + 1, "debug") == 0) {
+					debug_default = DEBUG_ALL;
+				} else if (strcmp(arg + 1, "display")) {
 					usage();
-					exit(1);
+					exit(EXIT_FAILURE);
 				}
 				break;
 			case 'g':
 				if (strcmp(arg + 1, "geometry")) {
 					usage();
-					exit(1);
+					exit(EXIT_FAILURE);
 				}
 				break;
 			case 'v':
 				printversion();
-				exit(0);
+				exit(EXIT_SUCCESS);
 				break;
 			case 'c':
 				if (argc > (i + 1)) {
@@ -628,7 +631,7 @@ void parse_cmd(int argc, char **argv, char *config_file)
 				break;
 			default:
 				usage();
-				exit(0);
+				exit(EXIT_SUCCESS);
 				break;
 			}
 		}
@@ -638,26 +641,22 @@ void parse_cmd(int argc, char **argv, char *config_file)
 
 void usage(void)
 {
-	fprintf(stderr,
-			"\nwmBiff v" WMBIFF_VERSION
-			" - incoming mail checker\n"
-			"Gennady Belyakov <gb@ccat.elect.ru> and others (see the README file)\n"
-			"\n");
-	fprintf(stderr, "usage:\n");
-	fprintf(stderr, "    -display <display name>\n");
-	fprintf(stderr,
-			"    -geometry +XPOS+YPOS      initial window position\n");
-	fprintf(stderr,
-			"    -c <filename>             use specified config file\n");
-	fprintf(stderr, "    -h                        this help screen\n");
-	fprintf(stderr,
-			"    -v                        print the version number\n");
-	fprintf(stderr, "\n");
+	printf("\nwmBiff v" WMBIFF_VERSION
+		   " - incoming mail checker\n"
+		   "Gennady Belyakov <gb@ccat.elect.ru> and others (see the README file)\n"
+		   "\n"
+		   "usage:\n"
+		   "    -display <display name>\n"
+		   "    -geometry +XPOS+YPOS      initial window position\n"
+		   "    -c <filename>             use specified config file\n"
+		   "    -h                        this help screen\n"
+		   "    -v                        print the version number\n"
+		   "\n");
 }
 
 void printversion(void)
 {
-	fprintf(stderr, "wmbiff v%s\n", WMBIFF_VERSION);
+	printf("wmbiff v%s\n", WMBIFF_VERSION);
 }
 
 /* vim:set ts=4: */

@@ -1,4 +1,4 @@
-/* $Id: LicqClient.c,v 1.3 2001/10/04 09:50:59 jordi Exp $ */
+/* $Id: LicqClient.c,v 1.4 2002/03/01 08:41:29 bluehal Exp $ */
 /* Author : Yong-iL Joh ( tolkien@mizi.com )
    Modified: Jorge García ( Jorge.Garcia@uv.es )
  * 
@@ -26,27 +26,23 @@ int licqCheckHistory(Pop3 pc)
 	int count_status = 0;
 	char buf[1024];
 
-#ifdef DEBUG_MAIL_COUNT
-	printf(">Mailbox: '%s'\n", pc->path);
-#endif
+	DM(pc, DEBUG_INFO, ">Mailbox: '%s'\n", pc->path);
 
 	/* licq file */
 	if (stat(pc->path, &st)) {
-		fprintf(stderr, "wmbiff: Can't stat mailbox '%s': %s\n",
-				pc->path, strerror(errno));
+		DM(pc, DEBUG_ERROR, "Can't stat mailbox '%s': %s\n",
+		   pc->path, strerror(errno));
 		return -1;				/* Error stating mailbox */
 	}
 
 	if (st.st_mtime != PCM.mtime || st.st_size != PCM.size
 		|| pc->OldMsgs < 0) {
 		/* file was changed OR initially read */
-#ifdef DEBUG_MAIL_COUNT
-		printf("  was changed,"
-			   " TIME: old %lu, new %lu"
-			   " SIZE: old %lu, new %lu\n",
-			   PCM.mtime, st.st_mtime, (unsigned long) PCM.size,
-			   st.st_size);
-#endif
+		DM(pc, DEBUG_INFO,
+		   "  was changed,"
+		   " TIME: old %lu, new %lu"
+		   " SIZE: old %lu, new %lu\n",
+		   PCM.mtime, st.st_mtime, (unsigned long) PCM.size, st.st_size);
 		ut.actime = st.st_atime;
 		ut.modtime = st.st_mtime;
 		F = pc->open(pc);
@@ -59,9 +55,8 @@ int licqCheckHistory(Pop3 pc)
 		}
 		pc->TotalMsgs = count_status * 2;
 		pc->UnreadMsgs = pc->TotalMsgs - count_status;
-#ifdef DEBUG_MAIL_COUNT
-		printf("from: %d status: %d\n", pc->TotalMsgs, pc->UnreadMsgs);
-#endif
+		DM(pc, DEBUG_INFO, "from: %d status: %d\n", pc->TotalMsgs,
+		   pc->UnreadMsgs);
 
 		fclose(F);
 
@@ -87,10 +82,8 @@ int licqCreate(Pop3 pc, char *str)
 
 	strcpy(pc->path, str + 5);	/* cut off ``licq:'' */
 
-#ifdef DEBUG_LICQ
-	printf("licq: str = '%s'\n", str);
-	printf("licq: path= '%s'\n", pc->path);
-#endif
+	DM(pc, DEBUG_INFO, "licq: str = '%s'\n", str);
+	DM(pc, DEBUG_INFO, "licq: path= '%s'\n", pc->path);
 
 	return 0;
 }

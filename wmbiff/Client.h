@@ -1,4 +1,4 @@
-/* $Id: Client.h,v 1.7 2002/02/02 18:04:18 jordi Exp $ */
+/* $Id: Client.h,v 1.8 2002/03/01 08:41:29 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -34,6 +34,7 @@ typedef struct _mbox_t {
 	int OldMsgs;
 	int OldUnreadMsgs;
 	int blink_stat;				/* blink digits flag-counter */
+	int debug;					/* debugging status */
 
 	union {
 		struct {
@@ -85,6 +86,33 @@ int licqCreate(Pop3 pc, char *str);
 int mboxCreate(Pop3 pc, char *str);
 int maildirCreate(Pop3 pc, char *str);
 FILE *openMailbox(Pop3 pc);
+
+/* _NONE is for silent operation.  _ERROR is for things that should
+   be printed assuming that the user might possibly see them. _INFO is
+   for reasonably useless but possibly interesting messages. _ALL is
+   for everything.  Restated, _ERROR will always be printed, _INFO only
+   if debugging messages were requested. */
+#define DEBUG_NONE  0
+#define DEBUG_ERROR 1
+#define DEBUG_INFO  2
+#define DEBUG_ALL   2
+/* inspired by ksymoops-2.3.4/ksymoops.h */
+#define DM(mbox, msglevel, X...) \
+do { \
+  if (mbox == NULL || (mbox)->debug >= msglevel) { \
+     printf("wmbiff: " X); \
+(void)fflush(NULL); \
+  } \
+} while(0)
+
+extern int debug_default;
+#define DMA(msglevel, X...) \
+do { \
+  if (debug_default >= msglevel) { \
+     printf("wmbiff: " ##X); \
+(void)fflush(NULL); \
+  } \
+} while(0)
 
 #endif
 /* vim:set ts=4: */

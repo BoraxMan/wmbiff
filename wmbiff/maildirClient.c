@@ -1,4 +1,4 @@
-/* $Id: maildirClient.c,v 1.3 2001/10/04 09:50:59 jordi Exp $ */
+/* $Id: maildirClient.c,v 1.4 2002/03/01 08:41:29 bluehal Exp $ */
 /* Author : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
  * 
@@ -28,9 +28,8 @@ static int count_msgs(char *path)
 
 	D = opendir(path);
 	if (D == NULL) {
-		fprintf(stderr,
-				"wmbiff: Error opening directory '%s': %s\n", path,
-				strerror(errno));
+		DMA(DEBUG_ERROR,
+			"Error opening directory '%s': %s\n", path, strerror(errno));
 		return -1;
 	}
 
@@ -53,9 +52,7 @@ int maildirCheckHistory(Pop3 pc)
 
 	int count_new = 0, count_cur = 0;
 
-#ifdef DEBUG_MAIL_COUNT
-	printf(">Maildir: '%s'\n", pc->path);
-#endif
+	DM(pc, DEBUG_INFO, ">Maildir: '%s'\n", pc->path);
 
 	strcpy(path_new, pc->path);
 	strcat(path_new, "/new/");
@@ -64,13 +61,13 @@ int maildirCheckHistory(Pop3 pc)
 
 	/* maildir */
 	if (stat(path_new, &st_new)) {
-		fprintf(stderr, "wmbiff: Can't stat mailbox '%s': %s\n",
-				path_new, strerror(errno));
+		DM(pc, DEBUG_ERROR, "Can't stat mailbox '%s': %s\n",
+		   path_new, strerror(errno));
 		return -1;				/* Error stating mailbox */
 	}
 	if (stat(path_cur, &st_cur)) {
-		fprintf(stderr, "wmbiff: Can't stat mailbox '%s': %s\n",
-				path_cur, strerror(errno));
+		DM(pc, DEBUG_ERROR, "Can't stat mailbox '%s': %s\n",
+		   path_cur, strerror(errno));
 		return -1;				/* Error stating mailbox */
 	}
 
@@ -80,17 +77,15 @@ int maildirCheckHistory(Pop3 pc)
 		|| st_new.st_size != PCM.size_new
 		|| st_cur.st_mtime != PCM.mtime_cur
 		|| st_cur.st_size != PCM.size_cur || pc->OldMsgs < 0) {
-#ifdef DEBUG_MAIL_COUNT
-		printf("  was changed,\n"
-			   " TIME(new): old %lu, new %lu"
-			   " SIZE(new): old %lu, new %lu\n"
-			   " TIME(cur): old %lu, new %lu"
-			   " SIZE(cur): old %lu, new %lu\n",
-			   PCM.mtime_new, st_new.st_mtime,
-			   (unsigned long) PCM.size_new, st_new.st_size,
-			   PCM.mtime_cur, st_cur.st_mtime,
-			   (unsigned long) PCM.size_cur, st_cur.st_size);
-#endif
+		DM(pc, DEBUG_INFO, "  was changed,\n"
+		   " TIME(new): old %lu, new %lu"
+		   " SIZE(new): old %lu, new %lu\n"
+		   " TIME(cur): old %lu, new %lu"
+		   " SIZE(cur): old %lu, new %lu\n",
+		   PCM.mtime_new, st_new.st_mtime,
+		   (unsigned long) PCM.size_new, st_new.st_size,
+		   PCM.mtime_cur, st_cur.st_mtime,
+		   (unsigned long) PCM.size_cur, st_cur.st_size);
 
 		count_new = count_msgs(path_new);
 		count_cur = count_msgs(path_cur);
@@ -130,10 +125,8 @@ int maildirCreate(Pop3 pc, char *str)
 	pc->checkMail = maildirCheckHistory;
 	strcpy(pc->path, str + 8);	/* cut off ``maildir:'' */
 
-#ifdef DEBUG_MAILDIR
-	printf("maildir: str = '%s'\n", str);
-	printf("maildir: path= '%s'\n", pc->path);
-#endif
+	DM(pc, DEBUG_INFO, "maildir: str = '%s'\n", str);
+	DM(pc, DEBUG_INFO, "maildir: path= '%s'\n", pc->path);
 
 	return 0;
 }

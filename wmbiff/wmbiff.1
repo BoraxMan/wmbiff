@@ -1,5 +1,5 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiff.1,v 1.5 2001/10/04 09:50:59 jordi Exp $
+.\" $Id: wmbiff.1,v 1.6 2002/03/01 08:41:29 bluehal Exp $
 .\"
 .\" wmbiff.1 and wmbiffrc.5 are copyright 1999-2001 by
 .\" Jordi Mallach <jordi@debian.org>
@@ -13,7 +13,7 @@ WMBiff \- A dockable Mailbox Monitor
 
 .SH SYNOPSIS
 .B wmbiff
-[-display <display name>] [-geometry +XPOS+YPOS] [-c <filename>] [-h] [-v]
+[-display <display name>] [-geometry +XPOS+YPOS] [-c <filename>] [-h] [-v] [-debug]
 .br
 
 .SH DESCRIPTION
@@ -52,11 +52,18 @@ Initial window position.
 .TP
 .B \-c <filename>
 Use specified config file.
+.TP
+.B \-debug 
+Print verbose log of progress.
 
 .SH BUGS
-Please send any bug reports or suggestions to the WMBiff Development
-Mailing List <wmbiff-devel@lists.sourceforge.net>.
-.br
+Send bug reports or suggestions to the WMBiff Development
+Mailing List <wmbiff-devel@lists.sourceforge.net>.   Consider
+attaching a transcript of your session, generated using:
+.RS
+wmbiff -debug | tee wmbiff-log
+.RE
+Be sure to remove any instances of your password.
 
 .SH FILES
 .TP
