@@ -1,4 +1,4 @@
-/* $Id: Client.h,v 1.12 2002/03/12 23:53:15 bluehal Exp $ */
+/* $Id: Client.h,v 1.13 2002/04/04 08:51:50 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -57,16 +57,9 @@ typedef struct _mbox_t {
 			int serverPort;
 			int localPort;
 			char authList[100];
-		} pop;
-		struct {
-			char password[32];
-			char userName[32];
-			char serverName[256];
-			int serverPort;
-			int localPort;
-			char authList[100];
-			unsigned int dossl:1;
-		} imap;
+			unsigned int dossl:1,	/* use tls. */
+			 interactive_password:1;	/* prompt the user if we can't login / password is empty */
+		} pop_imap;
 	} u;
 
 	FILE *(*open) (Pop3);
@@ -75,6 +68,8 @@ typedef struct _mbox_t {
 	time_t prevtime;
 	time_t prevfetch_time;
 	int loopinterval;			/* loop interval for this mailbox */
+
+	const char *askpass;		/* command to execute to get a password, if needed */
 } mbox_t;
 
 #define BUF_SIZE 1024

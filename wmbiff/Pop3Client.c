@@ -1,4 +1,4 @@
-/* $Id: Pop3Client.c,v 1.9 2002/03/12 23:53:15 bluehal Exp $ */
+/* $Id: Pop3Client.c,v 1.10 2002/04/04 08:51:50 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -18,7 +18,7 @@
 #include <dmalloc.h>
 #endif
 
-#define	PCU	(pc->u).pop
+#define	PCU	(pc->u).pop_imap
 #define POP_DM(pc, lvl, args...) DM(pc, lvl, "pop3: " args)
 
 #ifdef WITH_GCRYPT
@@ -162,7 +162,7 @@ int pop3Create(Pop3 pc, const char *str)
 	 */
 	const char *regexes[] = {
 		"pop3:([^: ]{1,32}) ([^ ]{1,32}) ([^: ]+)( [0-9]+)? *",
-		"pop3:([^: ]{1,32}):([^@]{1,32})@([^: ]+)(:[0-9]+)? *",
+		"pop3:([^: ]{1,32}):([^@]{0,32})@([^: ]+)(:[0-9]+)? *",
 		NULL
 	};
 
@@ -276,8 +276,6 @@ static FILE *authenticate_apop(Pop3 pc, FILE * fp, char *apop_str)
 		/* server doesn't support apop. */
 		return (NULL);
 	}
-	POP_DM(pc, DEBUG_INFO, "APOP challenge: %s\n", apop_str);
-	strcat(apop_str, PCU.password);
 
 	gmh = gcry_md_open(GCRY_MD_MD5, 0);
 	gcry_md_write(gmh, (unsigned char *) apop_str, strlen(apop_str));

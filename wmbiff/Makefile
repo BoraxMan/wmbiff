@@ -1,6 +1,6 @@
 # Makefile for wmbiff
 #
-# $Id: Makefile,v 1.28 2002/03/26 16:30:32 jordi Exp $
+# $Id: Makefile,v 1.29 2002/04/04 08:51:50 bluehal Exp $
 
 # Disable gnutls crypto?
 #WITHOUT_CRYPTO=	1
@@ -24,7 +24,7 @@ CFLAGS?=	-O2 -Wall -Wpointer-arith
 # Nothing below here should need to be changed
 ###########################################################
 
-WMBIFF_VERSION=	"0.3.8"
+WMBIFF_VERSION=	"0.4.0pre1"
 EXTRAFLAGS=	-DWMBIFF_VERSION='$(WMBIFF_VERSION)' 
 
 # Default linux owners
@@ -74,7 +74,7 @@ INSTALL_FILE?=	$(INSTALL) -p -o $(INSTALL_USER) -g $(INSTALL_GROUP) -m 644
 OBJS =	wmbiff.o socket.o \
 	Pop3Client.o LicqClient.o mboxClient.o \
 	maildirClient.o Imap4Client.o tlsComm.o \
-	ShellClient.o \
+	ShellClient.o passwordMgr.o\
 	../wmgeneral/wmgeneral.o \
 	../wmgeneral/misc.o \
 	../wmgeneral/list.o \
@@ -84,6 +84,7 @@ all: wmbiff
 
 Imap4Client.o: Imap4Client.c Client.h Makefile
 Pop3Client.o: Pop3Client.c Client.h Makefile
+passwordMgr.o: passwordMgr.c passwordMgr.h Client.h Makefile
 wmbiff.o: wmbiff-master.xpm wmbiff.c Client.h
 
 .c.o:

@@ -13,6 +13,7 @@
 #include "Client.h"
 #include "charutil.h"
 #include "tlsComm.h"
+#include "passwordMgr.h"
 
 #include <sys/types.h>
 #include <stdio.h>
@@ -24,7 +25,7 @@
 #include <dmalloc.h>
 #endif
 
-#define	PCU	(pc->u).imap
+#define	PCU	(pc->u).pop_imap
 
 #ifdef __LCLINT__
 void asprintf( /*@out@ */ char **out, char *fmt, ...);
@@ -42,6 +43,7 @@ static struct fdmap_struct {
 	/*@owned@ */ struct connection_state *cs;
 } fdmap[FDMAP_SIZE];
 
+static void ask_user_for_password(Pop3 pc, int bFlushCache);
 
 /* authentication callbacks */
 #ifdef WITH_GCRYPT
@@ -75,8 +77,8 @@ static struct connection_state *state_for_pcu(Pop3 pc)
 	char *connection_id;
 	struct connection_state *retval = NULL;
 	int i;
-	asprintf(&connection_id, "%s|%s|%s|%d", PCU.userName,
-			 PCU.password, PCU.serverName, PCU.serverPort);
+	asprintf(&connection_id, "%s|%s|%d", PCU.userName,
+			 PCU.serverName, PCU.serverPort);
 	for (i = 0; i < FDMAP_SIZE; i++)
 		if (fdmap[i].user_password_server_port != NULL &&
 			(strcmp(connection_id,
@@ -96,8 +98,8 @@ static void bind_state_to_pcu(Pop3 pc,
 	if (scs == NULL) {
 		abort();
 	}
-	asprintf(&connection_id, "%s|%s|%s|%d", PCU.userName,
-			 PCU.password, PCU.serverName, PCU.serverPort);
+	asprintf(&connection_id, "%s|%s|%d", PCU.userName,
+			 PCU.serverName, PCU.serverPort);
 	for (i = 0; i < FDMAP_SIZE && fdmap[i].cs != NULL; i++);
 	if (i == FDMAP_SIZE) {
 		/* should never happen */
@@ -258,6 +260,8 @@ int imap_checkmail(Pop3 pc)
 
 	/* if it's not in the cache, try to open */
 	if (scs == NULL) {
+		IMAP_DM(pc, DEBUG_INFO, "Need new connection to %s@%s\n",
+				PCU.userName, PCU.serverName);
 		(void) pc->open(pc);
 		scs = state_for_pcu(pc);
 	}
@@ -290,7 +294,7 @@ int imap4Create(Pop3 pc, const char *const str)
 	struct re_registers regs;
 	int i, matchedchars;
 	const char *regexes[] = {
-		".*imaps?:([^: ]{1,32}):([^@]{1,32})@([^/: ]+)(/[^: ]+)?(:[0-9]+)? *",
+		".*imaps?:([^: ]{1,32}):([^@]{0,32})@([^/: ]+)(/[^: ]+)?(:[0-9]+)? *",
 		".*imaps?:([^: ]{1,32}) ([^ ]{1,32}) ([^/: ]+)(/[^: ]+)?( [0-9]+)? *",
 		NULL
 	};
@@ -334,6 +338,8 @@ int imap4Create(Pop3 pc, const char *const str)
 	/* copy matches where they belong */
 	copy_substring(PCU.userName, regs.start[1], regs.end[1], str);
 	copy_substring(PCU.password, regs.start[2], regs.end[2], str);
+	if (PCU.password[0] == '\0')
+		PCU.interactive_password = 1;
 	copy_substring(PCU.serverName, regs.start[3], regs.end[3], str);
 	if (regs.start[4] != -1)
 		copy_substring(pc->path, regs.start[4] + 1, regs.end[4], str);
@@ -378,20 +384,31 @@ static int authenticate_plaintext(Pop3 pc,
 		goto plaintext_failed;
 	}
 
-	/* login */
-	tlscomm_printf(scs, "a001 LOGIN %s \"%s\"\r\n", PCU.userName,
-				   PCU.password);
-	if (!tlscomm_expect(scs, "a001 ", buf, BUF_SIZE)) {
-		IMAP_DM(pc, DEBUG_ERROR,
-				"Did not get a response to the LOGIN command.\n");
-		goto plaintext_failed;
-	}
+	ask_user_for_password(pc, 0);
+	do {
+		/* login */
+		tlscomm_printf(scs, "a001 LOGIN %s \"%s\"\r\n", PCU.userName,
+					   PCU.password);
+		if (!tlscomm_expect(scs, "a001 ", buf, BUF_SIZE)) {
+			IMAP_DM(pc, DEBUG_ERROR,
+					"Did not get a response to the LOGIN command.\n");
+			goto plaintext_failed;
+		}
 
-	if (buf[5] != 'O') {
-		IMAP_DM(pc, DEBUG_ERROR, "IMAP Login failed.\n");
-		goto plaintext_failed;
-	}
-	return (1);
+		if (buf[5] != 'O') {
+			IMAP_DM(pc, DEBUG_ERROR, "IMAP Login failed.\n");
+			/* if we're prompting the user, ask again, else fail */
+			if (PCU.interactive_password) {
+				PCU.password[0] = '\0';
+				ask_user_for_password(pc, 1);	/* 1=overwrite the cache */
+			} else {
+				goto plaintext_failed;
+			}
+		} else {
+			return (1);
+		}
+	} while (1);
+
   plaintext_failed:
 	return (0);
 }
@@ -420,6 +437,7 @@ static int authenticate_md5(Pop3 pc,
 
 	strcpy(buf, PCU.userName);
 	strcat(buf, " ");
+	ask_user_for_password(pc, 0);
 	gmh = gcry_md_open(GCRY_MD_MD5, GCRY_MD_FLAG_HMAC);
 	gcry_md_setkey(gmh, PCU.password, strlen(PCU.password));
 	gcry_md_write(gmh, (unsigned char *) buf2, strlen(buf2));
@@ -452,3 +470,22 @@ static int authenticate_md5(Pop3 pc,
 	return 0;
 }
 #endif
+
+static void ask_user_for_password(Pop3 pc, int bFlushCache)
+{
+	/* see if we already have a password, as provided in the config file, or
+	   already requested from the user. */
+	if (PCU.interactive_password) {
+		if (strlen(PCU.password) == 0) {
+			/* we need to grab the password from the user. */
+			const char *password;
+			IMAP_DM(pc, DEBUG_INFO, "asking for password %d\n",
+					bFlushCache);
+			password =
+				passwordFor(PCU.userName, PCU.serverName, pc, bFlushCache);
+			if (password != NULL) {
+				strcpy(PCU.password, password);
+			}
+		}
+	}
+}

@@ -1,9 +1,16 @@
-# $Id: sample.wmbiffrc,v 1.8 2002/03/06 07:15:08 bluehal Exp $
+# $Id: sample.wmbiffrc,v 1.9 2002/04/04 08:51:50 bluehal Exp $
 #
 # See wmbiffrc(5) for more info.
 #
 # Global interval -- seconds between check mailboxes
 interval=60
+
+# Global askpass -- choose a password acting program
+# that behaves like ssh-askpass
+# the commented version below is likely to work on RedHat 
+# systems; wmbiff's default is likely to work on Debian
+# systems with ssh-askpass installed.
+#askpass = /usr/libexec/openssh/x11-ssh-askpass
 
 ### First string ###
 
