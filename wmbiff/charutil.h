@@ -1,4 +1,4 @@
-/* $Id: charutil.h,v 1.10 2003/01/19 13:13:04 bluehal Exp $ */
+/* $Id: charutil.h,v 1.11 2003/01/28 11:12:43 bluehal Exp $ */
 /* Author: Mark Hurley  (debian4tux@telocity.com)
  *
  * Character / string manipulation utilities. 
@@ -12,12 +12,8 @@
 #include <config.h>
 #endif
 
-#ifdef HAVE_GNUREGEX_H
-#include <gnuregex.h>
-#else
 #ifdef HAVE_REGEX_H
 #include <regex.h>
-#endif
 #endif
 
 void FullTrim(char *psValue);
