@@ -403,6 +403,7 @@ void imap_cacheHeaders( /*@notnull@ */ Pop3 pc)
 		do {
 			struct msglst *m = malloc(sizeof(struct msglst));
 			char hdrbuf[128];
+			int fetch_command_done = FALSE;
 			tlscomm_printf(scs, "a04 FETCH %s (FLAGS "
 						   "BODY[HEADER.FIELDS (FROM SUBJECT)])\r\n",
 						   msgid);
@@ -427,6 +428,7 @@ void imap_cacheHeaders( /*@notnull@ */ Pop3 pc)
 							if (m->subj[0] == '\0') {
 								strcpy(m->subj, "(no subject)");
 							}
+							fetch_command_done = TRUE;
 						}
 					} else {
 						IMAP_DM(pc, DEBUG_ERROR,
@@ -443,6 +445,9 @@ void imap_cacheHeaders( /*@notnull@ */ Pop3 pc)
 				pc->headerCache->in_use = 0;	/* initialize that it isn't locked */
 			} else {
 				IMAP_DM(pc, DEBUG_ERROR, "error fetching: %s", hdrbuf);
+			}
+			if (!fetch_command_done) {
+				tlscomm_expect(scs, "a04 OK FETCH", hdrbuf, 127);
 			}
 		} while ((msgid = strtok(NULL, " \r\n")) != NULL
 				 && isdigit(msgid[0]));
