@@ -1,5 +1,12 @@
 Release Notes
 ~~~~~~~~~~~~~
+Release 0.4.22 - March 27, 2004
+  * Skip examine/search unless requested with msglst option.
+  * Exit if ssh-askpass permissions check fails.
+
+Release 0.4.21 - February 21, 2004
+  * Fix a bug where fetch times out to some IMAP servers.
+
 Release 0.4.20 - January 1, 2004
   * Add --disable-crypto for source-based distributions 
     while libgcrypt is unstable.
@@ -460,4 +467,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.55 2004/01/01 07:47:50 bluehal Exp $
+$Id: NEWS,v 1.56 2004/03/28 00:36:11 bluehal Exp $
