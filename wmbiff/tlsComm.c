@@ -312,7 +312,8 @@ int tls_check_certificate(struct connection_state *scs,
 	} else if (certstat & GNUTLS_CERT_REVOKED) {
 		bad_certificate(scs, "server's certificate has been revoked.\n");
 	} else if (certstat & GNUTLS_CERT_INVALID) {
-		bad_certificate(scs, "server's certificate is invalid.\n");
+		bad_certificate(scs, "server's certificate is invalid.\n"
+                        "there may be a problem with the certificate stored in your certfile");
 	} else if (certstat & GNUTLS_CERT_NOT_TRUSTED) {
 		TDM(DEBUG_INFO, "server's certificate is not trusted.\n");
 		TDM(DEBUG_INFO,
