@@ -1,0 +1,225 @@
+Release Notes
+~~~~~~~~~~~~~
+
+Release 0.3.1 - (unreleased)
+
+  * Replaced /var/spool/mail with /var/mail, which is what the FHS mandates.
+    All decent systems should have either the directory or a symlink pointing
+    somewhere else. (Jordi Mallach)
+  * I reformatted ths changelog, again.  I hope this is the last time I need
+    to do this.  The CVS logs should be used for all changes, and this file
+    should by updated for user-visible changes only, from now on.
+    (Dwayne C. Litzenberger)
+  * Updated the README to reflect that Gennady Belyakov died right after
+    releasing wmBiff 0.2.  May your soul rest in peace, Gennady.
+    (Dwayne C. Litzenberger)
+  * Fixed the IMAP support, again. (Rob Funk)
+
+
+Release 0.3.0 - Fri, 16 May 2001 12:16:44 +0200
+
+  * [ReadLine] removed previous trim leading spaces, added TrimFull.  Fixes
+    Debian Bug #95849 (Mark Hurley).
+  * There was a bug where if a POP3 or IMAP mailbox read failed and the
+    following reads were successful, but no mail was in the server, the given
+    mailbox would remain reading "XX". Now it updates the counter no matter
+    what the read was (Mark Hurley).
+  * wmBiff would only count as new mails in mbox mailboxes with "N" flags,
+    ignoring those marked "ON" (Rob Funk).
+  * Fixed reading of quoted imap folders, which some IMAPd's do (Rob Funk).
+  * README: updated some very obsolete info. (Jordi Mallach)
+
+
+Release 0.2q1+Debian - Tue,  1 May 2001 10:11:00 +0000
+
+  * Moved to CVS at SourceForge. (Jordi Mallach)
+
+
+Release 0.2q1 - Fri, 13 Apr 2001 02:47:10 -0400
+
+  * This release is by Mark Hurley <debian4tux@telocity.com>.
+  * wmbiff/Client.h: move DEBUG_* macros to wmbiff/Makefile
+  * wmbiff/Pop3Client.c:
+    + My password contains an  @  character.  This causes
+      the pop3 line to be incorrectly parsed by wmbiff.
+      * Drop all of the ":" after the pop3 and delimit all values with
+        spaces.  This works well, as passwords/user-id's all agree that
+        the space is a non-legit value.
+         
+        Example: assume my password is:  myEmailhasa@init
+         
+        Old way:
+        path.3=pop3:debian4tux:myEmailhasa@init@mail.telocity.com
+
+        New way:
+        path.3=pop3:debian4tux myEmailhasa@init mail.telcoity.com
+        
+        Ahh...before you say it.  "Backward compatibility?" You will
+        also find in the patch, a NEW function.  So that the OLD and
+        NEW way is easily compatible with all ".wmbiffrc" files.
+        
+        Dev. Comments:
+        This was not the cleanest way to implement it, but I had to
+        suffice with a clean/quick implementation.  I originally wrote
+        one function to handle past and new parsing.  However, I
+        thought it would be beneficial to leave them separated, so we
+        could eventually drop the old method?
+        
+        Related Changes:
+        The man page will need to be updated (not provided in patch).
+        We can weed the "old" style out of the example script as well.
+        Still explaining the changes in the man page to leave out
+        confusion in a users mind (as they are likely to find "old"
+        style scripts).
+    + My mail server at Telocity.com is following the RFC's to
+      a "T".  RFC 1725 states that the LAST command be removed.
+      After some searching I have NOT turned up a replacement.
+      Which does make sense, this command is only so useful,
+      and contributes to the popularity of other such remoting
+      such as LDAP?
+      * I've set the Unread messages to the TotalMessages,
+        assuming (as suggested by the RFC) no messages have been
+        read.  I have also suppressed the error printed to
+        stderr, it is correct to return an error, *now*.  ;)
+
+        The only way to keep track of messages which have been
+        read, is to remember the unique number assigned to them.
+        This is what fetchmail does.  However, it does not work
+        correctly if you check and read mail thru other methods
+        (a web mail client).
+  * wmbiff/wmbiff.c:
+        -       for (index = 0; index < 4; index++)
+        +       for (index = 0; index < 5; index++)
+    
+        BUG!  Last postion #4 was not correctly being checked.
+        Now correctly checks each position.
+
+
+Release 0.2q - Tue, 20 Mar 2001 05:32:35 +0100
+
+  * This release is by Jorge García <Jorge.Garcia@uv.es>.
+  * wmbiff/{*.[ch]}: removed unnecesary includes.
+  * wmbiff/wmbiff.c: some cleanups and optimizations. 
+    + init_biff:
+      * show error if user config file does not exists
+      * use of userconfig "interval" (wasn't correctly parsed)
+    + {do_biff, displayMsgCounters}: some changes to make Sleep_Interval
+      and Blink_Mode local
+    + parse_cmd: some changes to make uconfig_file local
+    + {BlinkOn, BlinkOff, BlinkToogle}: Removed (merged by do_biff)
+    + {ReadConfigString, ReadConfigInt}: Removed 
+    + countmail: removed init in header (wasn't used)
+    + ReadLine: Created (new parsing code, extracts pairs of setting
+      and value)
+    + Read_Config_File: now there is only ONE parse not 36!
+  * wmbiff/{IMap4Client.c, Pop3Client.c}: check for correct format line to 
+    avoid "segmentation fault" while parsing.
+
+
+Release 0.2p - Mon, 12 Mar 2001 00:00:00 -0600
+
+  * This release is by Dwayne C. Litzenberger <dlitz@dlitz.net>.
+  * Added maildir support!  Yay!
+  * Stole the manpages from Debian.
+  * Massive (lack of) coding style cleanup; Standardized coding style using
+    GNU indent.
+  * Reversed order of ChangeLog as suggested by Jordi.
+  * Cleaned up the v0.2o ChangeLog entry.  What a mess!  Added missing credits.
+  * Cleaned up and reformatted the rest of the changelog to an almost-Debian
+    format while I'm at it.  It's much more readable that way.
+  * Moved definition of WMBIFF_VERSION to the Makefile.
+  * All your base are belong to us.
+  * I'm not maintaining wmBiff; I just submitted a big patch.  Send your
+    complaints (or complements) to Yong-iL Joh.
+  
+
+Release 0.2o - Mon, 12 Mar 2001 00:00:00 +0900
+
+  * This release is by Yong-iL Joh <tolkien@mizi.com>.
+  * I don't think the date of this changelog entry is right.
+    (Dwayne C. Litzenberger)
+  * Jordi Mallach <jordi@sindominio.net>, Debian's wmbiff maintainer, sent
+    me an email a couple of days ago which included a patch with man pages.
+    The patch did the following:
+      + Fixed a major upstream bug that renders this new wmbiff unusable.
+        Thanks to Guillaume Morin, Jérôme Marant and Mark Hurley for their
+        help identifying the bug, and Jorge García <Jorge.Garcia@uv.es> for
+        writing a patch. Basically, the new upstream broke backwards
+        compatibility of wmbiffrc with Gennady's wmbiff, fixed that.
+        This patch also fixes wmbiff not using $MAIL or defaulting to
+        /var/spool/mail/$USER if no ~/.wmbiffrc is found (closes: #87778).
+      + wmbiff/wmbiff.c: updated WMBIFF_VERSION to current.
+      + wmbiff/{socket.c, wmbiff.c}: removed <sys/time.h> includes.
+      + debian/{wmbiff.1, wmbiffrc.5}: updated for IMAP4 and Licq support.
+      + Jorge García removed the segfault in Jordi's wmbiffrc
+      + Vladimir Popov <pva48@mail.ru> fixed a potential buffer overflow
+        in init_biff() (The "/* Make labels look right */" section).
+      + Jorge García <Jorge.Garcia@uv.es> fixed a display bug in the
+        number-of- mails display.
+  * use poll() instead of select()
+
+ -- Yong-iL Joh <tolkien@mizi.com>  12-Mar-2001 +0900
+
+
+Release 0.2n - Tue, 20 Feb 2001 0:00:00 +0900
+  
+  * This release is by Yong-iL Joh <tolkien@mizi.com>.
+  * Nick Clarey <nclarey@3glab.com> sent me a patch.
+    that enhances the following:
+      + UW Imap server 2000.283rh
+      + Config file now supports IMAP mailbox "paths" rather than
+        just the mailbox name (e.g. mail/foo/blah)
+
+
+Release 0.2m - Mon,  5 Feb 2001 00:00:00 +0900
+
+  * This release is by Yong-iL Joh <tolkien@mizi.com>.
+  * Imap4Client.c did not close when a connection error occurred.  Fixed it.
+
+
+Release 0.2l - Thu, 11 Jan 2001 00:00:00 +0900
+  
+  * This release is by Yong-iL Joh <tolkien@mizi.com>.
+  * Imap4Client.c had a bug when trying to connect to an imap4 server.  Fixed
+    it.
+
+
+Release 0.2j - Mon,  1 Jan 2001 00:00:00 +0900
+
+  * This release is by Yong-iL Joh <tolkien@mizi.com>.
+  * Because I can't contact the author, I jumped to version 0.2j
+  * Added imap4-based mail server check component.
+  * Divided wmbiff.c to wmbiff.c, LicqClient.c mboxClient.c
+
+
+Release 0.2-licq - Sat,  1 Jan 2000 00:00:00 +0000
+
+  * This release is by Yong-iL Joh <tolkien@mizi.com>.
+  * The actual date of this release is unknown, so I picked New Year's Day,
+    Y2K. (Dwayne C. Litzenberger)
+  * I found it from http://www.licq.org/download.html.
+  
+
+Release 0.2 - Fri, 26 Nov 1999 00:00:00 +0000 
+  
+  * This release is by Gennady Belyakov <gb@ccat.elect.ru>.
+  * We don't actually know the time zone of Gennady's changelog entries
+    (Dwayne C. Litzenberger).
+  * POP3 support added with (auto)fetching
+  * digits blinking on new mail arrival
+  * resource wasting lowered
+  * individual rescan interval for differrent mailboxes
+  * some bugfixes
+
+
+Release 0.1a - Thu, 18 Nov 1999 00:00:00 +0000
+  
+  * This release is by Gennady Belyakov <gb@ccat.elect.ru>.
+  * Some fixes with intialization
+
+
+Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
+
+  * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
+
+
