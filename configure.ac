@@ -6,7 +6,7 @@ dnl and configure:
 dnl  installation prefix
 dnl  version
 
-AC_INIT(WMBiff, 0.4.14, wmbiff-devel@lists.sourceforge.net, wmbiff)
+AC_INIT(WMBiff, 0.4.15pre, wmbiff-devel@lists.sourceforge.net, wmbiff)
 AC_CONFIG_AUX_DIR(autoconf)
 AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
@@ -70,7 +70,8 @@ if test "$gnutls" = "ok"; then
                          CPPFLAGS="$CPPFLAGS $LIBGNUTLS_CFLAGS"
                          GNUTLS_COMMON_O="gnutls-common.o"
                          GNUTLS_MAN_STATUS="This copy of WMBiff was compiled with GNUTLS."
-                         AC_CHECK_HEADERS(gnutls/gnutls.h) ])
+                         AC_CHECK_HEADERS(gnutls/gnutls.h) ],
+                         [ echo GNUTLS can be found at ftp://gnutls.hellug.gr/pub/gnutls ])
 else
  AC_MSG_RESULT(GNUTLS support requires libz.a and libgdbm.a, so will be disabled)
 fi
@@ -78,7 +79,8 @@ GCRYPT_MAN_STATUS="This copy of WMBiff was not compiled with gcrypt."
 AM_PATH_LIBGCRYPT(1.1.8, [CFLAGS="$CFLAGS $LIBGCRYPT_CFLAGS"
                          CPPFLAGS="$CPPFLAGS $LIBGCRYPT_CFLAGS"
                          GCRYPT_MAN_STATUS="This copy of WMBiff was compiled with gcrypt."
-                         AC_CHECK_HEADERS(gcrypt.h) ] )
+                         AC_CHECK_HEADERS(gcrypt.h) ],
+                         [ echo libgcrypt can be found at ftp://ftp.gnupg.org/pub/gcrypt/alpha/libgcrypt/ ]  )
 
 
 AC_SUBST(LIBGCRYPT_LIBS)
