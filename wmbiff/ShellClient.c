@@ -76,41 +76,78 @@ static int kind_pclose(FILE * F, const char *command, Pop3 pc)
 	return (0);
 }
 
+char *grabCommandOutput(Pop3 pc, const char *command) {
+  FILE *F;
+  char linebuf[512];
+  SH_DM(pc, DEBUG_INFO, "Executing '%s'\n", command);
+  if ((F = kind_popen(command, "r")) == NULL) {
+    return NULL;
+  }
+  if (fgets(linebuf, 512, F) == NULL) {
+    SH_DM(pc, DEBUG_ERROR,
+          "fgets: unable to read the output of '%s': %s\n", command,
+          strerror(errno));
+    kind_pclose(F, command, pc);
+    return NULL;
+  }
+  chomp(linebuf);
+  kind_pclose(F, command, pc);
+  return(strdup(linebuf));
+}
+
+char *backtickExpand(Pop3 pc, const char *path) {
+  char bigbuffer[1024];
+  const char *tickstart;
+  const char *tickend;
+  bigbuffer[0]='\0';
+  while((tickstart = strchr(path, '`')) != NULL) {
+    char *command;
+    char *commandoutput;
+    tickend = strchr(tickstart+1, '`');
+    if(tickend == NULL) {
+      SH_DM(pc, DEBUG_ERROR, "unbalanced \' in %s\n", path);
+      return NULL;
+    }
+    strncat(bigbuffer, path, tickstart-path);
+    command = strndup(tickstart+1, tickend-tickstart-1);
+    commandoutput = grabCommandOutput(pc, command);
+    free(command);
+    if(commandoutput != NULL) {
+        strcat(bigbuffer, commandoutput);
+        free(commandoutput);
+    }
+    path = tickend+1;
+  } 
+  /* grab the rest */
+  strcat(bigbuffer, path);
+  SH_DM(pc, DEBUG_INFO, "expanded to %s\n", bigbuffer);
+  return(strdup(bigbuffer));
+}
+
 int shellCmdCheck(Pop3 pc)
 {
-	FILE *F;
 	int count_status = 0;
-	char linebuf[256];
+    char *commandOutput;
 
 	if (pc == NULL)
 		return -1;
 	SH_DM(pc, DEBUG_INFO, ">Mailbox: '%s'\n", pc->path);
 
-	/* run the program and disable the signal handler (if successful) */
-	if ((F = kind_popen(pc->path, "r")) == NULL) {
-		return -1;
-	}
-
 	/* fetch the first line of input */
 	pc->TextStatus[0] = '\0';
-	if (fgets(linebuf, 256, F) == NULL) {
-		SH_DM(pc, DEBUG_ERROR,
-			  "fgets: unable to read the output of '%s': %s\n", pc->path,
-			  strerror(errno));
-		kind_pclose(F, pc->path, pc);
+    if((commandOutput= grabCommandOutput(pc, pc->path)) == NULL) {
 		return -1;
-	}
-	chomp(linebuf);
-	SH_DM(pc, DEBUG_INFO, "'%s' returned '%s'\n", pc->path, linebuf);
+    }
+	SH_DM(pc, DEBUG_INFO, "'%s' returned '%s'\n", pc->path, commandOutput);
 
 	/* see if it's numeric; the numeric check is somewhat 
 	   useful, as wmbiff renders 4-digit numbers, but not
 	   4-character strings. */
-	if (sscanf(linebuf, "%d", &(count_status)) == 1) {
-		if (strstr(linebuf, "new")) {
+	if (sscanf(commandOutput, "%d", &(count_status)) == 1) {
+		if (strstr(commandOutput, "new")) {
 			pc->UnreadMsgs = count_status;
 			pc->TotalMsgs = 0;
-		} else if (strstr(linebuf, "old")) {
+		} else if (strstr(commandOutput, "old")) {
 			pc->UnreadMsgs = 0;
 			pc->TotalMsgs = count_status;
 		} else {
@@ -118,31 +155,34 @@ int shellCmdCheck(Pop3 pc)
 			pc->UnreadMsgs = 0;
 			pc->TotalMsgs = count_status;
 		}
-	} else if (sscanf(linebuf, "%9s\n", pc->TextStatus) == 1) {
+	} else if (sscanf(commandOutput, "%9s\n", pc->TextStatus) == 1) {
 		/* validate the string input */
 		int i;
 		for (i = 0; pc->TextStatus[i] != '\0' && isalnum(pc->TextStatus[i])
 			 && i < 10; i++);
 		if (pc->TextStatus[i] != '\0') {
 			SH_DM(pc, DEBUG_ERROR,
-				  "sorry, wmbiff supports only alphanumeric (isalnum()) strings ('%s' is not ok)\n",
+				  "wmbiff only supports alphanumeric (isalnum) strings:\n"
+                  " '%s' is not ok\n",
 				  pc->TextStatus);
-			pc->TextStatus[i] = '\0';	/* null terminate it at the first bad char. */
+            /* null terminate it at the first bad char: */
+			pc->TextStatus[i] = '\0';	
 		}
 		/* see if we should print as new or not */
-		pc->UnreadMsgs = (strstr(linebuf, "new")) ? 1 : 0;
+		pc->UnreadMsgs = (strstr(commandOutput, "new")) ? 1 : 0;
 	} else {
 		SH_DM(pc, DEBUG_ERROR,
-			  "'%s' returned something other than an integer message count or short string.\n",
+			  "'%s' returned something other than an integer message count"
+              " or short string.\n",
 			  pc->path);
-		kind_pclose(F, pc->path, pc);
+        free(commandOutput);
 		return -1;
 	}
 
 	SH_DM(pc, DEBUG_INFO, "from: %s status: %s %d %d\n",
 		  pc->path, pc->TextStatus, pc->TotalMsgs, pc->UnreadMsgs);
-
-	return (kind_pclose(F, pc->path, pc));
+    free(commandOutput);
+    return(0);
 }
 
 int shellCreate(Pop3 pc, const char *str)
@@ -179,3 +219,10 @@ int shellCreate(Pop3 pc, const char *str)
 }
 
 /* vim:set ts=4: */
+/*
+ * Local Variables:
+ * tab-width: 4
+ * c-indent-level: 4
+ * c-basic-offset: 4
+ * End:
+ */
