@@ -1,5 +1,5 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiffrc.5.in,v 1.1 2002/04/08 09:35:19 bluehal Exp $
+.\" $Id: wmbiffrc.5.in,v 1.2 2002/04/15 02:09:56 bluehal Exp $
 .\"
 .\" wmbiff.1 and wmbiffrc.5 are copyright 1999-2002 by 
 .\" Jordi Mallach <jordi@debian.org>
@@ -135,12 +135,22 @@ The user's icq UIN is optional.
 gicu:[UIN]
 .RE
 .TP
+.I finger
+With this box type, wmbiff will finger an account to see if
+there is unread mail.  Both finger and perl must be in your
+path, and your server must run a finger daemon.
+.RS
+finger:user@host
+.RE
+.TP
 .I shell
 With this EXPERIMENTAL keyword, wmbiff will launch the
 specified shell command and read its output (STDOUT)
-expecting an integer number to be displayed as a count
-of new messages.   The behavior of this experimental
-keyword is likely to change in future revisions.
+expecting an integer message count or a three-character
+string.  If "new" is in the first line, the string or number
+will be displayed in yellow. The behavior of this
+experimental keyword is likely to change in future
+revisions.
 .RS
 shell:::/path/to/command
 .RE
