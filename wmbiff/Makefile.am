@@ -6,7 +6,7 @@ wmbiff_LDADD = -L../wmgeneral -lwmgeneral
 wmbiff_DEPENDENCIES = ../wmgeneral/libwmgeneral.a
 man_MANS = wmbiff.1 wmbiffrc.5
 skindir = $(datadir)/wmbiff/skins
-skin_DATA = wmbiff-master-led.xpm wmbiff-master-contrast.xpm
+skin_DATA = wmbiff-master-led.xpm wmbiff-master-contrast.xpm 
 
 EXTRA_DIST = $(man_MANS) sample.wmbiffrc $(skin_DATA)
 
@@ -33,3 +33,11 @@ indent:
 dist-hook-local: indent
 dist-clean-local:
 	test -L wmbiff-master.xpm && rm wmbiff-master.xpm
+
+# remove colors, then substitute old colors, then repalletize
+wmbiff-master-contrast.xpm:  wmbiff-master-led.xpm Makefile
+	egrep -v '^"[:%][[:space:]]c #' < $< | \
+	sed -e 's/:/./g' -e 's/%/$$/g' -e 's/ 15 / 13 /' | \
+	sed -e 's/#\([0-9A-F]\{2\}\)[0-9A-F]\{2\}\([0-9A-F]\{2\}\)[0-9A-F]\{2\}\([0-9A-F]\{2\}\)[0-9A-F]\{2\}/#\1\2\3/'\
+	> $@ || rm $@
+
