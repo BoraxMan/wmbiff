@@ -1,10 +1,12 @@
 Release Notes
 ~~~~~~~~~~~~~
 
-Release 0.3.2 - [UNRELEASED]
+Release 0.3.2 - Tue, 23 Oct 2001 20:30:37 +0200
+
   * After some tries (other OpenSSL based patches, independent APOP
     & CRAM-Md5 patches) we've come up with something based on GNUtls and
     gcrypt, which are GPL based and have no licensing issues for us.
+    See ChangeLog for details.
   * WMBiff now supports IMAP-SSL, APOP and CRAM-Md5 authentication. These
     can be disabled at compile time, commenting out the WITH_TLS and
     WITH_GCRYPT defines. (Neil Spring, NAKAYAMA Takao and Jay T. Francis).

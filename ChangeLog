@@ -1,15 +1,75 @@
-CVS Changelog.  Don't bother editing this file, because it will get overwritten
-by maint/prerelease.sh .
+2001-10-23 Tuesday 18:33 UTC -- Jordi Mallach <jordi@sindominio.net>
 
-The latest changelog entry is in a different format, because it's inserted by
-CVS on commit.
+	* wmbiff/Makefile: Bump WMBIFF_VERSION to 0.3.2.
 
-  $Log: ChangeLog,v $
-  Revision 1.12  2001/10/04 08:54:02  jordi
-  Backed out hoehoe's patch, preparing to apply Neil's.
+2001-10-05 Friday 16:10 UTC -- Jordi Mallach <jordi@sindominio.net>
 
+	* wmbiff/Makefile: Changed order of additions to LIBS and
+	EXTRAFLAGS, removed extra WMBIFF_VERSION definition.
 
-2001-09-24 Monday 11:58 UTC -- Jordi Mallach <jordi@sindominio.net>
+2001-10-04 Thursday 09:50 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* NEWS, README, TODO, wmbiff/Client.h, wmbiff/Imap4Client.c,
+	wmbiff/LicqClient.c, wmbiff/Makefile, wmbiff/Pop3Client.c,
+	wmbiff/charutil.c, wmbiff/charutil.h, wmbiff/maildirClient.c,
+	wmbiff/mboxClient.c, wmbiff/socket.c, wmbiff/tlsComm.c,
+	wmbiff/tlsComm.h, wmbiff/wmbiff.1, wmbiff/wmbiff.c,
+	wmbiff/wmbiffrc.5: * Big patch from Neil Spring which adds lots of
+	crypto support to WMBiff.  * WMBiff can now speak IMAP over TLS and
+	CRAM-MD5, and APOP using libgcrypt.  * Known problems:	 - gnutls
+	is being developed still, so it may have security related bugs.   
+	- A bug in gnutls (a too-small buffer) may cause problems      in
+	the parsing of openssl certificates. This should be fixed by gnutls
+	     soon, hopefully. Added error messages if this bug is tickled.
+	If you've      got problems with IMAP SSL, please try upgrading
+	gnutls. If the problem	    persists, let us know.    - IMAP has
+	totally been rewritten, so bugs may crop up.	- Pop3 hasn't been
+	rewritten to use the TLS primitives, though it probably      could
+	be if someone wanted to.  * There's a new interface for reading and
+	writing to the socket in   tlsComm.[ch].  This makes the IMAP code
+	somewhat independent of whether   ssl is used, and provides nicer
+	primitives to help skip 'informational'   messages.  * WITH_TLS and
+	WITH_GCRYPT are on-by-default in the Makefile.	TLS   applies to
+	encryption, GCRYPT to cram-md5 and apop authentication.    Since
+	gnutls depends on libgcrypt anyway, these probably don't need to be
+	   independent.  Some compile warnings may be generated when these
+	are    disabled.  * Added code to optionally include dmalloc.h and
+	link -ldmalloc. This   doesn't do anything at the moment, but
+	shouldn't hurt. It's off-by-default.  * IMAP connections are now
+	persistent.  persistent.  This is to cut down on   the need to
+	re-negotiate an SSL connection every time you want to check   mail.
+	It tries to use just one connection per
+	(server/username/password/port	 number), which means multiple
+	mailboxes need only one connection.  * There are a handful of
+	lclint (http://lclint.cs.virginia.edu) annotations   in
+	tlsComm.[ch]. These should also not hurt anyone, and are meant to
+	keep   the signal to noise ratio of lclint high.  * The rewritten
+	IMAP code uses the GNU regex library to handle the   configuration
+	line.  I think its clearer than the cascading strtok()	 solution,
+	but the regex might not be perfect.  * Removed an unnecessary
+	"inline" keyword from charutil.h.  * Added a TODO document with the
+	bits that are missing from the picture.  * Please bow in awe at
+	NAKAYAMA Takao, Jay T. Francis and specially   Neil Spring for all
+	of this.
+
+2001-10-04 Thursday 09:21 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* wmbiff/ApopClient.c: Removed unneeded Apop support code, now
+	integrated in Neil and Jay's patch.
+
+2001-10-04 Thursday 09:00 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* maint/changelog.sed: Added my other SF account, which I intend to
+	use now.
+
+2001-10-04 Thursday 08:54 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, NEWS, README, wmbiff/Client.h, wmbiff/Makefile,
+	wmbiff/sample.wmbiffrc, wmbiff/wmbiff.1, wmbiff/wmbiff.c,
+	wmbiff/wmbiffrc.5: Backed out hoehoe's patch, preparing to apply
+	Neil's.
+
+2001-09-24 Monday 11:58 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
 
 	* ChangeLog, NEWS, README, wmbiff/ApopClient.c, wmbiff/Client.h,
 	wmbiff/Makefile, wmbiff/sample.wmbiffrc, wmbiff/wmbiff.1,
@@ -17,31 +77,31 @@ CVS on commit.
 	NAKAYAMA Takao <hoehoe@wakaba.jp>.  Fixed some bits of the manpage
 	(Jordi) Bumped version to 0.3.2.
 
-2001-09-24 Monday 11:56 UTC -- Jordi Mallach <jordi@sindominio.net>
+2001-09-24 Monday 11:56 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
 
 	* maint/prerelease.sh: Removed -t to cvs2cl invocation, to make
 	cleaner ChangeLogs.
 
-2001-06-24 Sunday 18:17 UTC -- Jordi Mallach <jordi@sindominio.net>
+2001-06-24 Sunday 18:17 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
 
 	* ChangeLog, NEWS: Released wmbiff 0.3.1.
 
-2001-06-24 Sunday 18:08 UTC -- Jordi Mallach <jordi@sindominio.net>
+2001-06-24 Sunday 18:08 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
 
 	* ChangeLog, README: Removed duplicate entry for Vladimir Popov in
 	README.
 
-2001-06-23 Saturday 00:09 UTC -- Jordi Mallach <jordi@sindominio.net>
+2001-06-23 Saturday 00:09 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
 
 	* wmbiff/Imap4Client.c: Imap fix from Rob Funk
 
-2001-06-23 Saturday 00:07 UTC -- Jordi Mallach <jordi@sindominio.net>
+2001-06-23 Saturday 00:07 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
 
 	* ChangeLog, NEWS, maint/changelog.sed, maint/prerelease.sh:
 	Renamed CHANGES to ChangeLog and RELEASE-NOTES to NEWS, modified
 	release scripts accordingly. Added Mark to the sed file.
 
-2001-06-22 Friday 23:55 UTC -- Jordi Mallach <jordi@sindominio.net>
+2001-06-22 Friday 23:55 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
 
 	* CHANGES, RELEASE-NOTES: Renamed to NEWS and ChangeLog
 
@@ -74,7 +134,7 @@ CVS on commit.
 	Belyakov died right after releasing   wmBiff 0.2.  May your soul
 	rest in peace, Gennady.  (Dwayne C. Litzenberger)
 
-2001-06-16 Saturday 01:02 UTC -- Jordi Mallach <jordi@sindominio.net>
+2001-06-16 Saturday 01:02 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
 
 	* ChangeLog, wmbiff/Makefile, wmbiff/sample.wmbiffrc,
 	wmbiff/wmbiff.c: An FHS fix for wmbiff.c and use $(CC) in the
@@ -85,28 +145,28 @@ CVS on commit.
 	* ChangeLog, wmbiff/Makefile, wmbiff/charutil.c: Committing Mark
 	Hurley's patch
 
-2001-05-16 Wednesday 10:48 UTC -- Jordi Mallach <jordi@sindominio.net>
+2001-05-16 Wednesday 10:48 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
 
 	* ChangeLog, README: Updated some obsolete info in README
 
-2001-05-11 Friday 15:04 UTC -- Jordi Mallach <jordi@sindominio.net>
+2001-05-11 Friday 15:04 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
 
 	* ChangeLog, wmbiff/Imap4Client.c, wmbiff/Makefile,
 	wmbiff/charutil.c, wmbiff/charutil.h, wmbiff/wmbiff.c: Mark's
 	wmbiffrc parsing fix, small Makefile changes and bump version to
 	0.3.0.
 
-2001-05-11 Friday 14:49 UTC -- Jordi Mallach <jordi@sindominio.net>
+2001-05-11 Friday 14:49 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
 
 	* wmbiff/: .cvsignore, Makefile: Uncommitted stuff to deal with the
 	removal of the xmp link
 
-2001-05-04 Friday 11:01 UTC -- Jordi Mallach <jordi@sindominio.net>
+2001-05-04 Friday 11:01 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
 
 	* ChangeLog, wmbiff/Makefile: Updated Changelog and Makefile for
 	0.2r.
 
-2001-05-01 Tuesday 16:11 UTC -- Jordi Mallach <jordi@sindominio.net>
+2001-05-01 Tuesday 16:11 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
 
 	* README.licq, ChangeLog, README, wmgeneral/list.c,
 	wmgeneral/list.h, wmgeneral/misc.c, wmgeneral/misc.h,
@@ -117,7 +177,7 @@ CVS on commit.
 	wmbiff/LicqClient.c, wmbiff/Pop3Client.c, wmbiff/maildirClient.c,
 	wmbiff/wmbiffrc.5: Initial revision
 
-2001-05-01 Tuesday 16:11 UTC -- Jordi Mallach <jordi@sindominio.net>
+2001-05-01 Tuesday 16:11 UTC -- Jordi Mallach <Jordi Mallach <jordi@sindominio.net>@sindominio.net>
 
 	* README.licq, ChangeLog, README, wmgeneral/list.c,
 	wmgeneral/list.h, wmgeneral/misc.c, wmgeneral/misc.h,
