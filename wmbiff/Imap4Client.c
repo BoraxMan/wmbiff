@@ -278,6 +278,8 @@ FILE *imap_open(Pop3 pc)
 
 }
 
+void imap_cacheHeaders( /*@notnull@ */ Pop3 pc);
+
 int imap_checkmail( /*@notnull@ */ Pop3 pc)
 {
 	/* recover connection state from the cache */
@@ -313,6 +315,12 @@ int imap_checkmail( /*@notnull@ */ Pop3 pc)
 		if (msg != NULL)
 			(void) sscanf(msg, "(MESSAGES %d UNSEEN %d)",
 						  &(pc->TotalMsgs), &(pc->UnreadMsgs));
+		/* update the cached headers if evidence that change
+		   has occurred; not necessarily complete. */
+		if (pc->UnreadMsgs != pc->OldUnreadMsgs ||
+			pc->TotalMsgs != pc->OldMsgs) {
+			imap_cacheHeaders(pc);
+		}
 	} else {
 		/* something went wrong. bail. */
 		tlscomm_close(unbind(scs));
@@ -321,22 +329,35 @@ int imap_checkmail( /*@notnull@ */ Pop3 pc)
 	return 0;
 }
 
-struct msglst *imap_getHeaders( /*@notnull@ */ Pop3 pc)
+void imap_cacheHeaders( /*@notnull@ */ Pop3 pc)
 {
 	struct connection_state *scs = state_for_pcu(pc);
-	struct msglst *message_list;
 	char *msgid;
 	char buf[BUF_SIZE];
+	struct msglst *h;
 
 	if (scs == NULL) {
 		(void) imap_open(pc);
 		scs = state_for_pcu(pc);
 	}
 	if (scs == NULL) {
-		return NULL;
+		return;
 	}
 	if (tlscomm_is_blacklisted(scs) != 0) {
-		return NULL;
+		return;
+	}
+
+	if (pc->headerCache != NULL) {
+		/* make sure the current copy is "unlocked" */
+		if (pc->headerCache->in_use == 1) {
+			return;
+		}
+		/* free the old one */
+		for (h = pc->headerCache; h != NULL;) {
+			struct msglst *n = h->next;
+			free(h);
+			h = n;
+		}
 	}
 
 	IMAP_DM(pc, DEBUG_INFO, "working headers\n");
@@ -344,7 +365,7 @@ struct msglst *imap_getHeaders( /*@notnull@ */ Pop3 pc)
 	tlscomm_printf(scs, "a004 EXAMINE %s\r\n", pc->path);
 	if (tlscomm_expect(scs, "a004 OK", buf, 127) == 0) {
 		tlscomm_close(unbind(scs));
-		return NULL;
+		return;
 	}
 	IMAP_DM(pc, DEBUG_INFO, "examine ok\n");
 
@@ -352,13 +373,13 @@ struct msglst *imap_getHeaders( /*@notnull@ */ Pop3 pc)
 	tlscomm_printf(scs, "a005 SEARCH UNSEEN\r\n");
 	if (tlscomm_expect(scs, "* SEARCH", buf, 127) == 0) {
 		tlscomm_close(unbind(scs));
-		return NULL;
+		return;
 	}
 	IMAP_DM(pc, DEBUG_INFO, "search: %s", buf);
 	if (strlen(buf) < 9)
-		return NULL;			/* search turned up nothing */
+		return;					/* search turned up nothing */
 	msgid = strtok(buf + 9, " \r\n");
-	message_list = NULL;
+	pc->headerCache = NULL;
 	/* the isdigit cruft is to deal with EOL */
 	if (msgid != NULL && isdigit(msgid[0]))
 		do {
@@ -387,8 +408,8 @@ struct msglst *imap_getHeaders( /*@notnull@ */ Pop3 pc)
 				}
 				IMAP_DM(pc, DEBUG_INFO, "From: '%s' Subj: '%s'\n", m->from,
 						m->subj);
-				m->next = message_list;
-				message_list = m;
+				m->next = pc->headerCache;
+				pc->headerCache = m;
 			} else {
 				IMAP_DM(pc, DEBUG_ERROR, "error fetching: %s", hdrbuf);
 			}
@@ -398,9 +419,24 @@ struct msglst *imap_getHeaders( /*@notnull@ */ Pop3 pc)
 	tlscomm_printf(scs, "a06 CLOSE\r\n");	/* return to polling state */
 	/*  may be unneeded tlscomm_expect(scs, "a06 OK CLOSE\r\n" );  see if it worked? */
 	IMAP_DM(pc, DEBUG_INFO, "worked headers\n");
-	return message_list;
 }
 
+struct msglst *imap_getHeaders( /*@notnull@ */ Pop3 pc)
+{
+	if (pc->headerCache == NULL)
+		imap_cacheHeaders(pc);
+	if (pc->headerCache != NULL)
+		pc->headerCache->in_use = 1;
+	return pc->headerCache;
+}
+
+void imap_releaseHeaders(Pop3 pc
+						 __attribute__ ((unused)), struct msglst *h)
+{
+	assert(h != NULL);
+	/* allow the list to be released next time around */
+	h->in_use = 0;
+}
 
 /* parse the config line to setup the Pop3 structure */
 int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
@@ -504,6 +540,7 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 
 	pc->checkMail = imap_checkmail;
 	pc->getHeaders = imap_getHeaders;
+	pc->releaseHeaders = imap_releaseHeaders;
 	pc->TotalMsgs = 0;
 	pc->UnreadMsgs = 0;
 	pc->OldMsgs = -1;

@@ -243,6 +243,15 @@ struct msglst *shell_getHeaders( /*@notnull@ */ Pop3 pc)
 	}
 	return message_list;
 }
+void shell_releaseHeaders(Pop3 pc
+						  __attribute__ ((unused)), struct msglst *h)
+{
+	for (; h != NULL;) {
+		struct msglst *n = h->next;
+		free(h);
+		h = n;
+	}
+}
 
 int shellCreate( /*@notnull@ */ Pop3 pc, const char *str)
 {

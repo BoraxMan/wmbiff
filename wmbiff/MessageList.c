@@ -33,6 +33,9 @@ static XFontStruct *fn;
 static int fontHeight;
 extern const char *foreground;
 extern const char *background;
+
+Pop3 Active_pc;
+
 static int loadFont(const char *fontname)
 {
 	if (display != NULL) {
@@ -69,6 +72,8 @@ void msglst_show(Pop3 pc, int x, int y)
 	int limit = 10;
 	XGCValues gcv;
 	unsigned long gcm;
+
+	Active_pc = pc;				/* hold so we can release later. */
 
 	/* local gc */
 	gcm = GCForeground | GCBackground | GCGraphicsExposures;
@@ -161,15 +166,12 @@ void msglst_show(Pop3 pc, int x, int y)
 void msglst_hide(void)
 {
 	if (newwin) {
-		struct msglst *n, *h;
 		flush_expose(newwin);	/* swallow the messages */
 		XDestroyWindow(display, newwin);
 		//   } else {
 		// no window fprintf(stderr, "unexpected error destroying msglist window\n");
-		for (h = Headers; h != NULL;) {
-			n = h->next;
-			free(h);
-			h = n;
+		if (Active_pc->releaseHeaders != NULL && Headers != NULL) {
+			Active_pc->releaseHeaders(Active_pc, Headers);
 		}
 		newwin = 0;
 	}

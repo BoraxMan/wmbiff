@@ -1,11 +1,11 @@
-/* $Id: Client.h,v 1.33 2003/04/17 01:56:00 bluehal Exp $ */
+/* $Id: Client.h,v 1.34 2003/06/08 07:01:08 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
  *
  * Email Checker Pop3/Imap4/Licq/Gicu/mbox/maildir/finger
  *
- * Last Updated : $Date: 2003/04/17 01:56:00 $
+ * Last Updated : $Date: 2003/06/08 07:01:08 $
  *
  */
 
@@ -47,6 +47,8 @@ typedef struct _mbox_t {
 	int blink_stat;				/* blink digits flag-counter */
 	int debug;					/* debugging status */
 
+	struct msglst *headerCache;
+
 	union {
 		struct {
 			time_t mtime;
@@ -76,7 +78,11 @@ typedef struct _mbox_t {
 	} u;
 
 	int (*checkMail) ( /*@notnull@ */ Pop3);
+
+	/* collect the headers to show in a pop up */
 	struct msglst *(*getHeaders) ( /*@notnull@ */ Pop3);
+	/* allow the client to free the headers, or keep them cached */
+	void (*releaseHeaders) ( /*@notnull@ */ Pop3, struct msglst * ml);
 
 	time_t prevtime;
 	time_t prevfetch_time;

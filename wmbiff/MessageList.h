@@ -5,6 +5,7 @@ struct msglst {
 	struct msglst *next;
 	char subj[SUBJ_LEN];
 	char from[FROM_LEN];
+	unsigned int in_use:1;
 };
 
 void msglst_show(Pop3 pc, int x, int y);
