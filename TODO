@@ -1,6 +1,11 @@
 This is not a prioritized list.  Patches that accomplish
 these todo items are welcome.
 
+* Update for GNUTLS 0.4.x 
+  GNUTLS changes its API on just about every release,
+  generally to support additional functionality.  WMBiff
+  will only release with support for one version of GNUTLS,
+  likely whatever is in Debian unstable at the time.
 * Store and verify server certificates. 
   I don't know whether gnutls supports this.  A pointer to
   documentation that describes what to do, or a way to leech
@@ -8,7 +13,7 @@ these todo items are welcome.
 * \ line continuations in configuration file.
   Because shell commands can be quite long.
 * Generic constructors for mboxes.  
-  There's a lot of common code across different Clients;
+  There's some common code across different Clients;
   this is one piece that could use refactoring.
 * Add more shell "recipes" besides gicu.
   Just added 'finger'.  I'm hoping to add something to
@@ -16,6 +21,9 @@ these todo items are welcome.
 * Support on/off status LED's, for, for example,
   grep eth0 /proc/net/dev | wc -l
   The colored LED's are already in WMBiff's pixmap.
+* Support buttons 4 and 5
+  The mousewheel could be useful for some behaviors, like
+  controlling volume, or selecting different mailboxes.
 * Use a helper program to blink keyboard led's.
   Requires killing the 'notify' program when new mail no
   longer exists.  Keyboard blinking is done via a helper
@@ -55,7 +63,7 @@ these todo items are welcome.
   If it works, tell us.  Optionally the patch at sourceforge
   could be integrated.
 
-$Id: TODO,v 1.12 2002/04/27 08:34:14 bluehal Exp $
+$Id: TODO,v 1.13 2002/04/28 17:47:42 bluehal Exp $
 
 Local Variables:
 mode: outline
