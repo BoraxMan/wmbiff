@@ -1,11 +1,12 @@
-/* $Id: mboxClient.c,v 1.11 2002/04/20 07:54:06 bluehal Exp $ */
+/* $Id: mboxClient.c,v 1.12 2002/04/20 09:12:35 bluehal Exp $ */
 /* Author:		Yong-iL Joh <tolkien@mizi.com>
    Modified:	Jorge García <Jorge.Garcia@uv.es>
    			 	Rob Funk <rfunk@funknet.net>
+   			 	Neil Spring <nspring@cs.washington.edu>
  * 
  * MBOX checker.
  *
- * Last Updated : Thu Apr 26 03:09:40 CEST 2001
+ * Last Updated : $Date: 2002/04/20 09:12:35 $
  *
  */
 
@@ -28,6 +29,8 @@ FILE *openMailbox(Pop3 pc, const char *mbox_filename)
 	if ((mailbox = fopen(mbox_filename, "r")) == NULL) {
 		DM(pc, DEBUG_ERROR, "Error opening mailbox '%s': %s\n",
 		   mbox_filename, strerror(errno));
+		pc->TotalMsgs = -1;
+		pc->UnreadMsgs = -1;
 	}
 	return (mailbox);
 }
@@ -35,18 +38,16 @@ FILE *openMailbox(Pop3 pc, const char *mbox_filename)
 /* count the messages in a mailbox */
 static void countMessages(Pop3 pc, const char *mbox_filename)
 {
-	FILE *F = openMailbox(pc, mbox_filename);
+	FILE *F;
 	char buf[BUF_SIZE];
 	int is_header = 0;
 	int next_from_is_start_of_header = 1;
 	int count_from = 0, count_status = 0;
 	int len_from = strlen(FROM_STR), len_status = strlen(STATUS_STR);
 
-	if (F == NULL) {
-		pc->TotalMsgs = -1;
-		pc->UnreadMsgs = -1;
+	F = openMailbox(pc, mbox_filename);
+	if (F == NULL)
 		return;
-	}
 
 	/* count message */
 	while (fgets(buf, BUF_SIZE, F)) {
