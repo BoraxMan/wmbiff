@@ -1,4 +1,4 @@
-/* $Id: LicqClient.c,v 1.5 2002/04/07 05:08:23 bluehal Exp $ */
+/* $Id: LicqClient.c,v 1.6 2002/04/09 07:45:52 bluehal Exp $ */
 /* Author : Yong-iL Joh ( tolkien@mizi.com )
    Modified: Jorge García ( Jorge.Garcia@uv.es )
  * 
@@ -42,8 +42,8 @@ int licqCheckHistory(Pop3 pc)
 		   "  was changed,"
 		   " TIME: old %lu, new %lu"
 		   " SIZE: old %lu, new %lu\n",
-		   PCM.mtime, (unsigned long)st.st_mtime, 
-           (unsigned long) PCM.size, (unsigned long)st.st_size);
+		   PCM.mtime, (unsigned long) st.st_mtime,
+		   (unsigned long) PCM.size, (unsigned long) st.st_size);
 		ut.actime = st.st_atime;
 		ut.modtime = st.st_mtime;
 		F = pc->open(pc);

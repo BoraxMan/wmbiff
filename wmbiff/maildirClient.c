@@ -1,11 +1,11 @@
-/* $Id: maildirClient.c,v 1.6 2002/04/07 05:08:23 bluehal Exp $ */
+/* $Id: maildirClient.c,v 1.7 2002/04/09 07:45:52 bluehal Exp $ */
 /* Author : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
    Modified : Dwayne C. Litzenberger ( dlitz@dlitz.net )
  * 
  * Maildir checker.
  *
- * Last Updated : $Date: 2002/04/07 05:08:23 $
+ * Last Updated : $Date: 2002/04/09 07:45:52 $
  *
  */
 
@@ -83,10 +83,10 @@ int maildirCheckHistory(Pop3 pc)
 		   " SIZE(new): old %lu, new %lu\n"
 		   " TIME(cur): old %lu, new %lu"
 		   " SIZE(cur): old %lu, new %lu\n",
-		   PCM.mtime_new, (unsigned long)st_new.st_mtime,
-		   (unsigned long) PCM.size_new, (unsigned long)st_new.st_size,
-		   PCM.mtime_cur, (unsigned long)st_cur.st_mtime,
-		   (unsigned long) PCM.size_cur, (unsigned long)st_cur.st_size);
+		   PCM.mtime_new, (unsigned long) st_new.st_mtime,
+		   (unsigned long) PCM.size_new, (unsigned long) st_new.st_size,
+		   PCM.mtime_cur, (unsigned long) st_cur.st_mtime,
+		   (unsigned long) PCM.size_cur, (unsigned long) st_cur.st_size);
 
 		count_new = count_msgs(path_new);
 		count_cur = count_msgs(path_cur);
