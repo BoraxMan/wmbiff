@@ -1,3 +1,4 @@
+TESTS = test_wmbiff
 noinst_PROGRAMS = test_wmbiff
 bin_PROGRAMS = wmbiff
 wmbiff_SOURCES = wmbiff.c socket.c Pop3Client.c LicqClient.c mboxClient.c \
