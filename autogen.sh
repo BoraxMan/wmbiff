@@ -64,7 +64,7 @@ fi
 
 ACLOCAL=${ACLOCAL} AUTOHEADER=${AUTOHEADER} \
 AUTOCONF=${AUTOCONF} AUTOMAKE=${AUTOMAKE}  \
-${AUTORECONF} --install --symlink && \
+${AUTORECONF} --verbose --install --symlink && \
  ./configure && \
  make
 
