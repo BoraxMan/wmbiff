@@ -6,10 +6,67 @@ The latest changelog entry is in a different format, because it's inserted by
 CVS on commit.
 
   $Log: ChangeLog,v $
-  Revision 1.23  2002/04/07 05:08:23  bluehal
+  Revision 1.24  2002/04/09 07:52:11  bluehal
+  bump version to 0.4.0pre3 - permissions checking for .wmbiffrc added.
+
+  Revision 1.1  2002/04/07 05:08:23  bluehal
   use automake / autoconf; after checkout run ./FromCVS.sh
 
 
+
+2002-04-09 Tuesday 07:47 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* Makefile.am: try to tell the difference between running make dist
+	with cvs and missing cvs2cl (an error), and running make dist
+	without cvs (which should be ok).
+
+2002-04-09 Tuesday 07:45 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: LicqClient.c, maildirClient.c, mboxClient.c: some
+	explicit casts to make compiling on non-linux a bit more
+	warning-free
+
+2002-04-09 Tuesday 07:44 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiff.c: permissions checking for .wmbiffrc (if it
+	exists), some minor cleanup associated with this.
+
+2002-04-09 Tuesday 07:43 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Makefile.am: _DATA files don't get distributed, add the
+	skins into extra_dist. automake can be confusing
+
+2002-04-08 Monday 09:35 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* configure.in, wmbiff/wmbiffrc.5, wmbiff/wmbiffrc.5.in:
+	automatically generate wmbiffrc.5 based on the results of
+	configure, so that the configure-time chosen defaults are
+	accurately shown
+
+2002-04-07 Sunday 19:30 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* configure.in: don't try to configure gnutls if libz or libgdbm
+	aren't installed
+
+2002-04-07 Sunday 19:30 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* FromCVS.sh: allow for automake 1.5's need for depcomp
+
+2002-04-07 Sunday 05:08 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* COPYING, ChangeLog, FromCVS.sh, INSTALL, Makefile.am, NEWS, TODO,
+	configure.in, autoconf/acconfig.h, autoconf/install-sh,
+	autoconf/missing, autoconf/mkinstalldirs, maint/changelog-header,
+	wmbiff/Client.h, wmbiff/Imap4Client.c, wmbiff/LicqClient.c,
+	wmbiff/Makefile, wmbiff/Makefile.am, wmbiff/Pop3Client.c,
+	wmbiff/charutil.h, wmbiff/maildirClient.c, wmbiff/mboxClient.c,
+	wmbiff/tlsComm.c, wmbiff/wmbiff.c, wmgeneral/Makefile.am,
+	wmgeneral/wmgeneral.c: use automake / autoconf; after checkout run
+	./FromCVS.sh
+
+2002-04-07 Sunday 03:23 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* AUTHORS: automake required file, duplicated from README
 
 2002-04-05 Friday 19:44 UTC -- Neil Spring <nspring@cs.washington.edu>
 
