@@ -2,3 +2,4 @@
 *.o
 wmbiff
 wmbiff-master.xpm
+Makefile.in

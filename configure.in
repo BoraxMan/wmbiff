@@ -23,17 +23,20 @@ if test -n "$GCC"; then
  AC_MSG_RESULT(adding -Wall and friends to CFLAGS.)
 fi
 
+dnl a no-op to force autoconf to seek out the preprocessor now.
+AC_CHECK_HEADERS(stdio.h)
+
 dnl Pre-gnutls.
 gnutls="ok"
-AC_CHECK_LIB(z, gzopen, , gnutls="nope") dnl GNUTLS seems to need libz; fail here if it's missing.
-AC_CHECK_LIB(gdbm, dbminit, , gnutls="nope") dnl GNUTLS seems to need libgdbm; fail here if it's missing.
+AC_CHECK_LIB(z, gzopen, [], [gnutls="nope"]) dnl GNUTLS seems to need libz; fail here if it's missing.
+AC_CHECK_LIB(gdbm, dbminit, [], [gnutls="nope"]) dnl GNUTLS seems to need libgdbm; fail here if it's missing.
 
 dnl Parameter is minimum version 
 dnl TODO: fix so that GCRYPT is tested only if GNUTLS fails; the dependence
 dnl between them makes this turn redundant
 
 GNUTLS_MAN_STATUS="This copy of WMBiff was not compiled with GNUTLS."
-if test "$gnutls" == "ok"; then
+if test "$gnutls" = "ok"; then
  AM_PATH_LIBGNUTLS(0.3.3, [LIBS="$LIBS $LIBGNUTLS_LIBS"
                          CFLAGS="$CFLAGS $LIBGNUTLS_CFLAGS"
                          GNUTLS_MAN_STATUS="This copy of WMBiff was compiled with GNUTLS." ])
@@ -62,7 +65,7 @@ AC_CHECK_LIB(X11, XrmParseCommand)
 AC_CHECK_LIB(Xext, XextAddDisplay)
 AC_CHECK_LIB(Xpm, XpmCreateImageFromXpmImage)
 
-AC_CHECK_HEADERS(X11/xpm.h, , AC_CHECK_HEADERS(xpm.h, , AC_MSG_ERROR([xpm.h is needed])))
+AC_CHECK_HEADERS(X11/xpm.h, [], AC_CHECK_HEADERS(xpm.h, [], AC_MSG_ERROR([xpm.h is needed])))
 
 dnl Password prompting stuff.
 AC_PATH_PROGS(DEFAULT_ASKPASS, ssh-askpass x11-ssh-askpass ssh-askpass-gnome, /usr/bin/ssh-askpass)
