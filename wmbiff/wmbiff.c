@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.42 2002/12/29 03:25:31 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.43 2003/01/03 20:37:38 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -433,7 +433,7 @@ int exists(const char *filename)
 
 /* acts like execvp, with code inspired by it */
 /* mustfree */
-static char *search_path(const char *path, /*@notnull@ */
+static char *search_path(const char *path,	/*@notnull@ */
 						 const char *find_me)
 {
 	char *buf;
@@ -1054,6 +1054,8 @@ static void parse_cmd(int argc, char **argv, /*@out@ */ char *config_file)
 				if (strcmp(arg + 1, "geometry") != 0) {
 					usage();
 					exit(EXIT_FAILURE);
+				} else {
+					i++;		/* gobble the argument */
 				}
 				break;
 			case 'h':
