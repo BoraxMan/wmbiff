@@ -7,7 +7,7 @@ dnl and configure:
 dnl  installation prefix
 dnl  version
 
-AC_INIT(WMBiff, 0.4.12, wmbiff-devel@lists.sourceforge.net, wmbiff)
+AC_INIT(WMBiff, 0.4.13, wmbiff-devel@lists.sourceforge.net, wmbiff)
 AC_CONFIG_AUX_DIR(autoconf)
 AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
@@ -24,21 +24,39 @@ if test -n "$GCC"; then
  AC_MSG_RESULT(adding -Wall and friends to CFLAGS.)
 fi
 
+case `(uname -s) 2>/dev/null` in
+    "Darwin")
+       CFLAGS="$CFLAGS -no-cpp-precomp"
+       AC_MSG_RESULT(adding cpp precompiler workaround for Mac OS X)
+     ;;
+esac
+
 dnl a no-op to force autoconf to seek out the preprocessor now.
 AC_CHECK_HEADERS(stdio.h)
 
 dnl for IPv6 support
 AC_CHECK_FUNCS(getaddrinfo)
 
+dnl AC_CHECK_FUNC(asprintf, , VASPRINTF="vasprintf.c")
+
 dnl replacing the old USE_POLL define
 AC_CHECK_FUNCS(poll)
+
+dnl declare RETSIGTYPE
+AC_TYPE_SIGNAL
+
+dnl solaris
+AC_CHECK_LIB(nsl, gethostbyname)
+AC_CHECK_LIB(socket, connect)
+AC_CHECK_LIB(resolv, herror)
 
 dnl Pre-gnutls.
 gnutls="ok"
 AC_CHECK_LIB(z, gzopen, [], [gnutls="nope"]) dnl GNUTLS seems to need libz; fail here if it's missing.
 AC_CHECK_LIB(gdbm, dbminit, [], [gnutls="nope"]) dnl GNUTLS seems to need libgdbm; fail here if it's missing.
 
-dnl Parameter is minimum version 
+
+dnl Parameter is minimum version
 dnl TODO: fix so that GCRYPT is tested only if GNUTLS fails; the dependence
 dnl between them makes this turn redundant
 
@@ -49,7 +67,7 @@ if test "$gnutls" = "ok"; then
                           CFLAGS="$CFLAGS $LIBGNUTLS_CFLAGS"
                          CPPFLAGS="$CPPFLAGS $LIBGNUTLS_CFLAGS"
                          GNUTLS_COMMON_O="gnutls-common.o"
-                         GNUTLS_MAN_STATUS="This copy of WMBiff was compiled with GNUTLS." 
+                         GNUTLS_MAN_STATUS="This copy of WMBiff was compiled with GNUTLS."
                          AC_CHECK_HEADERS(gnutls/gnutls.h) ])
 else
  AC_MSG_RESULT(GNUTLS support requires libz.a and libgdbm.a, so will be disabled)
@@ -94,6 +112,28 @@ dnl AC_SUBST(GNOME_LIBS)
 dnl AC_SUBST(GNOME_CFLAGS)
 
 
+dnl see if __attribute__ is supported.  modified from AC_C_INLINE 
+dnl in the autoconf distribution.
+AC_DEFUN([WM_C_ATTRIBUTE],
+[AC_CACHE_CHECK([for __attribute__ support], wm_cv_c_attribute,
+[wm_cv_c_attribute=no
+AC_COMPILE_IFELSE([AC_LANG_SOURCE(
+[#ifndef __cplusplus
+typedef int foo_t;
+foo_t foo () __attribute__((unused));
+foo_t foo () {return 0; }
+#endif
+])],
+                    [wm_cv_c_attribute=yes])
+])
+case $wm_cv_c_attribute in
+  yes)AC_DEFINE(HAVE___ATTRIBUTE__, ,
+                [Define if '__attribute__' is supported by the compiler]) 
+  ;;
+esac
+])# WM_C_ATTRIBUTE
+
+WM_C_ATTRIBUTE
 
 dnl Password prompting stuff.
 AC_PATH_PROGS(DEFAULT_ASKPASS, ssh-askpass x11-ssh-askpass ssh-askpass-gnome, /usr/bin/ssh-askpass)
@@ -110,7 +150,7 @@ fi
 dnl where to install em
 AC_SUBST(SKINDIR)
 dnl where to find em
-AC_DEFINE_UNQUOTED(DEFAULT_SKIN_PATH, 
+AC_DEFINE_UNQUOTED(DEFAULT_SKIN_PATH,
                    "$SKINDIR:/usr/share/wmbiff/skins:/usr/local/share/wmbiff/skins:.", [Path to use when finding skins (modified pixmaps)] )
 
 dnl We're done.
