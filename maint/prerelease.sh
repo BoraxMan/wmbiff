@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: prerelease.sh,v 1.3 2001/06/23 00:07:03 oskuro Exp $
+# $Id: prerelease.sh,v 1.4 2001/09/24 11:56:27 oskuro Exp $
 # wmBiff prerelease script.  Used mainly by the upstream maintainer(s).
 # Run this before making a new release of wmBiff
 # You will need cvs2cl.
@@ -26,7 +26,7 @@ EOF
 echo "  $""Log""$" >> ChangeLog
 echo ""            >> ChangeLog
 
-cvs2cl --stdout --utc --day-of-week -t | sed -f maint/changelog.sed >> ChangeLog
+cvs2cl --stdout --utc --day-of-week | sed -f maint/changelog.sed >> ChangeLog
 
 set +x
 
