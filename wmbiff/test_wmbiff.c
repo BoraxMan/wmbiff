@@ -53,6 +53,10 @@ int test_backtickExpand(void) {
   return(retval);
 }
 
+#define CKSTRING(x,shouldbe) if(strcmp(x,shouldbe)) { \
+printf("Failed: expected '" #shouldbe "' but got '%s'\n", x); \
+ return 1; }
+
 /* return 1 if fail, 0 if success */
 int test_passwordMgr(void) {
 	const char *b;
@@ -103,7 +107,7 @@ int test_passwordMgr(void) {
 		return(1);
 	}
 	printf
-		("SUCCESS: expected 'abcdefghi1abcdefghi2abcdefghi3ab' got '%s'\n",
+		("SUCCESS: expected 'abcdefghi1abcdefghi2abcdefghi3a' got '%s'\n",
 		 b);
 
 	/* try overflowing the buffer */
@@ -117,7 +121,7 @@ int test_passwordMgr(void) {
 		return(1);
 	}
 	printf
-		("SUCCESS: expected 'abcdefghi1abcdefghi2abcdefghi3ab' got '%s'\n",
+		("SUCCESS: expected 'abcdefghi1abcdefghi2abcdefghi3a' got '%s'\n",
 		 b);
 
 	/* make sure we still have the old one */
@@ -151,9 +155,6 @@ int test_passwordMgr(void) {
     return(0);
 }
 
-#define CKSTRING(x,shouldbe) if(strcmp(x,shouldbe)) { \
-printf("Failed: expected '" #shouldbe "' but got '%s'\n", x); \
- return 1; }
 #define CKINT(x,shouldbe) if(x != shouldbe) { \
 printf("Failed: expected '" #shouldbe "' but got '%d'\n", x); \
  return 1; }

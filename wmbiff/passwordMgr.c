@@ -159,6 +159,12 @@ char *passwordFor(const char *username,
 #endif
 			p->next = pass_list;
 			pass_list = p;
+			if (strlen(password_ptr) > 31) {
+				DM(pc, DEBUG_ERROR,
+				   "passmgr: warning: your password appears longer (%d) than expected (%d)\n",
+				   strlen(password_ptr), 31);
+				password_ptr[31] = '\0';
+			}
 			return (password_ptr);
 		}
 	}
