@@ -11,7 +11,8 @@
    Yellow digits display number of unread messages, with blinking on new
    mail arrival, if any.
    
-   At this moment only unix-style and POP3 mailboxes are supported.
+   At this moment unix-style (mbox), maildir POP3 and IMAP mailboxes are
+   supported. wmBiff also understands Licq's history files.
    wmBiff supports up to 5 mailboxes (but you can start 2 or more
    wmbiff's with differrent configs).
    
@@ -27,10 +28,10 @@
                           Compiling and Installation
                                        
 Extract the archive:
-        tar -xvzf wmbiff-0.2.tar.gz
+        tar -xvzf wmbiff-0.x.tar.gz
 
 Enter the wmbiff directory and edit the Makefile:
-        cd wmbiff-0.2/
+        cd wmbiff-0.x/
         vi Makefile
 
 Make the binary:
@@ -76,13 +77,16 @@ position. All other positions will be empty.
    Nick Clarey (nclarey@3glab.com)
    An OpenBSD guy (I don't have the name handy)
    Dwayne C. Litzenberger (dlitz@dlitz.net)
+   Vladimir Popov (pva48@mail.ru)
+   Mark Hurley (debian4tux@telocity.com)
+   Rob Funk (rfunk@funkinet.net)
+   
    
      _________________________________________________________________
    
-   Any suggestions/bug reports please send to
-   
-    Yong-iL Joh tolkien@mizi.com
-    
+   Any suggestions/bug reports please send to our mailing list,
+ 
+    wmbiff-devel@lists.sourceforge.net
+
     or the original author, Gennady Belyakov gb@ccat.elect.ru, if he
     reappears.
-

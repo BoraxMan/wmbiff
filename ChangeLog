@@ -16,8 +16,9 @@ wmBiff (0.3.0)
     flags, ignoring those marked "ON" (Rob Funk).
   * wmbiff/Imap4Client.c: fixed reading of quoted imap folders, which some
     IMAPd's do (Rob Funk).
+  * README: updated some very obsolete info.
 
- -- Jordi Mallach <jordi@sindominio.net>  Fri,  11 May 2001 17:02:44 +0200
+ -- Jordi Mallach <jordi@sindominio.net>  Fri,  16 May 2001 12:16:44 +0200
 
 wmBiff (0.2q1)
   * wmbiff/Client.h: move DEBUG_* macros to wmbiff/Makefile
@@ -134,8 +135,8 @@ wmBiff (0.2o)
       + wmbiff/{socket.c, wmbiff.c}: removed <sys/time.h> includes.
       + debian/{wmbiff.1, wmbiffrc.5}: updated for IMAP4 and Licq support.
       + Jorge García removed the segfault in Jordi's wmbiffrc
-      + An OpenBSD guy (I don't have the name handy) fixed a potential buffer
-        overflow in init_biff() (The "/* Make labels look right */" section)
+      + Vladimir Popov <pva48@mail.ru> fixed a potential buffer overflow
+        in init_biff() (The "/* Make labels look right */" section).
       + Jorge García <Jorge.Garcia@uv.es> fixed a display bug in the
         number-of- mails display.
   * use poll() instead of select()
