@@ -1,11 +1,11 @@
 Release Notes
 ~~~~~~~~~~~~~
-Release 0.4.15 - Mar x, 2003
+Release 0.4.15 - Mar 30, 2003
   * Frobnicate internally stored passwords, partially 
     obfuscating them in memory.  Not actually more 
     secure, but harder to casually discover a password.
   * Tighten configuration file lines to more quickly
-    detect misconfiguration; give the -relax option if
+    detect misconfiguration.  Add the -relax option if
     it is too paranoid.
   * Add support for -bg to round out -hi and -fg color
     specifiers.
@@ -413,4 +413,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.41 2003/03/30 10:38:37 bluehal Exp $
+$Id: NEWS,v 1.42 2003/03/30 11:23:34 bluehal Exp $
