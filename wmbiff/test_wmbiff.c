@@ -147,8 +147,8 @@ int test_passwordMgr(void) {
 	/* what it's like if ssh-askpass is ok'd with an empty password. */
 	m.askpass = "echo ; #";
 	b = passwordFor("try", "again", &m, 0);
-	if (strcmp(b, "") != 0) {
-		printf("FAILURE: expected '' got '%s'\n", b);
+	if (b == NULL || strcmp(b, "") != 0) {
+		printf("FAILURE: expected '' got '%s'\n", b ? b : "(null)");
 		return(1);
 	}
 	printf("SUCCESS: expected '' got '%s'\n", b);

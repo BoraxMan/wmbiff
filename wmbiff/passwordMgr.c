@@ -237,6 +237,8 @@ char *passwordFor(const char *username,
 
 	/* else, try to get it. */
 	if (pc->askpass != NULL) {
+        char *retval;
+
         p->password_len = 32;
 #ifdef HAVE_APPLE_KEYCHAIN
         if(strcmp(pc->askpass, "internal:apple:keychain") == 0) {
@@ -253,15 +255,13 @@ char *passwordFor(const char *username,
 #ifdef HAVE_APPLE_KEYCHAIN
         }
 #endif
-        if(p->password[0] != '\0') {
-            char *retval = strdup(p->password);
-			strcpy(p->user, username);
-			strcpy(p->server, servername);
-			ENFROB(p->password);
-			p->next = pass_list;
-			pass_list = p;
-			return (retval);
-		}
+        retval = strdup(p->password);
+        strcpy(p->user, username);
+        strcpy(p->server, servername);
+        ENFROB(p->password);
+        p->next = pass_list;
+        pass_list = p;
+        return (retval);
 	}
 
 	return (NULL);
