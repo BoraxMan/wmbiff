@@ -1,4 +1,4 @@
-/* $Id: charutil.c,v 1.9 2002/04/27 08:29:59 bluehal Exp $ */
+/* $Id: charutil.c,v 1.10 2002/04/29 02:01:51 bluehal Exp $ */
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -226,4 +226,13 @@ void chomp(char *s)
 	int l = strlen(s) - 1;
 	if (l >= 0 && s[l] == '\n')
 		s[l] = '\0';
+}
+
+char *strdup_ordie(const char *c) {
+  char *ret = strdup(c);
+  if(ret == NULL) {
+    fprintf(stderr, "ran out of memory\n");
+    exit(EXIT_FAILURE);
+  }
+  return(ret);
 }

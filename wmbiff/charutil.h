@@ -1,4 +1,4 @@
-/* $Id: charutil.h,v 1.7 2002/04/15 01:26:21 bluehal Exp $ */
+/* $Id: charutil.h,v 1.8 2002/04/29 02:01:51 bluehal Exp $ */
 /* Author: Mark Hurley  (debian4tux@telocity.com)
  *
  * Character / string manipulation utilities. 
@@ -40,4 +40,7 @@ int compile_and_match_regex(const char *regex, const char *str,
 
 /* acts like perl's function of the same name */
 void chomp(char *s);
+
+/* same as xstrdup, just better named ;) */
+char *strdup_ordie(const char *c);
 #endif
