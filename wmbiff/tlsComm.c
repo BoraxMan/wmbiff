@@ -124,7 +124,9 @@ static int wait_for_it(int sd, int timeoutseconds)
 	return (FD_ISSET(sd, &readfds));
 }
 
-int getline_from_buffer(char *readbuffer, char *linebuffer, int linebuflen)
+/* exported for testing */
+extern int
+getline_from_buffer(char *readbuffer, char *linebuffer, int linebuflen)
 {
 	char *p, *q;
 	int i;
@@ -138,6 +140,11 @@ int getline_from_buffer(char *readbuffer, char *linebuffer, int linebuflen)
 		   the newline */
 		i++;
 		p++;
+	} else {
+		/* TODO -- perhaps we should return no line at all
+		   here, as it might be incomplete.  don't want to
+		   break anything though. */
+		DMA(DEBUG_INFO, "expected line doesn't end on its own.\n");
 	}
 
 	if (i != 0) {
@@ -173,7 +180,7 @@ int tlscomm_expect(struct connection_state *scs,
 				   const char *prefix, char *linebuf, int buflen)
 {
 	int prefixlen = (int) strlen(prefix);
-	int readbytes = -1;
+	int readbytes = 0;
 	memset(linebuf, 0, buflen);
 	TDM(DEBUG_INFO, "%s: expecting: %s\n", scs->name, prefix);
 	/*     if(scs->unprocessed[0]) {
@@ -181,27 +188,32 @@ int tlscomm_expect(struct connection_state *scs,
 	   } */
 	while (scs->unprocessed[0] != '\0'
 		   || wait_for_it(scs->sd, EXPECT_TIMEOUT)) {
-		if (scs->unprocessed[0] == '\0') {
+		if (scs->unprocessed[readbytes] == '\0') {
+			int thisreadbytes;
 #ifdef USE_GNUTLS
 			if (scs->tls_state) {
 				/* BUF_SIZE - 1 leaves room for trailing \0 */
-				readbytes =
-					gnutls_read(scs->tls_state, scs->unprocessed,
-								BUF_SIZE - 1);
-				if (readbytes < 0) {
-					handle_gnutls_read_error(readbytes, scs);
+				thisreadbytes =
+					gnutls_read(scs->tls_state,
+								&scs->unprocessed[readbytes],
+								BUF_SIZE - 1 - readbytes);
+				if (thisreadbytes < 0) {
+					handle_gnutls_read_error(thisreadbytes, scs);
 					return 0;
 				}
 			} else
 #endif
 			{
-				readbytes = read(scs->sd, scs->unprocessed, BUF_SIZE - 1);
-				if (readbytes < 0) {
+				thisreadbytes =
+					read(scs->sd, &scs->unprocessed[readbytes],
+						 BUF_SIZE - 1 - readbytes);
+				if (thisreadbytes < 0) {
 					TDM(DEBUG_ERROR, "%s: error reading: %s\n", scs->name,
 						strerror(errno));
 					return 0;
 				}
 			}
+			readbytes += thisreadbytes;
 			/* force null termination */
 			scs->unprocessed[readbytes] = '\0';
 			if (readbytes == 0) {
@@ -432,7 +444,8 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc,
 
 		gnutls_cred_set(scs->tls_state, GNUTLS_CRD_CERTIFICATE,
 						scs->xcred);
-		gnutls_transport_set_ptr(scs->tls_state, sd);
+		gnutls_transport_set_ptr(scs->tls_state,
+								 (gnutls_transport_ptr) sd);
 		do {
 			zok = gnutls_handshake(scs->tls_state);
 		} while (zok == GNUTLS_E_INTERRUPTED || zok == GNUTLS_E_AGAIN);
