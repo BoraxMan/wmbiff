@@ -1,10 +1,11 @@
-/* $Id: maildirClient.c,v 1.4 2002/03/01 08:41:29 bluehal Exp $ */
+/* $Id: maildirClient.c,v 1.5 2002/03/05 05:02:44 dwonis Exp $ */
 /* Author : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
+   Modified : Dwayne C. Litzenberger ( dlitz@dlitz.net )
  * 
  * Maildir checker.
  *
- * Last Updated : Mar 20, 05:32:35 CET 2001     
+ * Last Updated : $Date: 2002/03/05 05:02:44 $
  *
  */
 
