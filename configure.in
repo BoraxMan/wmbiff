@@ -89,3 +89,5 @@ AC_DEFINE_UNQUOTED(DEFAULT_SKIN_PATH,
 
 dnl We're done.
 AC_OUTPUT(Makefile wmbiff/Makefile wmgeneral/Makefile wmbiff/wmbiffrc.5)
+dnl remind not to write the file.
+chmod 0444 wmbiff/wmbiffrc.5
