@@ -11,3 +11,5 @@ configure
 stamp-h
 stamp-h.in
 stamp-h1
+wmbiff-*.tar.gz
+.elog
