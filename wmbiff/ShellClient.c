@@ -10,9 +10,9 @@
 
 #include "Client.h"
 #include <errno.h>
+#include <string.h>
 #ifdef USE_DMALLOC
 #include <dmalloc.h>
-#include <string.h>
 #endif
 
 int shellCmdCheck(Pop3 pc)
