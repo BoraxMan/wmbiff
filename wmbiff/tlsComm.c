@@ -50,7 +50,7 @@ struct connection_state {
 	char *name;
 #ifdef HAVE_GNUTLS_H
 	GNUTLS_STATE state;
-	X509PKI_CLIENT_CREDENTIALS xcred;
+	GNUTLS_CERTIFICATE_CLIENT_CREDENTIALS xcred;
 #else
 	/*@null@ */ void *state;
 	/*@null@ */ void *xcred;
@@ -73,7 +73,7 @@ void tlscomm_close(struct connection_state *scs)
 	if (scs->state) {
 #ifdef HAVE_GNUTLS_H
 		gnutls_bye(scs->state, GNUTLS_SHUT_RDWR);
-		gnutls_x509pki_free_sc(scs->xcred);
+		gnutls_certificate_free_sc(scs->xcred);
 		gnutls_deinit(scs->state);
 		scs->xcred = NULL;
 #endif
@@ -260,103 +260,17 @@ void tlscomm_printf(struct connection_state *scs, const char *format, ...)
 
 /* most of this file only makes sense if using TLS. */
 #ifdef HAVE_GNUTLS_H
-
-/* taken from the GNUTLS documentation, version 0.3.0 and
-   0.2.10; this may need to be updated from gnutls's cli.c
-   (now common.h) if the gnutls interface changes, but that
-   is only necessary if you want debug_comm. */
-#define PRINTX(x,y) if (y[0]!=0) printf(" -   %s %s\n", x, y)
-#define PRINT_DN(X) PRINTX( "CN:", X.common_name); \
-	PRINTX( "OU:", X.organizational_unit_name); \
-	PRINTX( "O:", X.organization); \
-	PRINTX( "L:", X.locality_name); \
-	PRINTX( "S:", X.state_or_province_name); \
-	PRINTX( "C:", X.country); \
-	PRINTX( "E:", X.email)
-static int print_info(GNUTLS_STATE state)
-{
-	const char *tmp;
-	CredType cred;
-	gnutls_DN dn;
-	const gnutls_datum *cert_list;
-	CertificateStatus status;
-	int cert_list_size = 0;
-
-	tmp = gnutls_kx_get_name(gnutls_kx_get_algo(state));
-	printf("- Key Exchange: %s\n", tmp);
-
-	cred = gnutls_auth_get_type(state);
-	switch (cred) {
-	case GNUTLS_ANON:
-		printf("- Anonymous DH using prime of %d bits\n",
-			   gnutls_anon_client_get_dh_bits(state));
-		break;
-	case GNUTLS_X509PKI:
-		cert_list =
-			gnutls_x509pki_client_get_peer_certificate_list(state,
-															&cert_list_size);
-		status = gnutls_x509pki_client_get_peer_certificate_status(state);
-
-		switch (status) {
-		case GNUTLS_CERT_NOT_TRUSTED:
-			printf("- Peer's X509 Certificate was NOT verified\n");
-			break;
-		case GNUTLS_CERT_EXPIRED:
-			printf
-				("- Peer's X509 Certificate was verified but is expired\n");
-			break;
-		case GNUTLS_CERT_TRUSTED:
-			printf("- Peer's X509 Certificate was verified\n");
-			break;
-		case GNUTLS_CERT_NONE:
-			printf("- Peer did not send any X509 Certificate.\n");
-			break;
-		case GNUTLS_CERT_INVALID:
-			printf("- Peer's X509 Certificate was invalid\n");
-			break;
-		}
-
-		if (cert_list_size > 0) {
-			printf(" - Certificate info:\n");
-			printf(" - Certificate version: #%d\n",
-				   gnutls_x509pki_extract_certificate_version(&cert_list
-															  [0]));
-
-			gnutls_x509pki_extract_certificate_dn(&cert_list[0], &dn);
-			PRINT_DN(dn);
-
-			gnutls_x509pki_extract_certificate_issuer_dn(&cert_list[0],
-														 &dn);
-			printf(" - Certificate Issuer's info:\n");
-			PRINT_DN(dn);
-		}
-	default:
-		printf(" - Other.\n");
-	}
-
-	tmp = gnutls_protocol_get_name(gnutls_protocol_get_version(state));
-	printf("- Version: %s\n", tmp);
-
-	tmp = gnutls_compression_get_name(gnutls_compression_get_algo(state));
-	printf("- Compression: %s\n", tmp);
-
-	tmp = gnutls_cipher_get_name(gnutls_cipher_get_algo(state));
-	printf("- Cipher: %s\n", tmp);
-
-	tmp = gnutls_mac_get_name(gnutls_mac_get_algo(state));
-	printf("- MAC: %s\n", tmp);
-
-	return 0;
-}
+#include "gnutls-common.h"
 
 /* a start of a hack at verifying certificates.  does not
    provide any security at all.  I'm waiting for either
    gnutls to make this as easy as it should be, or someone
    to port Andrew McDonald's gnutls-for-mutt patch.
 */
+#ifdef FAILS_TO_COMPILE
 int tls_check_certificate(struct connection_state *scs)
 {
-	CertificateStatus certstat;
+    CertificateStatus certstat; */
 	const gnutls_datum *cert_list;
 	int cert_list_size = 0;
 
@@ -393,6 +307,7 @@ int tls_check_certificate(struct connection_state *scs)
 	TDM(DEBUG_INFO, "certificate check ok.\n");
 	return (0);
 }
+#endif
 
 struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc)
 {
@@ -415,7 +330,9 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc)
 		const int ciphers[] =
 			{ GNUTLS_CIPHER_3DES_CBC, GNUTLS_CIPHER_ARCFOUR, 0 };
 		const int compress[] = { GNUTLS_COMP_ZLIB, GNUTLS_COMP_NULL, 0 };
-		const int key_exch[] = { GNUTLS_KX_X509PKI_RSA, 0 };
+		const int key_exch[] = { GNUTLS_KX_RSA, GNUTLS_KX_DHE_DSS, 
+                                 GNUTLS_KX_DHE_RSA, GNUTLS_KX_SRP,
+                                 GNUTLS_KX_ANON_DH, 0 };
 		const int mac[] = { GNUTLS_MAC_SHA, GNUTLS_MAC_MD5, 0 };
 		assert(gnutls_protocol_set_priority(scs->state, protocols) == 0);
 		assert(gnutls_cipher_set_priority(scs->state, ciphers) == 0);
@@ -423,7 +340,7 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc)
 		assert(gnutls_kx_set_priority(scs->state, key_exch) == 0);
 		assert(gnutls_mac_set_priority(scs->state, mac) == 0);
 		/* no client private key */
-		if (gnutls_x509pki_allocate_sc(&scs->xcred, 1) < 0) {
+		if (gnutls_certificate_allocate_sc(&scs->xcred) < 0) {
 			DMA(DEBUG_ERROR, "gnutls memory error\n");
 			exit(1);
 		}
@@ -436,9 +353,9 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc)
 					certificate_filename);
 				exit(1);
 			}
-			zok = gnutls_x509pki_set_client_trust_file(scs->xcred,
+			zok = gnutls_certificate_set_x509_trust_file(scs->xcred,
 													   certificate_filename,
-													   "");
+													   GNUTLS_X509_FMT_PEM);
 			if (zok != 0) {
 				DMA(DEBUG_ERROR,
 					"GNUTLS did not like your certificate file %s.\n",
@@ -448,13 +365,15 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc)
 			}
 		}
 
-		gnutls_cred_set(scs->state, GNUTLS_X509PKI, scs->xcred);
+		gnutls_cred_set(scs->state, GNUTLS_CRD_CERTIFICATE, scs->xcred);
 		gnutls_transport_set_ptr(scs->state, sd);
 		do {
 			zok = gnutls_handshake(scs->state);
 		} while (zok == GNUTLS_E_INTERRUPTED || zok == GNUTLS_E_AGAIN);
 
+#ifdef FAILS_TO_COMPILE
 		tls_check_certificate(scs);
+#endif
 	}
 
 	if (zok < 0) {
@@ -484,7 +403,7 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc)
    verbose error crap */
 void handle_gnutls_read_error(int readbytes, struct connection_state *scs)
 {
-	if (gnutls_is_fatal_error(readbytes) == 1) {
+	if (gnutls_error_is_fatal(readbytes) == 1) {
 		TDM(DEBUG_ERROR,
 			"%s: Received corrupted data(%d) - server has terminated the connection abnormally\n",
 			scs->name, readbytes);
@@ -492,7 +411,7 @@ void handle_gnutls_read_error(int readbytes, struct connection_state *scs)
 		if (readbytes == GNUTLS_E_WARNING_ALERT_RECEIVED
 			|| readbytes == GNUTLS_E_FATAL_ALERT_RECEIVED)
 			TDM(DEBUG_ERROR, "* Received alert [%d]\n",
-				gnutls_alert_get_last(scs->state));
+				gnutls_alert_get(scs->state));
 		if (readbytes == GNUTLS_E_REHANDSHAKE)
 			TDM(DEBUG_ERROR, "* Received HelloRequest message\n");
 	}
