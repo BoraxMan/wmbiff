@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.39 2002/12/29 00:37:26 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.40 2002/12/29 00:57:47 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -725,7 +725,7 @@ int ReadLine(FILE * fp, char *setting, char *value, int *mbox_index)
 {
 	char buf[BUF_SIZE];
 	char *p, *q;
-	int len, aux;
+	int len;
 
 	*setting = '\0';
 	*value = '\0';
@@ -759,13 +759,17 @@ int ReadLine(FILE * fp, char *setting, char *value, int *mbox_index)
 	strcpy(value, q);
 
 	if (sscanf(p, "%[a-z.]%d", setting, mbox_index) == 2) {
+		/* mailbox-specific configuration, ends in a digit */
 		if (*mbox_index < 0 || *mbox_index >= MAX_NUM_MAILBOXES) {
 			DMA(DEBUG_ERROR, "invalid mailbox number %d\n", *mbox_index);
 			exit(EXIT_FAILURE);
 		}
 	} else if (sscanf(p, "%[a-z]", setting) == 1) {
+		/* global configuration, all text. */
 		*mbox_index = -1;
 	} else {
+		/* we found an uncommented line that has an equals,
+		   but is non-alphabetic. */
 		DMA(DEBUG_INFO, "unparsed setting %s\n", p);
 		return -1;
 	}
