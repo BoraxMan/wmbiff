@@ -108,7 +108,9 @@ static int wait_for_it(int sd, int timeoutseconds)
 	tv.tv_usec = 0;
 	FD_ZERO(&readfds);
 	FD_SET(sd, &readfds);
-	ready_descriptors = select(sd + 1, &readfds, NULL, NULL, &tv);
+	do {
+		ready_descriptors = select(sd + 1, &readfds, NULL, NULL, &tv);
+	} while (ready_descriptors == -1 && errno == EINTR);
 	if (ready_descriptors == 0) {
 		DMA(DEBUG_INFO,
 			"select timed out after %d seconds on socket: %d\n",
