@@ -1,4 +1,4 @@
-# $Id: test-wmbiffrc.shell,v 1.3 2002/06/01 07:03:59 bluehal Exp $
+# $Id: test-wmbiffrc.shell,v 1.4 2003/04/17 01:54:51 bluehal Exp $
 #
 # test wmbiffrc for the shell command and gicu method.
 # see sample.wmbiffrc and wmbiffrc.5 as documentation for the format.
@@ -8,8 +8,10 @@ interval=10
 label.0=one
 path.0=shell:::echo 1
 
-label.1=two
-path.1=shell:::echo 2 new
+label.1=deb
+path.1=shell:::nice ../scripts/security.debian.rb
+interval.1=120
+fetchcmd.1=msglst
 
 label.2=uptm
 path.2=shell:::uptime | awk '{print $3}'
@@ -23,3 +25,5 @@ path.3=gicu:
 label.4=finga
 path.4=finger:nspring@cs.washington.edu
 interval.4=60
+
+
