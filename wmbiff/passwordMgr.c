@@ -23,6 +23,7 @@
 
 #include "passwordMgr.h"
 #include "Client.h"
+#include "charutil.h"			/* chomp */
 #include <unistd.h>
 #include <sys/types.h>
 #include <stdlib.h>
@@ -106,7 +107,6 @@ const char *passwordFor(const char *username,
 		if (permissions_ok(pc, pc->askpass)) {
 			char buf[255];
 			FILE *fp;
-			int l;
 			int exit_status;
 			strcpy(p->user, username);
 			strcpy(p->server, servername);
@@ -141,10 +141,7 @@ const char *passwordFor(const char *username,
 				}
 			}
 
-			/* chomp; */
-			l = strlen(p->password) - 1;
-			if (p->password[l] == '\n')
-				p->password[l] = '\0';
+			chomp(p->password);
 			p->next = pass_list;
 			pass_list = p;
 			return (p->password);
