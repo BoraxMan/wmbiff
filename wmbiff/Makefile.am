@@ -7,7 +7,7 @@ wmbiff_SOURCES = wmbiff.c socket.c Pop3Client.c LicqClient.c mboxClient.c \
 wmbiff_LDADD = -L../wmgeneral -lwmgeneral
 wmbiff_DEPENDENCIES = ../wmgeneral/libwmgeneral.a
 test_wmbiff_SOURCES = ShellClient.c charutil.c charutil.h Client.h \
-	test_wmbiff.c
+	test_wmbiff.c passwordMgr.c
 man_MANS = wmbiff.1 wmbiffrc.5
 skindir = $(datadir)/wmbiff/skins
 skin_DATA = wmbiff-master-led.xpm wmbiff-master-contrast.xpm 

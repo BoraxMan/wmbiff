@@ -43,7 +43,8 @@ password_binding pass_list = NULL;
    a file, is owned by the user or by root, and is not world 
    writeable.   This is just a sanity check, and is not intended 
    to ensure the integrity of the password-asking program. */
-static int permissions_ok(Pop3 pc, const char *askpass_fname)
+/* would be static, but used in test_wmbiff */
+int permissions_ok(Pop3 pc, const char *askpass_fname)
 {
 	struct stat st;
 	if (index(askpass_fname, ' ')) {
@@ -135,7 +136,7 @@ const char *passwordFor(const char *username,
 					   strerror(errno));
 				} else {
 					DM(pc, DEBUG_ERROR,
-					   "passmgr: '%s' returne non-zero exit status %d\n",
+					   "passmgr: '%s' returned non-zero exit status %d\n",
 					   buf, exit_status);
 				}
 			}
@@ -150,99 +151,3 @@ const char *passwordFor(const char *username,
 	return (NULL);
 }
 
-#ifdef TEST_PASS_MGR
-int main(int argc, char *argv[])
-{
-	const char *b;
-	mbox_t m;
-
-	/* sh is almost certainly conforming; owned by root, etc. */
-	if (!permissions_ok(NULL, "/bin/sh")) {
-		printf("FAILURE: permission checker failed on /bin/sh.");
-		exit(EXIT_FAILURE);
-	}
-	/* tmp is definitely bad; and better be og+w */
-	if (permissions_ok(NULL, "/tmp")) {
-		printf("FAILURE: permission checker failed on /tmp.");
-		exit(EXIT_FAILURE);
-	}
-	/* TODO: also find some user-owned binary that shouldn't be g+w */
-	printf("SUCCESS: permission checker sanity check went well.\n");
-
-	/* *** */
-	m.askpass = "echo xlnt; #";
-
-	b = passwordFor("bill", "ted", &m, 0);
-	if (strcmp(b, "xlnt") != 0) {
-		printf("FAILURE: expected 'xlnt' got '%s'\n", b);
-		exit(EXIT_FAILURE);
-	}
-	printf("SUCCESS: expected 'xlnt' got '%s'\n", b);
-
-	/* *** */
-	m.askpass = "should be cached";
-	b = passwordFor("bill", "ted", &m, 0);
-	if (strcmp(b, "xlnt") != 0) {
-		printf("FAILURE: expected 'xlnt' got '%s'\n", b);
-		exit(EXIT_FAILURE);
-	}
-
-	printf("SUCCESS: cached 'xlnt' correctly\n");
-
-	/* *** */
-	m.askpass = "echo abcdefghi1abcdefghi2abcdefghi3a; #";
-
-	b = passwordFor("abbot", "costello", &m, 0);
-	if (strcmp(b, "abcdefghi1abcdefghi2abcdefghi3a") != 0) {
-		printf
-			("FAILURE: expected 'abcdefghi1abcdefghi2abcdefghi3a' got '%s'\n",
-			 b);
-		exit(EXIT_FAILURE);
-	}
-	printf
-		("SUCCESS: expected 'abcdefghi1abcdefghi2abcdefghi3ab' got '%s'\n",
-		 b);
-
-	/* try overflowing the buffer */
-	m.askpass = "echo abcdefghi1abcdefghi2abcdefghi3ab; #";
-	b = passwordFor("laverne", "shirley", &m, 0);
-	/* should come back truncated to fill the buffer */
-	if (strcmp(b, "abcdefghi1abcdefghi2abcdefghi3a") != 0) {
-		printf
-			("FAILURE: expected 'abcdefghi1abcdefghi2abcdefghi3a' got '%s'\n",
-			 b);
-		exit(EXIT_FAILURE);
-	}
-	printf
-		("SUCCESS: expected 'abcdefghi1abcdefghi2abcdefghi3ab' got '%s'\n",
-		 b);
-
-	/* make sure we still have the old one */
-	b = passwordFor("bill", "ted", &m, 0);
-	if (strcmp(b, "xlnt") != 0) {
-		printf("FAILURE: expected 'xlnt' got '%s'\n", b);
-		exit(EXIT_FAILURE);
-	}
-	printf("SUCCESS: expected 'xlnt' got '%s'\n", b);
-
-	/* what it's like if ssh-askpass is cancelled - should drop the mailbox */
-	m.askpass = "echo -n ; #";
-	b = passwordFor("abort", "me", &m, 0);
-	if (strcmp(b, "") != 0) {
-		printf("FAILURE: expected '' got '%s'\n", b);
-		exit(EXIT_FAILURE);
-	}
-	printf("SUCCESS: expected '' got '%s'\n", b);
-
-	/* what it's like if ssh-askpass is ok'd with an empty password. */
-	m.askpass = "echo ; #";
-	b = passwordFor("try", "again", &m, 0);
-	if (strcmp(b, "") != 0) {
-		printf("FAILURE: expected '' got '%s'\n", b);
-		exit(EXIT_FAILURE);
-	}
-	printf("SUCCESS: expected '' got '%s'\n", b);
-
-	exit(EXIT_SUCCESS);
-}
-#endif

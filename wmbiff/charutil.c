@@ -1,4 +1,4 @@
-/* $Id: charutil.c,v 1.8 2002/04/15 01:26:21 bluehal Exp $ */
+/* $Id: charutil.c,v 1.9 2002/04/27 08:29:59 bluehal Exp $ */
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -224,6 +224,6 @@ int compile_and_match_regex(const char *regex, const char *str,	/*@out@ */
 void chomp(char *s)
 {
 	int l = strlen(s) - 1;
-	if (l > 0 && s[l] == '\n')
+	if (l >= 0 && s[l] == '\n')
 		s[l] = '\0';
 }
