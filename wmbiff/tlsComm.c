@@ -39,7 +39,7 @@ extern const char *certificate_filename;
 
 /* how long to wait for the server to do its thing
    when we issue it a command (in seconds) */
-#define EXPECT_TIMEOUT 20
+#define EXPECT_TIMEOUT 40
 
 /* this is the per-connection state that is maintained for
    each connection; BIG variables are for ssl (null if not
