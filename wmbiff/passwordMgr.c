@@ -151,7 +151,6 @@ char *passwordFor(const char *username,
 
 			strcpy(p->user, username);
 			strcpy(p->server, servername);
-			password_ptr[31] = '\0';
 			strncpy(p->password, password_ptr, 31);
 			p->password[31] = '\0';	/* force a null termination */
 			// caller is responsible for freeing plaintext version free(password_ptr);
