@@ -272,7 +272,8 @@ void tlscomm_printf(struct connection_state *scs, const char *format, ...)
    gnutls to make this as easy as it should be, or someone
    to port Andrew McDonald's gnutls-for-mutt patch.
 */
-int tls_check_certificate(struct connection_state *scs)
+int tls_check_certificate(struct connection_state *scs,
+						  const char *remote_hostname)
 {
 	GNUTLS_CertificateStatus certstat;
 	const gnutls_datum *cert_list;
@@ -319,11 +320,30 @@ int tls_check_certificate(struct connection_state *scs)
 		TDM(DEBUG_INFO, "certificate passed time check.\n");
 	}
 
+	if (gnutls_x509_check_certificates_hostname
+		(&cert_list[0], remote_hostname) == 0) {
+		gnutls_DN dn;
+		gnutls_x509_extract_certificate_dn(&cert_list[0], &dn);
+		TDM(DEBUG_ERROR,
+			"server's certificate (%s) does not match its hostname (%s).\n",
+			dn.common_name, remote_hostname);
+		exit(1);
+	} else {
+		if ((scs->pc)->debug >= DEBUG_INFO) {
+			gnutls_DN dn;
+			gnutls_x509_extract_certificate_dn(&cert_list[0], &dn);
+			TDM(DEBUG_INFO,
+				"server's certificate (%s) matched its hostname (%s).\n",
+				dn.common_name, remote_hostname);
+		}
+	}
+
 	TDM(DEBUG_INFO, "certificate check ok.\n");
 	return (0);
 }
 
-struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc)
+struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc,
+										   const char *remote_hostname)
 {
 	static int gnutls_initialized;
 	int zok;
@@ -390,7 +410,7 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc)
 			zok = gnutls_handshake(scs->state);
 		} while (zok == GNUTLS_E_INTERRUPTED || zok == GNUTLS_E_AGAIN);
 
-		tls_check_certificate(scs);
+		tls_check_certificate(scs, remote_hostname);
 	}
 
 	if (zok < 0) {

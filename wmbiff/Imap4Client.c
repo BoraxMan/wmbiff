@@ -219,7 +219,7 @@ FILE *imap_open(Pop3 pc)
 	/* either we've negotiated ssl from starttls, or
 	   we're starting an encrypted connection now */
 	if (PCU.dossl != 0) {
-		scs = initialize_gnutls(sd, connection_name, pc);
+		scs = initialize_gnutls(sd, connection_name, pc, PCU.serverName);
 		if (scs == NULL) {
 			IMAP_DM(pc, DEBUG_ERROR, "Failed to initialize TLS\n");
 			return NULL;
