@@ -25,7 +25,7 @@
 /* kind_popen bumps off the sigchld handler - we care whether
    a checking program fails. */
 
-sighandler_t old_signal_handler;
+sig_t old_signal_handler;
 
 FILE *kind_popen(const char *command, const char *type)
 {
@@ -111,7 +111,8 @@ char *backtickExpand(Pop3 pc, const char *path)
 			return NULL;
 		}
 		strncat(bigbuffer, path, tickstart - path);
-		command = strndup(tickstart + 1, tickend - tickstart - 1);
+		command = strdup(tickstart + 1);
+		command[tickend - tickstart - 1] = '\0';
 		commandoutput = grabCommandOutput(pc, command);
 		free(command);
 		if (commandoutput != NULL) {
