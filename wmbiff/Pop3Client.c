@@ -1,4 +1,4 @@
-/* $Id: Pop3Client.c,v 1.13 2002/04/16 07:37:38 bluehal Exp $ */
+/* $Id: Pop3Client.c,v 1.14 2002/06/21 04:31:58 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -25,10 +25,13 @@
 #define POP_DM(pc, lvl, args...) DM(pc, lvl, "pop3: " args)
 
 #ifdef HAVE_GCRYPT_H
-static FILE *authenticate_md5(Pop3 pc, FILE * fp, char *unused);
-static FILE *authenticate_apop(Pop3 pc, FILE * fp, char *apop_str);
+static FILE *authenticate_md5( /*@notnull@ */ Pop3 pc, FILE * fp,
+							  char *unused);
+static FILE *authenticate_apop( /*@notnull@ */ Pop3 pc, FILE * fp,
+							   char *apop_str);
 #endif
-static FILE *authenticate_plaintext(Pop3 pc, FILE * fp, char *unused);
+static FILE *authenticate_plaintext( /*@notnull@ */ Pop3 pc, FILE * fp,
+									char *unused);
 
 static struct authentication_method {
 	const char *name;
@@ -45,6 +48,7 @@ static struct authentication_method {
 	NULL, NULL}
 };
 
+/*@null@*/
 FILE *pop3Login(Pop3 pc)
 {
 	int fd;
@@ -99,7 +103,7 @@ FILE *pop3Login(Pop3 pc)
 	return NULL;
 }
 
-int pop3CheckMail(Pop3 pc)
+int pop3CheckMail( /*@notnull@ */ Pop3 pc)
 {
 	FILE *f;
 	int read;
@@ -306,7 +310,9 @@ static FILE *authenticate_apop(Pop3 pc, FILE * fp, char *apop_str)
 }
 #endif							/* HAVE_GCRYPT_H */
 
-static FILE *authenticate_plaintext(Pop3 pc, FILE * fp, char *apop_str
+/*@null@*/
+static FILE *authenticate_plaintext( /*@notnull@ */ Pop3 pc,
+									FILE * fp, char *apop_str
 									__attribute__ ((unused)))
 {
 	char buf[BUF_SIZE];
