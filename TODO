@@ -10,6 +10,12 @@ these todo items are welcome.
   I don't know whether gnutls supports this.  A pointer to
   documentation that describes what to do, or a way to leech
   stored certificates or CA's from mutt would be great.
+* Optionally grab From / Subject for new IMAP on rightclick
+  The sequence of commands "examine $mailbox" "search new"
+  "fetch $msgnums (body[header.fields(from subject)])" "close"
+  should do the trick for grabbing the relevant info; then
+  what remains is to blit that onto a window and display it.
+  This feature inspired by popcheck.
 * \ line continuations in configuration file.
   Because shell commands can be quite long.
 * Generic constructors for mboxes.  
@@ -63,7 +69,7 @@ these todo items are welcome.
   If it works, tell us.  Optionally the patch at sourceforge
   could be integrated.
 
-$Id: TODO,v 1.13 2002/04/28 17:47:42 bluehal Exp $
+$Id: TODO,v 1.14 2002/05/03 05:47:28 bluehal Exp $
 
 Local Variables:
 mode: outline
