@@ -1,5 +1,5 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiffrc.5.in,v 1.13 2003/03/30 11:22:57 bluehal Exp $
+.\" $Id: wmbiffrc.5.in,v 1.14 2003/04/07 09:33:14 bluehal Exp $
 .\"
 .\" @configure_input@
 .\"
@@ -29,6 +29,20 @@ Comments must be preceeded by pound signs (#).
 The supported configuration options are:
 
 .TP 3
+\fBcertfile\fP
+File that holds TLS (SSL) certificates.  If specified,
+wmbiff will check certificates and exit on a failure, so
+your password is secure.  If not present, wmbiff will trust
+all certificates and may be vulnerable to a
+man-in-the-middle attack.  WMbiff's will not prompt if you
+want to accept new certificates.  Instead, wmbiff expects
+your mail client to keep certificates in a file.  For
+example, if mutt is your mailreader, you may add:
+
+.RS
+certfile=/home/<me>/.muttsslcerts
+.RE
+.TP
 \fBinterval\fP
 Global interval between mailbox checking. Value is the number of seconds, 5
 is the default.
@@ -131,9 +145,7 @@ those for ordinary IMAP4 boxes.  Port defaults to 993. If
 143 is specified, WMBiff will attempt to connect unencrypted
 but negotiate TLS using IMAP's STARTTLS command.  TLS
 support uses GNUTLS, which is under development and may be
-insecure.  TLS support is only for encryption: since
-certificates are not yet checked, it is vulnerable to
-man-in-the-middle attack.  See the imap format above
+insecure.  See the imap format above
 for additional detail about specifying your password.
 .RS
 imaps:user:passwd@server[/mailbox][:port] [auth]
