@@ -410,20 +410,22 @@ int loadFont(const char *fontname)
 }
 
 void drawString(int dest_x, int dest_y, const char *string,
-				const char *colorname, int right_justify)
+				const char *colorname, const char *bgcolorname,
+				int right_justify)
 {
 	int len = strlen(string);
 	assert(colorname != NULL);
 	XSetForeground(display, NormalGC, GetColor(colorname));
+	XSetBackground(display, NormalGC, GetColor(bgcolorname));
 	if (right_justify)
 		dest_x -= XTextWidth(f, string, len);
 	XDrawImageString(display, wmgen_bkg.pixmap, NormalGC, dest_x, dest_y,
 					 string, len);
 }
 
-void eraseRect(int x, int y, int x2, int y2)
+void eraseRect(int x, int y, int x2, int y2, const char *bgcolorname)
 {
-	XSetForeground(display, NormalGC, GetColor("black"));
+	XSetForeground(display, NormalGC, GetColor(bgcolorname));
 	XFillRectangle(display, wmgen_bkg.pixmap, NormalGC, x, y, x2 - x,
 				   y2 - y);
 }

@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.51 2003/03/06 21:15:15 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.52 2003/03/30 10:38:38 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -73,7 +73,8 @@ static const char *font = NULL;
 int debug_default = DEBUG_ERROR;
 
 /* color from wmbiff's xpm, down to 24 bits. */
-static const char *foreground = "#21B3AF";
+static const char *foreground = "#21B3AF";	/* foreground cyan */
+static const char *background = "#202020";	/* background gray */
 static const char *highlight = "yellow";
 int SkipCertificateCheck = 0;
 int Relax = 0;					/* be not paranoid */
@@ -516,7 +517,7 @@ static int wmbiffrc_permissions_check(const char *wmbiffrc_fname)
 static void ClearDigits(unsigned int i)
 {
 	if (font) {
-		eraseRect(39, mbox_y(i), 58, mbox_y(i + 1) - 1);
+		eraseRect(39, mbox_y(i), 58, mbox_y(i + 1) - 1, background);
 	} else {
 		/* overwrite the colon */
 		copyXPMArea((10 * (CHAR_WIDTH + 1)), 64, (CHAR_WIDTH + 1),
@@ -534,8 +535,8 @@ static void BlitString(const char *name, int x, int y, int new)
 	if (font != NULL) {
 		/* an alternate behavior - draw the string using a font
 		   instead of the pixmap.  should allow pretty colors */
-		drawString(x, y + CHAR_HEIGHT, name, new ? highlight : foreground,
-				   0);
+		drawString(x, y + CHAR_HEIGHT + 1, name,
+				   new ? highlight : foreground, background, 0);
 	} else {
 		/* normal, LED-like behavior. */
 		int i, c, k = x;
@@ -571,8 +572,8 @@ static void BlitNum(int num, int x, int y, int new)
 
 	if (font != NULL) {
 		const char *color = (new) ? highlight : foreground;
-		drawString(x + (CHAR_WIDTH * 2 + 4), y + CHAR_HEIGHT, buf,
-				   color, 1);
+		drawString(x + (CHAR_WIDTH * 2 + 4), y + CHAR_HEIGHT + 1, buf,
+				   color, background, 1);
 	} else {
 		int newx = x;
 
@@ -789,6 +790,8 @@ static char **CreateBackingXPM(int width, int height,
 	sprintf(ret[0], "%d %d %d %d", width, height, colors, 1);
 	ret[1] = (char *) " \tc #0000FF";	/* no color */
 	ret[2] = (char *) ".\tc #202020";	/* background gray */
+	ret[2] = malloc_ordie(30);
+	sprintf(ret[2], ".\tc %s", background);
 	ret[3] = (char *) "+\tc #000000";	/* shadowed */
 	ret[4] = (char *) "@\tc #C7C3C7";	/* highlight */
 	ret[5] = (char *) ":\tc #004941";	/* led off */
@@ -916,8 +919,10 @@ static void do_biff(int argc, const char **argv)
 			exit(EXIT_FAILURE);
 		}
 		/* make the whole background black */
-		eraseRect(x_origin, y_origin,
-				  wmbiff_mask_width - 6, wmbiff_mask_height - 6);
+		// removed; seems unnecessary with CreateBackingXPM 
+		//      eraseRect(x_origin, y_origin,
+		//    wmbiff_mask_width - 6, wmbiff_mask_height - 6, 
+		//          background);
 	}
 
 	/* First time setup of button regions and labels */
@@ -1009,6 +1014,7 @@ static void usage(void)
 		   "Please report bugs to %s\n"
 		   "\n"
 		   "usage:\n"
+		   "    -bg <color>               background color\n"
 		   "    -c <filename>             use specified config file\n"
 		   "    -debug                    enable debugging\n"
 		   "    -display <display name>   use specified X display\n"
@@ -1049,6 +1055,17 @@ static void parse_cmd(int argc, const char **argv,	/*@out@ */
 
 		if (*arg == '-') {
 			switch (arg[1]) {
+			case 'b':
+				if (strcmp(arg + 1, "bg") == 0) {
+					if (argc > (i + 1)) {
+						background = strdup_ordie(argv[i + 1]);
+						DMA(DEBUG_INFO, "new background: %s", foreground);
+						i++;
+						if (font == NULL)
+							font = DEFAULT_FONT;
+					}
+				}
+				break;
 			case 'd':
 				if (strcmp(arg + 1, "debug") == 0) {
 					debug_default = DEBUG_ALL;

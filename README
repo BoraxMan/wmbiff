@@ -70,6 +70,8 @@ position. All other positions will be empty.
  
     wmbiff-devel@lists.sourceforge.net
 
+   Please include the output of 'wmbiff -debug'.
+
      _________________________________________________________________
 
 UPDATE [2001-06-18]:
