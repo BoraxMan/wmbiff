@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.23 2002/04/15 02:21:22 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.24 2002/04/15 21:06:29 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -738,7 +738,7 @@ void XSleep(int millisec)
 
 void sigchld_handler(int sig __attribute__ ((unused)))
 {
-	while (waitpid(0, NULL, WNOHANG));
+	while (waitpid(0, NULL, WNOHANG) > 0);
 	signal(SIGCHLD, sigchld_handler);
 }
 
