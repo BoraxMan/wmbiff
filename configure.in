@@ -72,7 +72,7 @@ AC_CHECK_LIB(X11, XrmParseCommand)
 AC_CHECK_LIB(Xext, XextAddDisplay)
 AC_CHECK_LIB(Xpm, XpmCreateImageFromXpmImage)
 
-AC_CHECK_HEADERS(X11/xpm.h, [], AC_CHECK_HEADERS(xpm.h, [], AC_MSG_ERROR([xpm.h is needed])))
+AC_CHECK_HEADERS(X11/xpm.h, [], [AC_CHECK_HEADERS(xpm.h, [], AC_MSG_ERROR([xpm.h is needed]))])
 
 dnl Password prompting stuff.
 AC_PATH_PROGS(DEFAULT_ASKPASS, ssh-askpass x11-ssh-askpass ssh-askpass-gnome, /usr/bin/ssh-askpass)
