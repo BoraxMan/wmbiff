@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.16 2002/01/12 05:30:09 bluehal Exp $
+# $Id: Makefile,v 1.17 2002/01/12 05:50:37 bluehal Exp $
 
 WMBIFF_VERSION = "0.3.4"
 
@@ -19,9 +19,9 @@ EXTRAFLAGS = -DWMBIFF_VERSION='$(WMBIFF_VERSION)'
 
 # Comment these out if you don't want cryto support.
 EXTRAFLAGS += -DWITH_TLS -DWITH_GCRYPT 
-# if using v0.3.0 or above of gnutls, uncomment the following:
-EXTRAFLAGS += -DGNUTLS_VER=3 
 LIBS   += -lgnutls -lgcrypt
+# if using v0.2.x of gnutls comment out the following:
+EXTRAFLAGS += -DGNUTLS_VER=3 
 
 #EXTRAFLAGS += -DDEBUG_POP3 -DDEBUG_IMAP4 -DDEBUG_LICQ \
 #	-DDEBUG_MBOX -DDEBUG_MAILDIR -DDEBUG -DDEBUG_MAIL_COUNT \
