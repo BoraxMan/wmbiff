@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.26 2002/06/01 06:01:43 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.27 2002/06/01 17:58:52 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -506,7 +506,7 @@ static void BlitString(const char *name, int x, int y, int new)
 {
 	int i, c, k = x;
 
-#if 0
+#if USE_FONTS
 	/* an alternate behavior - draw the string using a font
 	   instead of the pixmap.  should allow pretty colors */
 	drawString(x, y + CHAR_HEIGHT, name, new ? "yellow" : "cyan", 0);
@@ -547,7 +547,7 @@ void BlitNum(int num, int x, int y, int new)
 
 	sprintf(buf, "%02i", num);
 
-#if 1
+#if USE_FONTS
 	drawString(x + (CHAR_WIDTH * 2 + 4), y + CHAR_HEIGHT, buf,
 			   new ? "yellow" : "cyan", 1);
 #else
