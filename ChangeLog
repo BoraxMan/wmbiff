@@ -1,3 +1,11 @@
+2001-11-23 Friday 15:55 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* NEWS, wmbiff/Makefile: Bumped version to 0.3.4, and release.
+
+2001-11-23 Friday 15:53 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, NEWS, wmbiff/sample.wmbiffrc: Doc updates for 0.3.4.
+
 2001-11-23 Friday 07:20 UTC -- Neil Spring <nspring@cs.washington.edu>
 
 	* TODO: one down
