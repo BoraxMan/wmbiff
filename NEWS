@@ -1,5 +1,9 @@
 Release Notes
 ~~~~~~~~~~~~~
+Release 0.4.20 - 
+  * Add --disable-crypto for source-based distributions 
+    while libgcrypt is unstable.
+
 Release 0.4.19 - November 8, 2003
   * Fix test_tlscomm with the right signature for read()
   * Another bugfix to IMAP msglst when headers are abnormal.
@@ -454,4 +458,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.53 2003/11/09 03:16:47 bluehal Exp $
+$Id: NEWS,v 1.54 2003/12/30 19:44:02 bluehal Exp $

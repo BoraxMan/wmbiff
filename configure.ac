@@ -6,7 +6,7 @@ dnl and configure:
 dnl  installation prefix
 dnl  version
 
-AC_INIT(WMBiff, 0.4.19, wmbiff-devel@lists.sourceforge.net, wmbiff)
+AC_INIT(WMBiff, 0.4.20, wmbiff-devel@lists.sourceforge.net, wmbiff)
 AC_CONFIG_AUX_DIR(autoconf)
 AM_INIT_AUTOMAKE(wmbiff, 0.4.19) dnl tarded syntax for automake <= 1.5
 AM_CONFIG_HEADER(config.h)
@@ -56,6 +56,7 @@ AC_CHECK_LIB(resolv, herror)
 
 dnl Pre-gnutls.
 gnutls="ok"
+gcrypt="ok"
 AC_CHECK_LIB(z, gzopen, [], [gnutls="nope"]) dnl GNUTLS seems to need libz; fail here if it's missing.
 dnl perhaps not required anymore:
 dnl AC_CHECK_LIB(gdbm, dbminit, [], [gnutls="nope"]) dnl GNUTLS seems to need libgdbm; fail here if it's missing.
@@ -64,6 +65,12 @@ dnl Parameter is minimum version
 dnl TODO: fix so that GCRYPT is tested only if GNUTLS fails; the dependence
 dnl between them makes this turn redundant
 
+AC_ARG_ENABLE(crypto, AC_HELP_STRING([ --disable-crypto ], [ disable gnutls/gcrypt ]), 
+                      [ if test $enableval != yes; then 
+                        gnutls="disabled"
+                        gcrypt="disabled"
+                       fi ])
+                      
 
 GNUTLS_MAN_STATUS="This copy of WMBiff was not compiled with GNUTLS."
 if test "$gnutls" = "ok"; then
@@ -77,12 +84,17 @@ if test "$gnutls" = "ok"; then
 else
  AC_MSG_RESULT(GNUTLS support requires libz.a and libgdbm.a, so will be disabled)
 fi
+
 GCRYPT_MAN_STATUS="This copy of WMBiff was not compiled with gcrypt."
-AM_PATH_LIBGCRYPT(1.1.8, [CFLAGS="$CFLAGS $LIBGCRYPT_CFLAGS"
+if test "$gcrypt" = "ok"; then
+ AM_PATH_LIBGCRYPT(1.1.8, [CFLAGS="$CFLAGS $LIBGCRYPT_CFLAGS"
                          CPPFLAGS="$CPPFLAGS $LIBGCRYPT_CFLAGS"
                          GCRYPT_MAN_STATUS="This copy of WMBiff was compiled with gcrypt."
                          AC_CHECK_HEADERS(gcrypt.h) ],
                          [ echo libgcrypt can be found at ftp://ftp.gnupg.org/pub/gcrypt/alpha/libgcrypt/ ]  )
+else
+        AC_MSG_RESULT(GCRYPT disabled.)                        
+fi;
 
 
 AC_SUBST(LIBGCRYPT_LIBS)

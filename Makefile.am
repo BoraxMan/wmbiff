@@ -2,6 +2,8 @@ SUBDIRS = wmgeneral wmbiff autoconf scripts
 EXTRA_DIST = ChangeLog FAQ README.licq TODO
 
 ACLOCAL_FLAGS = -I autoconf
+## dummies.
+ACLOCAL = @ACLOCAL@ $(ACLOCAL_FLAGS)
 
 ## no longer needed AUTOHEADER = @AUTOHEADER@ -l autoconf
 
