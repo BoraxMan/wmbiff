@@ -1,5 +1,5 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiff.1,v 1.8 2002/06/08 22:13:57 bluehal Exp $
+.\" $Id: wmbiff.1,v 1.9 2002/06/21 04:29:16 bluehal Exp $
 .\"
 .\" wmbiff.1 and wmbiffrc.5 are copyright 1999-2001 by
 .\" Jordi Mallach <jordi@debian.org>
@@ -13,7 +13,7 @@ WMBiff \- A dockable Mailbox Monitor
 
 .SH SYNOPSIS
 .B wmbiff
-[-display <display name>] [-geometry +XPOS+YPOS] [-c <filename>] [-h] [-v] [-debug] [-fg <foreground-color>] [-font <X11 font>|default]
+[-display <display name>] [-geometry +XPOS+YPOS] [-c <filename>] [-h] [-v] [-debug] [-fg <foreground-color>] [-font <X11 font>|default] [-hi <highlight-color>]
 .br
 
 .SH DESCRIPTION
@@ -65,6 +65,10 @@ Use specified X11 font instead of the LED pixmap.  This may
 be more readable or suitable for some non-US characters.
 The special font "default" tells wmbiff to use a compile
 time default.
+.TP
+.B \-hi <color>
+Use specified X11 color for new mail counters.  Implies -font
+default, unless overridden.
 
 .SH BUGS
 Send bug reports or suggestions to the WMBiff Development
