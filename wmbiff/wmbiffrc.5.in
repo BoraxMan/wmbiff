@@ -1,5 +1,5 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiffrc.5.in,v 1.2 2002/04/15 02:09:56 bluehal Exp $
+.\" $Id: wmbiffrc.5.in,v 1.3 2002/04/20 08:12:55 bluehal Exp $
 .\"
 .\" wmbiff.1 and wmbiffrc.5 are copyright 1999-2002 by 
 .\" Jordi Mallach <jordi@debian.org>
@@ -52,14 +52,19 @@ are supported:
 .TP
 .I mbox
 This is a local mbox mailbox. After the prefix, you only need to put the
-path to the mailbox wmbiff needs to read.  This is also the default.
+path to the mailbox wmbiff needs to read.  
+Local mboxes may be specified using shell commands enclosed
+in back-ticks. (`s.)
+.\"This is also the default.
 .RS
 mbox:/path/to/mail/debian-devel
-.RS
-- or -
 .RE
-/path/to/mail/debian-devel
-.RE
+.\"  let's stop making this available.
+.\" .RS
+.\" - or -
+.\" .RE
+.\" /path/to/mail/debian-devel
+.\" .RS
 .TP
 .I maildir
 This works just like \fImbox\fP above.  
