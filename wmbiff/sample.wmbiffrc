@@ -1,4 +1,4 @@
-# $Id: sample.wmbiffrc,v 1.15 2002/12/29 01:05:07 bluehal Exp $
+# $Id: sample.wmbiffrc,v 1.16 2002/12/29 05:42:24 bluehal Exp $
 #
 # See wmbiffrc(5) for more info.
 #
@@ -135,3 +135,5 @@ interval.4=300		# 5 minutes
 # Shell method
 # path.4=shell:::lpq | grep Queue | awk '{print $2}'
 
+# To check for security updates in debian
+path.4=shell:::/usr/lib/wmbiff/security.debian.rb
