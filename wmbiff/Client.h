@@ -1,4 +1,4 @@
-/* $Id: Client.h,v 1.5 2001/10/04 09:50:59 jordi Exp $ */
+/* $Id: Client.h,v 1.6 2001/11/16 01:13:36 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -54,6 +54,7 @@ typedef struct _mbox_t {
 			char serverName[256];
 			int serverPort;
 			int localPort;
+			char authList[100];
 		} pop;
 		struct {
 			char password[32];
@@ -61,6 +62,7 @@ typedef struct _mbox_t {
 			char serverName[256];
 			int serverPort;
 			int localPort;
+			char authList[100];
 			unsigned int dossl:1;
 		} imap;
 	} u;
@@ -76,14 +78,12 @@ typedef struct _mbox_t {
 #define BUF_SIZE 1024
 
 int sock_connect(const char *hostname, int port);
-int pop3Create(Pop3 pc, char *str);
+int pop3Create(Pop3 pc, const char *str);
 int imap4Create(Pop3 pc, const char *str);
 int licqCreate(Pop3 pc, char *str);
 int mboxCreate(Pop3 pc, char *str);
 int maildirCreate(Pop3 pc, char *str);
 FILE *openMailbox(Pop3 pc);
-int parse_old_pop3_path(Pop3 pc, char *str);
-int parse_new_pop3_path(Pop3 pc, char *str);
 
 #endif
 /* vim:set ts=4: */

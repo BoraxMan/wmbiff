@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.13 2001/10/28 23:32:55 jordi Exp $
+# $Id: Makefile,v 1.14 2001/11/16 01:13:36 bluehal Exp $
 
 WMBIFF_VERSION = "0.3.3"
 
@@ -11,8 +11,9 @@ CONF=/etc
 CC     = gcc
 LIBDIR = -L/usr/X11R6/lib
 LIBS   = -lXpm -lXext -lX11 
-CFLAGS = -O2 -Wall -Wpointer-arith
-#CFLAGS = -g -Wall -pedantic 
+CFLAGS = -O2 -Wall -Wpointer-arith 
+#CFLAGS = -g -Wall -Wpointer-arith -Wwrite-strings -pedantic
+#-W -Wmissing-noreturn -Wtraditional
 
 EXTRAFLAGS = -DWMBIFF_VERSION='$(WMBIFF_VERSION)' 
 
@@ -22,7 +23,7 @@ LIBS   += -lgnutls -lgcrypt
 
 #EXTRAFLAGS += -DDEBUG_POP3 -DDEBUG_IMAP4 -DDEBUG_LICQ \
 #	-DDEBUG_MBOX -DDEBUG_MAILDIR -DDEBUG -DDEBUG_MAIL_COUNT \
-#       -DDEBUG_COMM
+#	-DDEBUG_COMM
 
 #CFLAGS += -DUSE_DMALLOC
 #LIBS   += -ldmalloc
@@ -46,7 +47,6 @@ Imap4Client.o: Imap4Client.c Client.h Makefile
 
 .c.o:
 	$(CC) $(CFLAGS) $(EXTRAFLAGS) -c $< -o $*.o
-
 
 wmbiff-master.xpm:
 	ln -s wmbiff-master-led.xpm wmbiff-master.xpm

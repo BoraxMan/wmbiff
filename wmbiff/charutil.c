@@ -1,7 +1,8 @@
-/* $Id: charutil.c,v 1.4 2001/10/04 09:50:59 jordi Exp $ */
+/* $Id: charutil.c,v 1.5 2001/11/16 01:13:36 bluehal Exp $ */
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #ifdef USE_DMALLOC
 #include <dmalloc.h>
 #endif
@@ -149,4 +150,71 @@ void Decode_Base64(char *src, char *dst)
 		}
 	}
 	*dst = 0;
+}
+
+/* helper function for the configuration line parser */
+void copy_substring(char *destination,
+					int startidx, int endidx, const char *source)
+{
+	if (startidx > -1) {
+		strncpy(destination, source + startidx, endidx - startidx);
+		destination[endidx - startidx] = '\0';
+	}
+}
+
+/* common to Pop3 and Imap4 authentication list grabber. */
+void grab_authList(const char *source, char *destination)
+{
+	int i;
+	/* regex isn't all that helpful for lists of things. */
+	/* but does leave the end of the matched region in  regs.end[0] */
+	/* what remains is a list of legal authentication schemes. */
+	if (isalnum(source[0])) {
+		/* copy, while turning caps into lower case */
+		for (i = 0; i < 99 && source[i] != '\0'; i++) {
+			destination[i] = tolower(source[i]);
+		}
+		destination[i] = '\0';
+	} else {
+		destination[0] = '\0';
+	}
+}
+
+
+int compile_and_match_regex(const char *regex,
+							const char *str, /*@out@ */
+							struct re_registers *regs)
+{
+
+	const char *errstr;
+	int matchedchars;
+	struct re_pattern_buffer rpbuf;
+
+	/* compile the regex pattern */
+	memset(&rpbuf, 0, sizeof(struct re_pattern_buffer));
+	re_syntax_options = RE_SYNTAX_EGREP;
+	errstr = re_compile_pattern(regex, strlen(regex), &rpbuf);
+	if (errstr != NULL) {
+		fprintf(stderr, "error in compiling regular expression: %s\n",
+				errstr);
+		return -1;
+	}
+
+	/* match the regex */
+	regs->num_regs = REGS_UNALLOCATED;
+	matchedchars = re_match(&rpbuf, str, strlen(str), 0, regs);
+	/* this can fail (return -1 or 0) without being an error,
+	   if we're trying to apply a regex just to see if it
+	   matched. */
+
+#ifdef undef
+	printf("--\n");
+	for (i = 1; i < 6; i++) {
+		printf("%d %d, (%.*s)\n", regs.start[i], regs.end[i],
+			   (regs.end[i] - regs.start[i]),
+			   (regs.start[i] >= 0) ? &str[regs.start[i]] : "");
+	}
+#endif
+
+	return matchedchars;
 }
