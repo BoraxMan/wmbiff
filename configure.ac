@@ -30,6 +30,9 @@ AC_CHECK_HEADERS(stdio.h)
 dnl for IPv6 support
 AC_CHECK_FUNCS(getaddrinfo)
 
+dnl replacing the old USE_POLL define
+AC_CHECK_FUNCS(poll)
+
 dnl Pre-gnutls.
 gnutls="ok"
 AC_CHECK_LIB(z, gzopen, [], [gnutls="nope"]) dnl GNUTLS seems to need libz; fail here if it's missing.
