@@ -4,7 +4,7 @@ bin_PROGRAMS = wmbiff
 wmbiff_SOURCES = wmbiff.c socket.c Pop3Client.c LicqClient.c mboxClient.c \
 	maildirClient.c Imap4Client.c tlsComm.c tlsComm.h ShellClient.c  \
 	passwordMgr.c passwordMgr.h charutil.c charutil.h Client.h  \
-	regulo.c regulo.h 
+	regulo.c regulo.h  MessageList.c MessageList.h
 EXTRA_wmbiff_SOURCES = gnutls-common.c gnutls-common.h	
 wmbiff_LDADD = -L../wmgeneral -lwmgeneral @LIBGCRYPT_LIBS@ @GNUTLS_COMMON_O@
 wmbiff_DEPENDENCIES = ../wmgeneral/libwmgeneral.a Makefile @GNUTLS_COMMON_O@
