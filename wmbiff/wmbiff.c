@@ -1,3 +1,4 @@
+/* $Id: wmbiff.c,v 1.4 2001/06/19 03:38:58 dwonis Exp $ */
 
 #define	USE_POLL
 

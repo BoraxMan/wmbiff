@@ -1,39 +1,41 @@
-Sat, 16 Jun 2001 02:55:51 +0100  Jordi Mallach <jordi@sindominio.net>
+Release Release Notes:
+~~~~~~~~~~~~~~~~~~~~~~
 
-  * wmbiff/Makefile: replaced hardcoded `gcc' calls with $(CC).
-  * wmbiff/sample.wmbiffrc, wmbiff/wmbiff.c: replace /var/spool/mail 
-    with /var/mail, which is what the FHS mandates. All decent
-    systems should have either the directory or a symlink pointing
-    somewhere else.
+Release 0.3.1 - (unreleased)
 
-Wed, 16 May 2001 20:45:49 -0400  Mark Hurley <debian4tux@telocity.com>
+  * Replaced /var/spool/mail with /var/mail, which is what the FHS mandates.
+    All decent systems should have either the directory or a symlink pointing
+    somewhere else. (Jordi Mallach)
+  * I reformatted ths changelog, again.  I hope this is the last time I need
+    to do this.  The CVS logs should be used for all changes, and this file
+    should by updated for user-visible changes only, from now on.
+    (Dwayne C. Litzenberger) 
+  * Updated the README to reflect that Gennady Belyakov died right after releasing 
+    wmBiff 0.2.  May your soul rest in peace, Gennady.  (Dwayne C. Litzenberger)
 
-  * wmbiff/charutil.c: fixed gcc-3.0 implicit warning, but including string.h
-    also cleaned up other includes in same file
- 
-wmBiff (0.3.0)
-  * wmbiff/Makefile:
-    + added charutil.o to OBJS (Mark Hurley).
-    + little cosmetic changes and remove wmbiff-master.xpm.
-  * wmbiff/Imap4Client.c: removed two unused variables in imap4CheckMail
-    (Mark Hurley).
-  * wmbiff/charutil.c: added for TrimLeft, TrimRight, TrimFull (also .h)
-    (Mark Hurley).
-  * wmbiff/wmbiff.c: [ReadLine] removed previous trim leading spaces, added
-    TrimFull.  Fixes Debian Bug #95849 (Mark Hurley).
-  * wmbiff/wmbiff.c: if a pop3 or imap mailbox read fails and the following
-    reads are successful but no mail was in the server, the given mailbox
-    would remain reading "XX". Now it updates the counter no matter what the
-    read was (Mark Hurley).
-  * wmbiff/mboxClient.c: wmbiff would only count as new mails those with "N"
-    flags, ignoring those marked "ON" (Rob Funk).
-  * wmbiff/Imap4Client.c: fixed reading of quoted imap folders, which some
-    IMAPd's do (Rob Funk).
-  * README: updated some very obsolete info.
 
- -- Jordi Mallach <jordi@sindominio.net>  Fri,  16 May 2001 12:16:44 +0200
+Release 0.3.0 - Fri, 16 May 2001 12:16:44 +0200
 
-wmBiff (0.2q1)
+  * [ReadLine] removed previous trim leading spaces, added TrimFull.  Fixes
+    Debian Bug #95849 (Mark Hurley).
+  * There was a bug where if a POP3 or IMAP mailbox read failed and the
+    following reads were successful, but no mail was in the server, the given
+    mailbox would remain reading "XX". Now it updates the counter no matter
+    what the read was (Mark Hurley).
+  * wmBiff would only count as new mails in mbox mailboxes with "N" flags,
+    ignoring those marked "ON" (Rob Funk).
+  * Fixed reading of quoted imap folders, which some IMAPd's do (Rob Funk).
+  * README: updated some very obsolete info. (Jordi Mallach)
+
+
+Release 0.2q1+Debian - Tue,  1 May 2001 10:11:00 +0000
+
+  * Moved to CVS at SourceForge. (Jordi Mallach)
+
+
+Release 0.2q1 - Fri, 13 Apr 2001 02:47:10 -0400
+
+  * This release is by Mark Hurley <debian4tux@telocity.com>.
   * wmbiff/Client.h: move DEBUG_* macros to wmbiff/Makefile
   * wmbiff/Pop3Client.c:
     + My password contains an  @  character.  This causes
@@ -90,10 +92,10 @@ wmBiff (0.2q1)
         BUG!  Last postion #4 was not correctly being checked.
         Now correctly checks each position.
 
- -- Mark Hurley <debian4tux@telocity.com>  13 Apr 2001 02:47:10 -0400
 
+Release 0.2q - Tue, 20 Mar 2001 05:32:35 +0100
 
-wmBiff (0.2q)
+  * This release is by Jorge García <Jorge.Garcia@uv.es>.
   * wmbiff/{*.[ch]}: removed unnecesary includes.
   * wmbiff/wmbiff.c: some cleanups and optimizations. 
     + init_biff:
@@ -111,11 +113,10 @@ wmBiff (0.2q)
   * wmbiff/{IMap4Client.c, Pop3Client.c}: check for correct format line to 
     avoid "segmentation fault" while parsing.
 
- -- Jorge García <Jorge.Garcia@uv.es>  20-Mar-2001 05:32:35+0100
 
+Release 0.2p - Mon, 12 Mar 2001 00:00:00 -0600
 
-wmBiff (0.2p)
-
+  * This release is by Dwayne C. Litzenberger <dlitz@dlitz.net>.
   * Added maildir support!  Yay!
   * Stole the manpages from Debian.
   * Massive (lack of) coding style cleanup; Standardized coding style using
@@ -129,11 +130,12 @@ wmBiff (0.2p)
   * I'm not maintaining wmBiff; I just submitted a big patch.  Send your
     complaints (or complements) to Yong-iL Joh.
   
- -- Dwayne C. Litzenberger <dlitz@dlitz.net>  12-Mar-2001 -0600
 
+Release 0.2o - Mon, 12 Mar 2001 00:00:00 +0900
 
-wmBiff (0.2o)
-
+  * This release is by Yong-iL Joh <tolkien@mizi.com>.
+  * I don't think the date of this changelog entry is right.
+    (Dwayne C. Litzenberger)
   * Jordi Mallach <jordi@sindominio.net>, Debian's wmbiff maintainer, sent
     me an email a couple of days ago which included a patch with man pages.
     The patch did the following:
@@ -157,69 +159,65 @@ wmBiff (0.2o)
  -- Yong-iL Joh <tolkien@mizi.com>  12-Mar-2001 +0900
 
 
-wmBiff (0.2n)
+Release 0.2n - Tue, 20 Feb 2001 0:00:00 +0900
   
+  * This release is by Yong-iL Joh <tolkien@mizi.com>.
   * Nick Clarey <nclarey@3glab.com> sent me a patch.
     that enhances the following:
       + UW Imap server 2000.283rh
       + Config file now supports IMAP mailbox "paths" rather than
         just the mailbox name (e.g. mail/foo/blah)
 
- -- Yong-iL Joh <tolkien@mizi.com>  20-Feb-2001 +0900
 
+Release 0.2m - Mon,  5 Feb 2001 00:00:00 +0900
 
-wmBiff (0.2m)
-
+  * This release is by Yong-iL Joh <tolkien@mizi.com>.
   * Imap4Client.c did not close when a connection error occurred.  Fixed it.
 
- -- Yong-iL Joh <tolkien@mizi.com>  05-Feb-2001 +0900
-  
 
-wmBiff (0.2l)
+Release 0.2l - Thu, 11 Jan 2001 00:00:00 +0900
   
+  * This release is by Yong-iL Joh <tolkien@mizi.com>.
   * Imap4Client.c had a bug when trying to connect to an imap4 server.  Fixed
     it.
 
- -- Yong-iL Joh <tolkien@mizi.com>  11-Jan-2001 +0900
 
+Release 0.2j - Mon,  1 Jan 2001 00:00:00 +0900
 
-wmBiff (0.2j)  
-
+  * This release is by Yong-iL Joh <tolkien@mizi.com>.
   * Because I can't contact the author, I jumped to version 0.2j
   * Added imap4-based mail server check component.
   * Divided wmbiff.c to wmbiff.c, LicqClient.c mboxClient.c
 
- -- Yong-iL Joh <tolkien@mizi.com>  01-Jan-2001 +0900
 
+Release 0.2-licq - Sat,  1 Jan 2000 00:00:00 +0000
 
-wmBiff (0.2-licq)
-
+  * This release is by Yong-iL Joh <tolkien@mizi.com>.
+  * The actual date of this release is unknown, so I picked New Year's Day,
+    Y2K. (Dwayne C. Litzenberger)
   * I found it from http://www.licq.org/download.html.
   
- -- Yong-iL Joh <tolkien@mizi.com>  No Date
-          
 
-wmBiff (0.2)
+Release 0.2 - Fri, 26 Nov 1999 00:00:00 +0000 
   
+  * This release is by Gennady Belyakov <gb@ccat.elect.ru>.
+  * We don't actually know the time zone of Gennady's changelog entries
+    (Dwayne C. Litzenberger).
   * POP3 support added with (auto)fetching
   * digits blinking on new mail arrival
   * resource wasting lowered
   * individual rescan interval for differrent mailboxes
   * some bugfixes
 
- -- Gennady Belyakov <gb@ccat.elect.ru>  26-Nov-1999
-  
 
-wmBiff (0.1a)
+Release 0.1a - Thu, 18 Nov 1999 00:00:00 +0000
   
+  * This release is by Gennady Belyakov <gb@ccat.elect.ru>.
   * Some fixes with intialization
 
- -- Gennady Belyakov <gb@ccat.elect.ru>  18-Nov-1999
 
+Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
 
-wmBiff (0.1)
+  * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
-  * Initial release
-
- -- Gennady Belyakov <gb@ccat.elect.ru>  17-Nov-1999
 

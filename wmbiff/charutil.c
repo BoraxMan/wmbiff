@@ -1,3 +1,4 @@
+/* $Id: charutil.c,v 1.3 2001/06/19 03:38:58 dwonis Exp $ */
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

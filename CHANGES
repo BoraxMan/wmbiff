@@ -1,0 +1,60 @@
+CVS Changelog.  Don't bother editing this file, because it will get overwritten
+by maint/prerelease.sh .
+
+$
+
+2001-06-16 Saturday 01:02 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, wmbiff/Makefile, wmbiff/sample.wmbiffrc,
+	wmbiff/wmbiff.c: An FHS fix for wmbiff.c and use $(CC) in the
+	Makefile
+
+2001-05-17 Thursday 04:22 UTC -- Dwayne C. Litzenberger <dlitz@dlitz.net>
+
+	* ChangeLog, wmbiff/Makefile, wmbiff/charutil.c: Committing Mark
+	Hurley's patch
+
+2001-05-16 Wednesday 10:48 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, README: Updated some obsolete info in README
+
+2001-05-11 Friday 15:04 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, wmbiff/Imap4Client.c, wmbiff/Makefile,
+	wmbiff/charutil.c, wmbiff/charutil.h, wmbiff/wmbiff.c: Mark's
+	wmbiffrc parsing fix, small Makefile changes and bump version to
+	0.3.0.
+
+2001-05-11 Friday 14:49 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* wmbiff/: .cvsignore, Makefile: Uncommitted stuff to deal with the
+	removal of the xmp link
+
+2001-05-04 Friday 11:01 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, wmbiff/Makefile: Updated Changelog and Makefile for
+	0.2r.
+
+2001-05-01 Tuesday 16:11 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* README.licq, ChangeLog, README, wmgeneral/list.c,
+	wmgeneral/list.h, wmgeneral/misc.c, wmgeneral/misc.h,
+	wmgeneral/wmgeneral.h, wmbiff/socket.c, wmgeneral/wmgeneral.c,
+	wmbiff/Imap4Client.c, wmbiff/Makefile, wmbiff/mboxClient.c,
+	wmbiff/sample.wmbiffrc, wmbiff/wmbiff.1, wmbiff/wmbiff.c,
+	wmbiff/wmbiff-master-led.xpm, wmbiff/.cvsignore, wmbiff/Client.h,
+	wmbiff/LicqClient.c, wmbiff/Pop3Client.c, wmbiff/maildirClient.c,
+	wmbiff/wmbiffrc.5: Initial revision
+
+2001-05-01 Tuesday 16:11 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* README.licq, ChangeLog, README, wmgeneral/list.c,
+	wmgeneral/list.h, wmgeneral/misc.c, wmgeneral/misc.h,
+	wmgeneral/wmgeneral.h, wmbiff/socket.c, wmgeneral/wmgeneral.c,
+	wmbiff/Imap4Client.c, wmbiff/Makefile, wmbiff/mboxClient.c,
+	wmbiff/sample.wmbiffrc, wmbiff/wmbiff.1, wmbiff/wmbiff.c,
+	wmbiff/wmbiff-master-led.xpm, wmbiff/.cvsignore, wmbiff/Client.h,
+	wmbiff/LicqClient.c, wmbiff/Pop3Client.c, wmbiff/maildirClient.c,
+	wmbiff/wmbiffrc.5 (utags: start): Initial import to SourceForge,
+	version 0.2q1+Debian
+

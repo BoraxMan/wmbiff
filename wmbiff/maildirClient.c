@@ -1,3 +1,4 @@
+/* $Id: maildirClient.c,v 1.2 2001/06/19 03:38:58 dwonis Exp $ */
 /* Author : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
  * 

@@ -1,4 +1,4 @@
-   
+
                                   Introducing
                                        
    wmBiff is an WindowMaker docking utility, that displays number of
@@ -90,3 +90,44 @@ position. All other positions will be empty.
 
     or the original author, Gennady Belyakov gb@ccat.elect.ru, if he
     reappears.
+
+     _________________________________________________________________
+
+UPDATE [2001-06-18]:
+
+On Tuesday, 22 May 2001, Jordi Mallach sent the following email to the
+wmbiff-devel list:
+
+    Hello,
+    I just found evidence of what I had believed for a long time.
+    
+    http://www.monkey.org/openbsd/archive/ports/0101/msg00311.html
+    
+    Gennady Belyakov passed away right after releasing 0.2 and when he
+    stopped answering mail :|
+    
+    I guess we need to update the docs.
+    
+    Jordi
+
+Here is the message, if that URL becomes unavailable:
+
+    To: ports@openbsd.org 
+    Subject: Re: mail/wmbiff update 
+    From: Vladimir Popov <pva48@mail.ru> 
+    Date: Sat, 27 Jan 2001 09:34:15 +0500 
+    
+    On Fri, Jan 26, 2001 at 01:02:59PM +0000, Christian Weisgerber wrote:
+    > 
+    > The major issue I have with this port is that the master site/home
+    > page is unreachable.
+    > 
+    
+    Well, wmbiff's author Gennady Belyakov passed away in late November 1999.
+    That's why that url isn't any longer valid.
+    
+    --
+    Vladimir
+
+May your soul rest in peace, Gennady.
+

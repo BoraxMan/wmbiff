@@ -1,3 +1,4 @@
+/* $Id: socket.c,v 1.2 2001/06/19 03:38:58 dwonis Exp $ */
 /* Copyright (C) 1998 Trent Piepho  <xyzzy@u.washington.edu>
  *           (C) 1999 Trent Piepho  <xyzzy@speakeasy.org>
  *

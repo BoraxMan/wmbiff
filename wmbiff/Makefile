@@ -1,3 +1,4 @@
+# $Id: Makefile,v 1.7 2001/06/19 03:38:58 dwonis Exp $
 WMBIFF_VERSION="0.3.1"
 DESTDIR=
 prefix=/usr/local
@@ -45,6 +46,8 @@ clean:
 		rm -f $$i ; \
 	done
 	rm -f wmbiff *~ tags core wmbiff-master.xpm
+
+distclean: clean
 
 install: wmbiff
 	$(INSTALL_DIR) $(DESTDIR)$(bindir)
