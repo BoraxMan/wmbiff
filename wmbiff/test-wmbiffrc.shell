@@ -1,4 +1,4 @@
-# $Id: test-wmbiffrc.shell,v 1.2 2002/04/15 01:30:43 bluehal Exp $
+# $Id: test-wmbiffrc.shell,v 1.3 2002/06/01 07:03:59 bluehal Exp $
 #
 # test wmbiffrc for the shell command and gicu method.
 # see sample.wmbiffrc and wmbiffrc.5 as documentation for the format.
@@ -21,5 +21,5 @@ label.3=gicu
 path.3=gicu:
 
 label.4=finga
-path.4=finger:root@localhost
-interval.4=30
+path.4=finger:nspring@cs.washington.edu
+interval.4=60
