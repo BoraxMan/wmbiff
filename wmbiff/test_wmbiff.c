@@ -57,7 +57,7 @@ int test_backtickExpand(void)
 }
 
 #define CKSTRING(x,shouldbe) if(strcmp(x,shouldbe)) { \
-printf("Failed: expected '" #shouldbe "' but got '%s'\n", x); \
+printf("FAILED: expected '" #shouldbe "' but got '%s'\n", x); \
  return 1; } else { printf("good: '" shouldbe "' == '%s'\n", x); }
 
 /* return 1 if fail, 0 if success */
@@ -186,6 +186,14 @@ int test_imap4creator(void)
 	}
 	CKSTRING(m.path, "\"mybox\"");
 	CKSTRING(m.u.pop_imap.serverName, "bar");
+	CKINT(m.u.pop_imap.serverPort, 143);
+
+	if (imap4Create(&m, "imap:foo:@192.168.1.1/\"mybox\"")) {
+        printf("FAILED: to create IMAP box with IP address for servername\n");
+		return 1;
+	}
+	CKSTRING(m.path, "\"mybox\"");
+	CKSTRING(m.u.pop_imap.serverName, "192.168.1.1");
 	CKINT(m.u.pop_imap.serverPort, 143);
 
 	if (imap4Create(&m, "imap:foo:@bar/\"space box\"")) {

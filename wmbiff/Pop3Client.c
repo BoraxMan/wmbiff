@@ -1,4 +1,4 @@
-/* $Id: Pop3Client.c,v 1.20 2004/03/28 00:28:58 bluehal Exp $ */
+/* $Id: Pop3Client.c,v 1.21 2004/04/06 20:58:53 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -193,8 +193,8 @@ int pop3Create(Pop3 pc, const char *str)
 	   use of '@' in passwords
 	 */
 	const char *regexes[] = {
-		"pop3:([^: ]{1,32}):([^@]{0,32})@([A-Za-z][-A-Za-z0-9_.]+)(:[0-9]+)?(  *([CcAaPp][-A-Za-z5 ]*))?$",
-		"pop3:([^: ]{1,32}) ([^ ]{1,32}) ([A-Za-z][-A-Za-z0-9_.]+)( [0-9]+)?(  *([CcAaPp][-A-Za-z5 ]*))?$",
+		"pop3:([^: ]{1,32}):([^@]{0,32})@([A-Za-z1-9][-A-Za-z0-9_.]+)(:[0-9]+)?(  *([CcAaPp][-A-Za-z5 ]*))?$",
+		"pop3:([^: ]{1,32}) ([^ ]{1,32}) ([A-Za-z1-9][-A-Za-z0-9_.]+)( [0-9]+)?(  *([CcAaPp][-A-Za-z5 ]*))?$",
 		//      "pop3:([^: ]{1,32}) ([^ ]{1,32}) ([^: ]+)( [0-9]+)? *",
 		// "pop3:([^: ]{1,32}):([^@]{0,32})@([^: ]+)(:[0-9]+)? *",
 		NULL
