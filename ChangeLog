@@ -5,9 +5,19 @@ The latest changelog entry is in a different format, because it's inserted by
 CVS on commit.
 
   $Log: ChangeLog,v $
-  Revision 1.8  2001/06/23 00:07:03  oskuro
-  Renamed CHANGES to ChangeLog and RELEASE-NOTES to NEWS, modified release scripts accordingly. Added Mark to the sed file.
+  Revision 1.9  2001/06/24 18:08:56  oskuro
+  Removed duplicate entry for Vladimir Popov in README.
 
+
+2001-06-23 Saturday 00:09 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* wmbiff/Imap4Client.c: Imap fix from Rob Funk
+
+2001-06-23 Saturday 00:07 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, NEWS, maint/changelog.sed, maint/prerelease.sh:
+	Renamed CHANGES to ChangeLog and RELEASE-NOTES to NEWS, modified
+	release scripts accordingly. Added Mark to the sed file.
 
 2001-06-22 Friday 23:55 UTC -- Jordi Mallach <jordi@sindominio.net>
 
