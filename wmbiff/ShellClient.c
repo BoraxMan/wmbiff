@@ -61,19 +61,21 @@ int shellCreate(Pop3 pc, const char *str)
 	pc->open = openMailbox;
 	pc->checkMail = shellCmdCheck;
 	reserved1 = str + 6;		/* shell:>:: */
-	reserved2 = index(reserved1, ':') + 1;	/* shell::>: */
+	reserved2 = index(reserved1, ':');
 	if (reserved2 == NULL) {
 		DM(pc, DEBUG_ERROR,
 		   "shell method, unable to parse '%s', expecting ':'", str);
 		return 0;
 	}
-	commandline = index(reserved2, ':') + 1;	/* shell:::> */
+	reserved2++;				/* shell::>: */
+	commandline = index(reserved2, ':');
 	if (commandline == NULL) {
 		DM(pc, DEBUG_ERROR,
 		   "shell method, unable to parse '%s', expecting another ':'",
 		   str);
 		return 0;
 	}
+	commandline++;				/* shell:::> */
 	strcpy(pc->path, commandline);
 	DM(pc, DEBUG_INFO, "shell: path= '%s'\n", commandline);
 	return 0;
