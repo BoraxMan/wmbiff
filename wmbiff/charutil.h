@@ -1,4 +1,4 @@
-/* $Id: charutil.h,v 1.6 2002/04/07 05:08:23 bluehal Exp $ */
+/* $Id: charutil.h,v 1.7 2002/04/15 01:26:21 bluehal Exp $ */
 /* Author: Mark Hurley  (debian4tux@telocity.com)
  *
  * Character / string manipulation utilities. 
@@ -37,4 +37,7 @@ void grab_authList(const char *source, char *destination);
 /* handles main regex work */
 int compile_and_match_regex(const char *regex, const char *str,
 							/*@out@ */ struct re_registers *regs);
+
+/* acts like perl's function of the same name */
+void chomp(char *s);
 #endif

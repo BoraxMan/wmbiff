@@ -1,4 +1,4 @@
-/* $Id: charutil.c,v 1.7 2002/01/12 05:30:09 bluehal Exp $ */
+/* $Id: charutil.c,v 1.8 2002/04/15 01:26:21 bluehal Exp $ */
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -218,4 +218,12 @@ int compile_and_match_regex(const char *regex, const char *str,	/*@out@ */
 #endif
 
 	return matchedchars;
+}
+
+/* like perl chomp(); useful for dealing with input from popen */
+void chomp(char *s)
+{
+	int l = strlen(s) - 1;
+	if (l > 0 && s[l] == '\n')
+		s[l] = '\0';
 }
