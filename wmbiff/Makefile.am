@@ -39,7 +39,7 @@ MAINTAINERCLEANFILES = Makefile.in
 #
 #	-- Dwayne C. Litzenberger <dlitz@dlitz.net>
 indent:
-	indent -npro -kr -i4 -ts4 $(wmbiff_SOURCES) || true
+	indent -npro -kr -i4 -ts4 $(wmbiff_SOURCES) test_*.c || true
 
 # to perform surgery on a few changed files.
 .c.indent:
