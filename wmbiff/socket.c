@@ -1,4 +1,4 @@
-/* $Id: socket.c,v 1.6 2002/06/01 05:45:06 bluehal Exp $ */
+/* $Id: socket.c,v 1.7 2002/06/08 21:40:04 bluehal Exp $ */
 /* Copyright (C) 1998 Trent Piepho  <xyzzy@u.washington.edu>
  *           (C) 1999 Trent Piepho  <xyzzy@speakeasy.org>
  *
@@ -14,6 +14,10 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc., 675
  * Mass Ave, Cambridge, MA 02139, USA.  */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -76,6 +80,7 @@ int sock_connect(const char *hostname, int port)
 	}
 	return fd;
 #else
+#warning "This build will not support IPv6"
 	struct hostent *host;
 	struct sockaddr_in addr;
 	int fd, i;
@@ -99,9 +104,10 @@ int sock_connect(const char *hostname, int port)
 	addr.sin_port = htons(port);
 	i = connect(fd, (struct sockaddr *) &addr, sizeof(struct sockaddr));
 	if (i == -1) {
+		int saved_errno = errno;
 		perror("Error connecting");
 		printf("connect(%s:%d) failed: %s\n", inet_ntoa(addr.sin_addr),
-			   port, strerror(errno));
+			   port, strerror(saved_errno));
 		close(fd);
 		return (-1);
 	};
@@ -110,3 +116,10 @@ int sock_connect(const char *hostname, int port)
 }
 
 /* vim:set ts=4: */
+/*
+ * Local Variables:
+ * tab-width: 4
+ * c-indent-level: 4
+ * c-basic-offset: 4
+ * End:
+ */
