@@ -145,6 +145,7 @@ struct connection_state *unbind(
 	for (i = 0; i < FDMAP_SIZE && fdmap[i].cs != scs; i++);
 	if (i < FDMAP_SIZE) {
 		free(fdmap[i].user_server_port);
+		fdmap[i].user_server_port = NULL;
 		retval = fdmap[i].cs;
 		fdmap[i].cs = NULL;
 	}
@@ -428,6 +429,7 @@ void imap_cacheHeaders( /*@notnull@ */ Pop3 pc)
 						m->subj);
 				m->next = pc->headerCache;
 				pc->headerCache = m;
+				pc->headerCache->in_use = 0; /* initialize that it isn't locked */
 			} else {
 				IMAP_DM(pc, DEBUG_ERROR, "error fetching: %s", hdrbuf);
 			}
@@ -439,6 +441,8 @@ void imap_cacheHeaders( /*@notnull@ */ Pop3 pc)
 	IMAP_DM(pc, DEBUG_INFO, "worked headers\n");
 }
 
+/* a client is asking for the headers, hand em a reference, increase the
+   one-bit reference counter */
 struct msglst *imap_getHeaders( /*@notnull@ */ Pop3 pc)
 {
 	if (pc->headerCache == NULL)
