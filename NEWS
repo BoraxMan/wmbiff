@@ -1,7 +1,7 @@
 Release Notes
 ~~~~~~~~~~~~~
 
-Release 0.3.1 - (unreleased)
+Release 0.3.1 - Sun, 24 Jun 2001 20:15:41 +0200
 
   * Replaced /var/spool/mail with /var/mail, which is what the FHS mandates.
     All decent systems should have either the directory or a symlink pointing

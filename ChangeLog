@@ -5,19 +5,25 @@ The latest changelog entry is in a different format, because it's inserted by
 CVS on commit.
 
   $Log: ChangeLog,v $
-  Revision 1.9  2001/06/24 18:08:56  oskuro
-  Removed duplicate entry for Vladimir Popov in README.
+  Revision 1.10  2001/06/24 18:17:58  oskuro
+  Released wmbiff 0.3.1.
 
+
+2001-06-24 Sunday 18:08 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, README (utags: wmbiff_0_3_1): Removed duplicate entry
+	for Vladimir Popov in README.
 
 2001-06-23 Saturday 00:09 UTC -- Jordi Mallach <jordi@sindominio.net>
 
-	* wmbiff/Imap4Client.c: Imap fix from Rob Funk
+	* wmbiff/Imap4Client.c (tags: wmbiff_0_3_1): Imap fix from Rob Funk
 
 2001-06-23 Saturday 00:07 UTC -- Jordi Mallach <jordi@sindominio.net>
 
-	* ChangeLog, NEWS, maint/changelog.sed, maint/prerelease.sh:
-	Renamed CHANGES to ChangeLog and RELEASE-NOTES to NEWS, modified
-	release scripts accordingly. Added Mark to the sed file.
+	* ChangeLog, NEWS (tags: wmbiff_0_3_1), maint/changelog.sed (tags:
+	wmbiff_0_3_1), maint/prerelease.sh (tags: wmbiff_0_3_1): Renamed
+	CHANGES to ChangeLog and RELEASE-NOTES to NEWS, modified release
+	scripts accordingly. Added Mark to the sed file.
 
 2001-06-22 Friday 23:55 UTC -- Jordi Mallach <jordi@sindominio.net>
 
@@ -32,25 +38,30 @@ CVS on commit.
 2001-06-19 Tuesday 03:38 UTC -- Dwayne C. Litzenberger <dlitz@dlitz.net>
 
 	* CHANGES, ChangeLog, README, RELEASE-NOTES, maint/changelog.sed,
-	maint/prerelease.sh, wmbiff/Client.h, wmbiff/Imap4Client.c,
-	wmbiff/LicqClient.c, wmbiff/Makefile, wmbiff/Pop3Client.c,
-	wmbiff/charutil.c, wmbiff/charutil.h, wmbiff/maildirClient.c,
-	wmbiff/mboxClient.c, wmbiff/sample.wmbiffrc, wmbiff/socket.c,
-	wmbiff/wmbiff.1, wmbiff/wmbiff.c, wmbiff/wmbiffrc.5: * Another big
-	patch that mucks with everything.  I probably deserve to be  
-	flamed for this practice.  Feel free... :-) * Added
-	maint/prerelease.sh script.  Run it before making any releases.  *
-	Added maint/changelog.sed.  Add your SourceForge userid here.  *
-	Moved ChangeLog to RELEASE-NOTES (see below).  * Added a new file,
-	CHANGES (created by maint/prerelease.sh) that tabulates   all the
-	CVS changes.  * Added "distclean" to wmbiff/Makefile.  * Added CVS
-	Id$ to all the files in wmbiff/ .  * I reformatted ths changelog,
-	again.	I hope this is the last time I need   to do this.  The CVS
-	logs should be used for all changes, and this file   should by
-	updated for user-visible changes only, from now on.    (Dwayne C.
-	Litzenberger)  * Updated the README to reflect that Gennady
-	Belyakov died right after releasing   wmBiff 0.2.  May your soul
-	rest in peace, Gennady.  (Dwayne C. Litzenberger)
+	maint/prerelease.sh, wmbiff/Client.h (tags: wmbiff_0_3_1),
+	wmbiff/Imap4Client.c, wmbiff/LicqClient.c (tags: wmbiff_0_3_1),
+	wmbiff/Makefile (tags: wmbiff_0_3_1), wmbiff/Pop3Client.c (tags:
+	wmbiff_0_3_1), wmbiff/charutil.c (tags: wmbiff_0_3_1),
+	wmbiff/charutil.h (tags: wmbiff_0_3_1), wmbiff/maildirClient.c
+	(tags: wmbiff_0_3_1), wmbiff/mboxClient.c (tags: wmbiff_0_3_1),
+	wmbiff/sample.wmbiffrc (tags: wmbiff_0_3_1), wmbiff/socket.c (tags:
+	wmbiff_0_3_1), wmbiff/wmbiff.1 (tags: wmbiff_0_3_1),
+	wmbiff/wmbiff.c (tags: wmbiff_0_3_1), wmbiff/wmbiffrc.5 (tags:
+	wmbiff_0_3_1): * Another big patch that mucks with everything.	I
+	probably deserve to be	 flamed for this practice.  Feel free...
+	:-) * Added maint/prerelease.sh script.  Run it before making any
+	releases.  * Added maint/changelog.sed.  Add your SourceForge
+	userid here.  * Moved ChangeLog to RELEASE-NOTES (see below).  *
+	Added a new file, CHANGES (created by maint/prerelease.sh) that
+	tabulates   all the CVS changes.  * Added "distclean" to
+	wmbiff/Makefile.  * Added CVS Id$ to all the files in wmbiff/ .  *
+	I reformatted ths changelog, again.  I hope this is the last time I
+	need   to do this.  The CVS logs should be used for all changes,
+	and this file	should by updated for user-visible changes only,
+	from now on.	(Dwayne C. Litzenberger)  * Updated the README to
+	reflect that Gennady Belyakov died right after releasing   wmBiff
+	0.2.  May your soul rest in peace, Gennady.  (Dwayne C.
+	Litzenberger)
 
 2001-06-16 Saturday 01:02 UTC -- Jordi Mallach <jordi@sindominio.net>
 
@@ -76,8 +87,8 @@ CVS on commit.
 
 2001-05-11 Friday 14:49 UTC -- Jordi Mallach <jordi@sindominio.net>
 
-	* wmbiff/: .cvsignore, Makefile: Uncommitted stuff to deal with the
-	removal of the xmp link
+	* wmbiff/: .cvsignore (tags: wmbiff_0_3_1), Makefile: Uncommitted
+	stuff to deal with the removal of the xmp link
 
 2001-05-04 Friday 11:01 UTC -- Jordi Mallach <jordi@sindominio.net>
 
@@ -97,13 +108,15 @@ CVS on commit.
 
 2001-05-01 Tuesday 16:11 UTC -- Jordi Mallach <jordi@sindominio.net>
 
-	* README.licq, ChangeLog, README, wmgeneral/list.c,
-	wmgeneral/list.h, wmgeneral/misc.c, wmgeneral/misc.h,
-	wmgeneral/wmgeneral.h, wmbiff/socket.c, wmgeneral/wmgeneral.c,
-	wmbiff/Imap4Client.c, wmbiff/Makefile, wmbiff/mboxClient.c,
-	wmbiff/sample.wmbiffrc, wmbiff/wmbiff.1, wmbiff/wmbiff.c,
-	wmbiff/wmbiff-master-led.xpm, wmbiff/.cvsignore, wmbiff/Client.h,
-	wmbiff/LicqClient.c, wmbiff/Pop3Client.c, wmbiff/maildirClient.c,
-	wmbiff/wmbiffrc.5 (utags: start): Initial import to SourceForge,
-	version 0.2q1+Debian
+	* README.licq (tags: wmbiff_0_3_1), ChangeLog, README,
+	wmgeneral/list.c (tags: wmbiff_0_3_1), wmgeneral/list.h (tags:
+	wmbiff_0_3_1), wmgeneral/misc.c (tags: wmbiff_0_3_1),
+	wmgeneral/misc.h (tags: wmbiff_0_3_1), wmgeneral/wmgeneral.h (tags:
+	wmbiff_0_3_1), wmbiff/socket.c, wmgeneral/wmgeneral.c (tags:
+	wmbiff_0_3_1), wmbiff/Imap4Client.c, wmbiff/Makefile,
+	wmbiff/mboxClient.c, wmbiff/sample.wmbiffrc, wmbiff/wmbiff.1,
+	wmbiff/wmbiff.c, wmbiff/wmbiff-master-led.xpm (tags: wmbiff_0_3_1),
+	wmbiff/.cvsignore, wmbiff/Client.h, wmbiff/LicqClient.c,
+	wmbiff/Pop3Client.c, wmbiff/maildirClient.c, wmbiff/wmbiffrc.5
+	(utags: start): Initial import to SourceForge, version 0.2q1+Debian
 
