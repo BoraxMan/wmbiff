@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.58 2003/07/04 21:42:35 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.59 2003/11/08 22:17:42 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -45,7 +45,7 @@ static const int wmbiff_mask_width = 64;
 #define CHAR_HEIGHT 7
 
 #define BLINK_TIMES 8
-#define DEFAULT_SLEEP_INTERVAL 1000
+#define DEFAULT_SLEEP_INTERVAL 5000
 #define BLINK_SLEEP_INTERVAL    200
 #define DEFAULT_LOOP 5
 
