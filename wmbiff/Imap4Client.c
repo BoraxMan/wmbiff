@@ -606,7 +606,7 @@ static int authenticate_plaintext( /*@notnull@ */ Pop3 pc,
 		}
 
 		if (buf[5] != 'O') {
-			IMAP_DM(pc, DEBUG_ERROR, "IMAP Login failed.\n");
+			IMAP_DM(pc, DEBUG_ERROR, "IMAP Login failed: %s\n", buf);
 			/* if we're prompting the user, ask again, else fail */
 			if (PCU.interactive_password) {
 				PCU.password[0] = '\0';
