@@ -1,5 +1,5 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiff.1,v 1.10 2002/10/20 21:58:58 jordi Exp $
+.\" $Id: wmbiff.1,v 1.11 2002/11/13 06:44:08 bluehal Exp $
 .\"
 .\" wmbiff.1 and wmbiffrc.5 are copyright 1999-2001 by
 .\" Jordi Mallach <jordi@debian.org>
@@ -13,12 +13,13 @@ WMBiff \- A dockable Mailbox Monitor
 
 .SH SYNOPSIS
 .B wmbiff
-[-display <display name>] [-geometry +XPOS+YPOS] [-c <filename>] [-h] [-v] [-debug] [-fg <foreground-color>] [-font <X11 font>|default] [-hi <highlight-color>]
+[-display <display name>] [-geometry +XPOS+YPOS] [-c <filename>] [-h] [-v] [-debug] [-fg <foreground-color>] [-font <X11 font>|default] [-hi <highlight-color>] [+w]
 .br
 
 .SH DESCRIPTION
-WMbiff displays the status of up to five mailboxes. It gives information
-about new mail, if any, or total number of messages. It also has mail
+WMbiff displays the status of up to five mailboxes. It shows the number
+of new mail messages, if any, or the total number of messages.
+It also has mail
 retrieval capabilies, and can be configured to do this automatically. At the
 moment, UNIX-style, maildir, POP3, APOP and IMAP4 mailboxes are supported.
 WMbiff also supports Licq history files and gnomeicu, displaying the number of new
@@ -69,6 +70,13 @@ time default.
 .B \-hi <color>
 Use specified X11 color for new mail counters.  Implies -font
 default, unless overridden.
+.TP
+.B \+w 
+Do not use the "withdrawn" state: the wmbiff window will not
+be captured as an icon and placed in the dock, but will
+instead have its own window.  This option starts with a '+'
+for consistency with other software programs: many use '-w'
+to mean the opposite.
 
 .SH BUGS
 Send bug reports or suggestions to the WMBiff Development

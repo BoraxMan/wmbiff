@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.34 2002/11/12 08:27:45 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.35 2002/11/13 06:44:08 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -88,6 +88,7 @@ int debug_default = DEBUG_ERROR;
 /* color from wmbiff's xpm, down to 24 bits. */
 const char *foreground = "#21B3AF";
 const char *highlight = "yellow";
+int notWithdrawn = 0;
 
 int num_mailboxes = 1;
 const int x_origin = 5;
@@ -439,7 +440,7 @@ void do_biff(int argc, char **argv)
 					 wmbiff_mask_width, wmbiff_mask_height);
 
 	openXwindow(argc, argv, bkg_xpm, skin_xpm, wmbiff_mask_bits,
-				wmbiff_mask_width, wmbiff_mask_height);
+				wmbiff_mask_width, wmbiff_mask_height, notWithdrawn);
 
 	if (font != NULL) {
 		if (loadFont(font) < 0) {
@@ -1026,6 +1027,16 @@ void parse_cmd(int argc, char **argv, /*@out@ */ char *config_file)
 				exit(EXIT_SUCCESS);
 				break;
 			}
+		} else if (*arg == '+') {
+			switch (arg[1]) {
+			case 'w':
+				notWithdrawn = 1;
+				break;
+			default:
+				usage();
+				exit(EXIT_SUCCESS);
+				break;
+			}
 		}
 	}
 }
@@ -1047,6 +1058,7 @@ void usage(void)
 		   "    -h                        this help screen\n"
 		   "    -hi <color>               highlight color for new mail\n"
 		   "    -v                        print the version number\n"
+		   "    +w                        not withdrawn: run as a window\n"
 		   "\n");
 }
 

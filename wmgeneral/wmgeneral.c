@@ -449,7 +449,8 @@ void setMaskXY(int x, int y)
 \*******************************************************************************/
 void openXwindow(int argc, char *argv[], const char *pixmap_bytes_bkg[],
 				 const char *pixmap_bytes_src[],
-				 char *pixmask_bits, int pixmask_width, int pixmask_height)
+				 char *pixmask_bits,
+				 int pixmask_width, int pixmask_height, int notWithdrawn)
 {
 
 	unsigned int borderwidth = 1;
@@ -563,7 +564,8 @@ void openXwindow(int argc, char *argv[], const char *pixmap_bytes_bkg[],
 	mywmhints.icon_y = mysizehints.y;
 	mywmhints.window_group = win;
 	mywmhints.flags =
-		StateHint | IconWindowHint | IconPositionHint | WindowGroupHint;
+		(notWithdrawn ? 0 : StateHint) | IconWindowHint |
+		IconPositionHint | WindowGroupHint;
 
 	XSetWMHints(display, win, &mywmhints);
 
