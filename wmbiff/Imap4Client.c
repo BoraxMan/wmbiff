@@ -372,7 +372,7 @@ static int authenticate_plaintext(Pop3 pc,
 	}
 
 	/* login */
-	tlscomm_printf(scs, "a001 LOGIN %s %s\r\n", PCU.userName,
+	tlscomm_printf(scs, "a001 LOGIN %s \"%s\"\r\n", PCU.userName,
 				   PCU.password);
 	if (!tlscomm_expect(scs, "a001 ", buf, BUF_SIZE)) {
 		printf("unable to login");
