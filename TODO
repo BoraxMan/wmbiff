@@ -7,5 +7,9 @@
    for example, 8bpp displays or non 64x64 appsizes.
 - Support on/off status LED's, for, for example,
    grep eth0 /proc/net/dev | wc -l
+- Add a failure-expect case in tlsComm. For example,
+   an IMAP status query has a good response (* STATUS) 
+   and a bad response (a003 NO STATUS).  As soon as 
+   one of them is received, we're done.
 
-$Id: TODO,v 1.3 2002/03/12 09:15:29 bluehal Exp $
+$Id: TODO,v 1.4 2002/03/18 21:13:55 bluehal Exp $
