@@ -1,4 +1,4 @@
-/* $Id: Client.h,v 1.8 2002/03/01 08:41:29 bluehal Exp $ */
+/* $Id: Client.h,v 1.9 2002/03/02 05:58:16 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -40,15 +40,15 @@ typedef struct _mbox_t {
 		struct {
 			time_t ctime;
 			time_t mtime;
-			size_t size;
+			off_t size;
 		} mbox;
 		struct {
 			time_t ctime_new;
 			time_t mtime_new;
-			size_t size_new;
+			off_t size_new;
 			time_t ctime_cur;
 			time_t mtime_cur;
-			size_t size_cur;
+			off_t size_cur;
 		} maildir;
 		struct {
 			char password[32];
