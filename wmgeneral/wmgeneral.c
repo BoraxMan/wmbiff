@@ -47,6 +47,7 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include <assert.h>
 
 #include <X11/Xlib.h>
 #ifdef HAVE_X11_XPM_H
@@ -217,9 +218,9 @@ static Pixel GetColor(const char *name)
 
 	color.pixel = 0;
 	if (!XParseColor(display, attributes.colormap, name, &color)) {
-		fprintf(stderr, "wm.app: can't parse %s.\n", name);
+		fprintf(stderr, "wm.app: GetColor() can't parse %s.\n", name);
 	} else if (!XAllocColor(display, attributes.colormap, &color)) {
-		fprintf(stderr, "wm.app: can't allocate %s.\n", name);
+		fprintf(stderr, "wm.app: GetColor() can't allocate %s.\n", name);
 	}
 	return color.pixel;
 }
@@ -386,25 +387,36 @@ void copyXBMArea(int src_x, int src_y, int width, int height, int dest_x,
 
 /* added for wmbiff */
 XFontStruct *f;
-void loadFont(const char *fontname)
+int loadFont(const char *fontname)
 {
 	if (display != NULL) {
 		f = XLoadQueryFont(display, fontname);
-		if (f)
+		if (f) {
 			XSetFont(display, NormalGC, f->fid);
-		else
+			return 0;
+		} else {
 			printf("couldn't set font!\n");
+		}
 	}
+	return -1;
 }
+
 void drawString(int dest_x, int dest_y, const char *string,
 				const char *colorname, int right_justify)
 {
 	int len = strlen(string);
+	assert(colorname != NULL);
 	XSetForeground(display, NormalGC, GetColor(colorname));
 	if (right_justify)
 		dest_x -= XTextWidth(f, string, len);
-	XDrawString(display, wmgen.pixmap, NormalGC, dest_x, dest_y, string,
-				len);
+	XDrawImageString(display, wmgen.pixmap, NormalGC, dest_x, dest_y,
+					 string, len);
+}
+
+void eraseRect(int x, int y, int x2, int y2)
+{
+	XSetForeground(display, NormalGC, GetColor("black"));
+	XFillRectangle(display, wmgen.pixmap, NormalGC, x, y, x2 - x, y2 - y);
 }
 
 /* end wmbiff additions */

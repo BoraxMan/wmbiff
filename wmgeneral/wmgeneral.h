@@ -58,8 +58,10 @@ void setMaskXY(int, int);
 void parse_rcfile(const char *, rckeys *);
 
 /* for wmbiff */
-void loadFont(const char *fontname);
+int loadFont(const char *fontname);	/* -1 on fail, 0 success. */
 void drawString(int dest_x, int dest_y, const char *string,
 				const char *colorname, int right_justify);
+void eraseRect(int x, int y, int x2, int y2);
+/* end wmbiff */
 
 #endif
