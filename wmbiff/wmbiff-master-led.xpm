@@ -1,5 +1,5 @@
 /* XPM */
-static char * wmbiff_master_xpm[] = {
+static const char * wmbiff_master_xpm[] = {
 "160 100 15 1",
 " 	c #00000000FFFF",
 ".	c #208120812081",
