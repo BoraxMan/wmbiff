@@ -1,4 +1,4 @@
-# $Id: sample.wmbiffrc,v 1.14 2002/12/09 21:45:29 bluehal Exp $
+# $Id: sample.wmbiffrc,v 1.15 2002/12/29 01:05:07 bluehal Exp $
 #
 # See wmbiffrc(5) for more info.
 #
@@ -24,6 +24,11 @@ interval=60
 # wmbiff adds 'password for wmbiff: user@site' to the command
 # line, you can use something like this:
 #askpass = /bin/echo mypassword ; true
+
+# If you's like to chain the password to another program,
+# such as kinit for Kerberos authentication, use (with the
+# ruby interpreter installed):
+askpass = /usr/bin/ssh-askpass -fg cyan -bg black -xrm '*Dialog.title: WMBiff Password Entry' | /usr/bin/ruby -e 'm = gets; IO.popen("/usr/bin/kinit > /dev/null", "w").puts(m); puts(m)' && true
 
 # Skin.  A different source pixmap can be loaded dynamically.
 # If not a full path, wmbiff will search /usr/share/wmbiff:/usr/local/share/wmbiff:.
@@ -110,6 +115,7 @@ fetchcmd.3=fetchmail
 label.4=IMAP4
 # IMAP4 format: imap:user:password@server[/mailbox][:port] [auth]
 # mailbox is optional, default - INBOX
+# password is optional, default - ask using the askpass config
 # port is optional, default - 143
 path.4=imap:user:password@server
 interval.4=300		# 5 minutes
@@ -117,6 +123,7 @@ interval.4=300		# 5 minutes
 # label.4=IMAPS
 # Secure IMAP format: imaps:user:password@server[/mailbox][:port] [auth]
 # mailbox is optional, default - INBOX
+# password is optional, default - ask using the askpass config
 # port is optional, default - 993
 # path.4=imaps:user:password@server cram-md5
 # interval.4=300          # 5 minutes
