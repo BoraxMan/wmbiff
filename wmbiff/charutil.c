@@ -1,4 +1,4 @@
-/* $Id: charutil.c,v 1.15 2003/01/19 13:13:04 bluehal Exp $ */
+/* $Id: charutil.c,v 1.16 2003/11/08 22:58:54 bluehal Exp $ */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -21,7 +21,14 @@ static __inline__ void LeftTrim(char *psValue)
 	while (*psTmp == ' ' || *psTmp == '\t')
 		psTmp++;
 
-	strcpy(psValue, psTmp);
+	/* can't use strcpy here, as the strings must not
+	   overlap, at least according to spec. */
+	if (psTmp > psValue) {
+		while (*psTmp != '\0') {
+			*(psValue++) = *(psTmp++);
+		}
+		*(psValue) = '\0';
+	}
 }
 
 static __inline__ void RightTrim(char *psValue)

@@ -283,9 +283,13 @@ int shellCreate( /*@notnull@ */ Pop3 pc, const char *str)
 	}
 	commandline++;				/* shell:::> */
 
-	/* good thing strcpy handles overlapping regions */
+	/* strcpy is not specified to handle overlapping regions */
 	SH_DM(pc, DEBUG_INFO, "path= '%s'\n", commandline);
-	strcpy(pc->path, commandline);
+	{
+		char *tmp = strdup(commandline);
+		strcpy(pc->path, tmp);
+		free(tmp);
+	}
 	return 0;
 }
 
