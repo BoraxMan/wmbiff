@@ -7,8 +7,9 @@
  * modified by Jay Francis (jtf@u880.org) to support
  * CRAM-MD5 */
 
-/* get asprintf */
-#define _GNU_SOURCE
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include "Client.h"
 #include "charutil.h"
@@ -46,7 +47,7 @@ static struct fdmap_struct {
 static void ask_user_for_password(Pop3 pc, int bFlushCache);
 
 /* authentication callbacks */
-#ifdef WITH_GCRYPT
+#ifdef HAVE_GCRYPT_H
 static int authenticate_md5(Pop3 pc, struct connection_state *scs,
 							const char *capabilities);
 #endif
@@ -62,7 +63,7 @@ static struct imap_authentication_method {
 						  const char *capabilities);
 } auth_methods[] = {
 	{
-#ifdef WITH_GCRYPT
+#ifdef HAVE_GCRYPT_H
 	"cram-md5", authenticate_md5}, {
 #endif
 	"plaintext", authenticate_plaintext}, {
@@ -302,7 +303,7 @@ int imap4Create(Pop3 pc, const char *const str)
 	/* IMAP4 format: imap:user:password@server/mailbox[:port] */
 	/* If 'str' line is badly formatted, wmbiff won't display the mailbox. */
 	if (strncmp("sslimap:", str, 8) == 0 || strncmp("imaps:", str, 6) == 0) {
-#ifdef WITH_TLS
+#ifdef HAVE_GNUTLS_H
 		static int haveBeenWarned;
 		PCU.dossl = 1;
 		if (!haveBeenWarned) {
@@ -413,7 +414,7 @@ static int authenticate_plaintext(Pop3 pc,
 	return (0);
 }
 
-#ifdef WITH_GCRYPT
+#ifdef HAVE_GCRYPT_H
 static int authenticate_md5(Pop3 pc,
 							struct connection_state *scs,
 							const char *capabilities)

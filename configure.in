@@ -1,0 +1,75 @@
+dnl Autoconf is here to detect:
+dnl  gnutls, libgcrypt
+dnl  gnu regex (-lgnuregex / DEXT_GNU_REGEX_LIB)
+dnl  default ssh-askpass
+dnl and the basics X11, Xext, Xpm
+dnl and configure:
+dnl  installation prefix
+dnl  version
+
+AC_INIT(configure.in)
+AC_CONFIG_AUX_DIR(autoconf)
+AM_INIT_AUTOMAKE(wmbiff, 0.4.0pre2)
+dnl AUTOHEADER="$AUTOHEADER -l \\\\\\\$\(srcdir)/autoconf"
+AM_CONFIG_HEADER(config.h)
+AC_SUBST(VERSION)
+
+AC_PROG_INSTALL
+AC_PROG_CC
+AC_PROG_RANLIB
+
+if test -n "$GCC"; then
+ CFLAGS="$CFLAGS -D_GNU_SOURCE -W -Wall -Wshadow -Wpointer-arith -Wwrite-strings"
+ AC_MSG_RESULT(adding -Wall and friends to CFLAGS.)
+fi
+
+dnl Pre-gnutls.
+AC_CHECK_LIB(z, gzopen) dnl GNUTLS seems to need libz; fail here if it's missing.
+AC_CHECK_LIB(gdbm, dbminit) dnl GNUTLS seems to need libgdbm; fail here if it's missing.
+
+dnl Parameter is minimum version 
+dnl TODO: fix so that GCRYPT is tested only if GNUTLS fails; the dependence
+dnl between them makes this turn redundant
+
+AM_PATH_LIBGNUTLS(0.3.3, [LIBS="$LIBS $LIBGNUTLS_LIBS"
+                         CFLAGS="$CFLAGS $LIBGNUTLS_CFLAGS"])
+AM_PATH_LIBGCRYPT(1.1.5, [LIBS="$LIBS $LIBGCRYPT_LIBS"
+                         CFLAGS="$CFLAGS $LIBGCRYPT_CFLAGS"])
+AC_CHECK_HEADERS(gnutls.h gcrypt.h) 
+
+dnl regex stuff.
+AC_CHECK_HEADERS(regex.h gnuregex.h) dnl linux has regex.h, BSD gnuregex
+AC_CHECK_LIB(gnuregex, re_search) dnl BSD.
+
+dnl X11 stuff.
+AC_PATH_XTRA
+LIBS="$X_LIBS $LIBS"
+dnl want to get the -I flags so that later tests for include files work.
+dnl the preprocessor is used for check_headers, which doesn't use cflags.
+CPPFLAGS="$X_CFLAGS $CPPFLAGS"
+AC_CHECK_LIB(X11, XrmParseCommand)
+AC_CHECK_LIB(Xext, XextAddDisplay)
+AC_CHECK_LIB(Xpm, XpmCreateImageFromXpmImage)
+
+AC_CHECK_HEADERS(X11/xpm.h, , AC_CHECK_HEADERS(xpm.h, , AC_MSG_ERROR([xpm.h is needed])))
+
+dnl Password prompting stuff.
+AC_PATH_PROGS(ASKPASS, ssh-askpass x11-ssh-askpass ssh-askpass-gnome, /usr/bin/ssh-askpass)
+AC_PATH_PROG(CVS2CL, cvs2cl)
+AC_DEFINE_UNQUOTED(DEFAULT_ASKPASS, "$ASKPASS")
+
+dnl Skin files; note - this is duplicated in wmbiff/Makefile.am
+dnl haven't thought of a way around it.
+if test "x$prefix" != xNONE; then
+  SKINDIR="$prefix/share/wmbiff/skins"
+else
+  SKINDIR="$ac_default_prefix/share/wmbiff/skins"
+fi
+dnl where to install em
+AC_SUBST(SKINDIR)
+dnl where to find em
+AC_DEFINE_UNQUOTED(DEFAULT_SKIN_PATH, 
+                   "$SKINDIR:/usr/share/wmbiff/skins:/usr/local/share/wmbiff/skins:.")
+
+dnl We're done.
+AC_OUTPUT(Makefile wmbiff/Makefile wmgeneral/Makefile)

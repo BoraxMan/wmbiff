@@ -1,4 +1,4 @@
-/* $Id: mboxClient.c,v 1.6 2002/03/06 07:15:08 bluehal Exp $ */
+/* $Id: mboxClient.c,v 1.7 2002/04/07 05:08:23 bluehal Exp $ */
 /* Author:		Yong-iL Joh <tolkien@mizi.com>
    Modified:	Jorge García <Jorge.Garcia@uv.es>
    			 	Rob Funk <rfunk@funknet.net>
@@ -61,7 +61,8 @@ int mboxCheckHistory(Pop3 pc)
 		   "  was changed,"
 		   " TIME: old %lu, new %lu"
 		   " SIZE: old %lu, new %lu\n",
-		   PCM.mtime, st.st_mtime, (unsigned long) PCM.size, st.st_size);
+		   PCM.mtime, (unsigned long)st.st_mtime, 
+           (unsigned long) PCM.size, (unsigned long)st.st_size);
 		ut.actime = st.st_atime;
 		ut.modtime = st.st_mtime;
 		F = pc->open(pc);

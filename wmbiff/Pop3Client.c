@@ -1,4 +1,4 @@
-/* $Id: Pop3Client.c,v 1.10 2002/04/04 08:51:50 bluehal Exp $ */
+/* $Id: Pop3Client.c,v 1.11 2002/04/07 05:08:23 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -10,6 +10,9 @@
  * Last Updated : Tue Nov 13 13:45:23 PST 2001
  *
  */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include "Client.h"
 #include "charutil.h"
@@ -21,7 +24,7 @@
 #define	PCU	(pc->u).pop_imap
 #define POP_DM(pc, lvl, args...) DM(pc, lvl, "pop3: " args)
 
-#ifdef WITH_GCRYPT
+#ifdef HAVE_GCRYPT_H
 static FILE *authenticate_md5(Pop3 pc, FILE * fp, char *unused);
 static FILE *authenticate_apop(Pop3 pc, FILE * fp, char *apop_str);
 #endif
@@ -34,7 +37,7 @@ static struct authentication_method {
 	FILE *(*auth_callback) (Pop3 pc, FILE * fp, char *apop_str);
 } auth_methods[] = {
 	{
-#ifdef WITH_GCRYPT
+#ifdef HAVE_GCRYPT_H
 	"cram-md5", authenticate_md5}, {
 	"apop", authenticate_apop}, {
 #endif
@@ -209,7 +212,7 @@ int pop3Create(Pop3 pc, const char *str)
 }
 
 
-#ifdef WITH_GCRYPT
+#ifdef HAVE_GCRYPT_H
 static FILE *authenticate_md5(Pop3 pc,
 							  FILE * fp,
 							  char *apop_str __attribute__ ((unused)))
@@ -299,7 +302,7 @@ static FILE *authenticate_apop(Pop3 pc, FILE * fp, char *apop_str)
 		return NULL;
 	}
 }
-#endif							/* WITH_GCRYPT */
+#endif							/* HAVE_GCRYPT_H */
 
 static FILE *authenticate_plaintext(Pop3 pc, FILE * fp, char *apop_str
 									__attribute__ ((unused)))

@@ -1,4 +1,4 @@
-/* $Id: Client.h,v 1.13 2002/04/04 08:51:50 bluehal Exp $ */
+/* $Id: Client.h,v 1.14 2002/04/07 05:08:23 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -11,13 +11,16 @@
 
 #ifndef CLIENT
 #define CLIENT
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
 
-#ifdef WITH_GCRYPT
+#ifdef HAVE_GCRYPT_H
 #include <gcrypt.h>
 #endif
 

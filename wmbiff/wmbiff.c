@@ -1,4 +1,8 @@
-/* $Id: wmbiff.c,v 1.18 2002/04/05 19:43:54 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.19 2002/04/07 05:08:23 bluehal Exp $ */
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #define	USE_POLL
 
@@ -31,7 +35,7 @@
 #include <dmalloc.h>
 #endif
 
-#include "wmbiff-master.xpm"
+#include "wmbiff-master-led.xpm"
 char wmbiff_mask_bits[64 * 64];
 const int wmbiff_mask_width = 64;
 const int wmbiff_mask_height = 64;
@@ -55,8 +59,7 @@ const char *skin_filename = "wmbiff-master-led.xpm";
 /* this should eventually be derived at compile (or
    configure) time to use PREFIX from the makefile, but I (blueHal)
    prefer to wait for autoconf integration. */
-const char *skin_search_path =
-	"/usr/share/wmbiff:/usr/local/share/wmbiff:.";
+const char *skin_search_path = DEFAULT_SKIN_PATH;
 
 int ReadLine(FILE *, char *, char *, int *);
 int Read_Config_File(char *, int *);
@@ -91,7 +94,7 @@ void init_biff(char *uconfig_file)
 		mbox[i].fetchcmd[0] = 0;
 		mbox[i].loopinterval = 0;
 		mbox[i].debug = debug_default;
-		mbox[i].askpass = "/usr/bin/ssh-askpass";
+		mbox[i].askpass = DEFAULT_ASKPASS;
 	}
 
 	/* Some defaults, if config file is unavailable */
@@ -102,7 +105,7 @@ void init_biff(char *uconfig_file)
 		strcpy(mbox[0].path, "/var/mail/");
 		strcat(mbox[0].path, m);
 	}
-#ifdef WITH_GCRYPT
+#ifdef HAVE_GCRYPT_H
 	/* gcrypt is a little strange, in that it doesn't 
 	 * seem to initialize its memory pool by itself. 
 	 * I believe we *expect* "Warning: using insecure memory!"
@@ -762,7 +765,7 @@ void parse_cmd(int argc, char **argv, char *config_file)
 
 void usage(void)
 {
-	printf("\nwmBiff v" WMBIFF_VERSION
+	printf("\nwmBiff v" VERSION
 		   " - incoming mail checker\n"
 		   "Gennady Belyakov and others (see the README file)\n"
 		   "Please report bugs to wmbiff-devel@lists.sourceforge.net\n"
@@ -779,7 +782,7 @@ void usage(void)
 
 void printversion(void)
 {
-	printf("wmbiff v%s\n", WMBIFF_VERSION);
+	printf("wmbiff v%s\n", VERSION);
 }
 
 /* vim:set ts=4: */

@@ -1,5 +1,16 @@
 Release Notes
 ~~~~~~~~~~~~~
+Release 0.4.0 - unreleased
+
+  * Can leave IMAP password empty in .wmbiffrc: ssh-askpass
+    will be used to prompt the user.  See sample.wmbiffrc 
+    and wmbiffrc(5).
+  * A different background pixmap can be specified in .wmbiffrc.
+    This has the effect of "skins."  See wmbiffrc(5).
+  * Migrated to automake / autoconf to detect defaults for
+    ssh-askpass and prepare for future changes.
+  * [unfinished] Permissions on .wmbiffrc are checked to protect
+    security.
 
 Release 0.3.8 - Tue, 26 Mar 2002 17:17:07 +0100
 
@@ -279,4 +290,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.16 2002/03/26 16:30:32 jordi Exp $
+$Id: NEWS,v 1.17 2002/04/07 05:08:23 bluehal Exp $

@@ -1,3 +1,51 @@
+
+CVS Changelog.  Don't bother editing this file, because it will get overwritten
+by maint/prerelease.sh .
+
+The latest changelog entry is in a different format, because it's inserted by
+CVS on commit.
+
+  $Log: ChangeLog,v $
+  Revision 1.23  2002/04/07 05:08:23  bluehal
+  use automake / autoconf; after checkout run ./FromCVS.sh
+
+
+
+2002-04-05 Friday 19:44 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiff-master-contrast.xpm: a first cut higher-contrast
+	skin
+
+2002-04-05 Friday 19:43 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Makefile, sample.wmbiffrc, test-make.sh, wmbiff.c:
+	askpass - invoke ssh-askpass to fill in passwords for IMAP servers;
+	skin - dynamically load an .xpm background
+
+2002-04-05 Friday 19:42 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiffrc.5: documentation of askpass and skin
+
+2002-04-05 Friday 19:08 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/tlsComm.c: explicit handling of timeouts
+
+2002-04-05 Friday 19:02 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/passwordMgr.c: askpass having a space in it is an INFO,
+	not an ERR.
+
+2002-04-04 Thursday 08:51 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Client.h, Imap4Client.c, Makefile, Pop3Client.c,
+	passwordMgr.c, passwordMgr.h, sample.wmbiffrc, test-make.sh:
+	interactive password prompting support for imap - leave password in
+	the : format blank to use
+
+2002-03-26 Tuesday 16:30 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, NEWS, wmbiff/Makefile: Released WMBiff 0.3.8.
+
 2002-03-18 Monday 21:13 UTC -- Neil Spring <nspring@cs.washington.edu>
 
 	* TODO: add failure handling in expect

@@ -38,6 +38,9 @@
 
 */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -46,7 +49,13 @@
 #include <stdarg.h>
 
 #include <X11/Xlib.h>
+#ifdef HAVE_X11_XPM_H
 #include <X11/xpm.h>
+#endif
+#ifdef HAVE_XPM_H
+#include <xpm.h>
+#endif
+#include <X11/Xutil.h> /* needed for Region on solaris? */
 #include <X11/extensions/shape.h>
 
 #include "wmgeneral.h"

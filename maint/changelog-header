@@ -1,0 +1,12 @@
+
+CVS Changelog.  Don't bother editing this file, because it will get overwritten
+by maint/prerelease.sh .
+
+The latest changelog entry is in a different format, because it's inserted by
+CVS on commit.
+
+  $Log: changelog-header,v $
+  Revision 1.1  2002/04/07 05:08:23  bluehal
+  use automake / autoconf; after checkout run ./FromCVS.sh
+
+

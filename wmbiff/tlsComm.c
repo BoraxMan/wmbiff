@@ -6,6 +6,9 @@
    Neil Spring (nspring@cs.washington.edu) */
 
 /* TODO: handle "* BYE" internally? */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <stdarg.h>
 #include <sys/time.h>
@@ -16,7 +19,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
-#ifdef WITH_TLS
+#ifdef HAVE_GNUTLS_H
 #include <gnutls.h>
 #endif
 #ifdef USE_DMALLOC
@@ -42,7 +45,7 @@
 struct connection_state {
 	int sd;
 	char *name;
-#ifdef WITH_TLS
+#ifdef HAVE_GNUTLS_H
 	GNUTLS_STATE state;
 	X509PKI_CLIENT_CREDENTIALS xcred;
 #else
@@ -65,7 +68,7 @@ void tlscomm_close(struct connection_state *scs)
 
 	/* not ok to call this more than once */
 	if (scs->state) {
-#ifdef WITH_TLS
+#ifdef HAVE_GNUTLS_H
 		gnutls_bye(scs->state, GNUTLS_SHUT_RDWR);
 		gnutls_x509pki_free_sc(scs->xcred);
 		gnutls_deinit(scs->state);
@@ -155,7 +158,7 @@ int tlscomm_expect(struct connection_state *scs,
 	memset(buf, 0, buflen);
 	TDM(DEBUG_INFO, "%s: expecting: %s\n", scs->name, prefix);
 	while (wait_for_it(scs->sd, EXPECT_TIMEOUT)) {
-#ifdef WITH_TLS
+#ifdef HAVE_GNUTLS_H
 		if (scs->state) {
 			readbytes =
 				gnutls_read(scs->state, scs->unprocessed, BUF_SIZE);
@@ -232,7 +235,7 @@ void tlscomm_printf(struct connection_state *scs, const char *format, ...)
 	va_end(args);
 
 	if (scs->sd != -1) {
-#ifdef WITH_TLS
+#ifdef HAVE_GNUTLS_H
 		if (scs->state) {
 			int written = gnutls_write(scs->state, buf, bytes);
 			if (written < bytes) {
@@ -253,7 +256,7 @@ void tlscomm_printf(struct connection_state *scs, const char *format, ...)
 }
 
 /* most of this file only makes sense if using TLS. */
-#ifdef WITH_TLS
+#ifdef HAVE_GNUTLS_H
 
 /* taken from the GNUTLS documentation, version 0.3.0 and
    0.2.10; this may need to be updated from gnutls's cli.c
