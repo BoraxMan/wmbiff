@@ -21,14 +21,19 @@ dist-hook-local: ChangeLog
 
 # manually increment version in configure.in, which should be enough.
 ChangeLog: stamp-h Makefile configure.in
-	@if test -e maint/changelog-header && test "x$(CVS2CL)" != "x"; then \
+	@if test -e maint/changelog-header; then \
+	  if test "x$(CVS2CL)" != "x"; then \
 		cat maint/changelog-header > $@; \
 		echo >> $@; \
 		echo "running $(CVS2CL)..."; \
 		$(CVS2CL) --stdout --utc --day-of-week | sed -f maint/changelog.sed >> $@; \
-	else \
+	  else \
 		echo "Unable to build ChangeLog for distribution"; \
 		exit 1; \
-	fi	
+	  fi; \
+	else \
+      echo "ChangeLog doesn't seem like a good target. touching anyway."; \
+      touch $@; \
+    fi
 
 
