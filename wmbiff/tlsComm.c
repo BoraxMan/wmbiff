@@ -440,7 +440,7 @@ tls_check_certificate(struct connection_state *scs,
 
 	if (gnutls_x509_crt_check_hostname(cert, remote_hostname) == 0) {
 		char certificate_hostname[256];
-		int buflen = 255;
+		size_t buflen = 255;
 		gnutls_x509_crt_get_dn(cert, certificate_hostname, &buflen);
 		/* gnutls_x509_extract_certificate_dn(&cert_list[0], &dn); */
 		TDM(DEBUG_INFO,
@@ -451,7 +451,7 @@ tls_check_certificate(struct connection_state *scs,
 	} else {
 		if ((scs->pc)->debug >= DEBUG_INFO) {
 			char certificate_hostname[256];
-			int buflen = 255;
+			size_t buflen = 255;
 			gnutls_x509_crt_get_dn(cert, certificate_hostname, &buflen);
 			/* gnutls_x509_extract_certificate_dn(&cert_list[0], &dn); */
 			TDM(DEBUG_INFO,

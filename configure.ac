@@ -46,6 +46,9 @@ dnl AC_CHECK_FUNC(asprintf, , VASPRINTF="vasprintf.c")
 dnl replacing the old USE_POLL define
 AC_CHECK_FUNCS(poll)
 
+dnl for gnutls-common.h, which defines this if missing. 
+AC_CHECK_FUNCS(inet_ntop)
+
 dnl declare RETSIGTYPE
 AC_TYPE_SIGNAL
 
