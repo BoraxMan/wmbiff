@@ -336,12 +336,28 @@ int imap_checkmail( /*@notnull@ */ Pop3 pc)
 	return 0;
 }
 
+void imap_releaseHeaders(Pop3 pc
+						 __attribute__ ((unused)), struct msglst *h)
+{
+	assert(h != NULL);
+	/* allow the list to be released next time around */
+	if (h->in_use <= 0) {
+		/* free the old one */
+		while (h != NULL) {
+			struct msglst *n = h->next;
+			free(h);
+			h = n;
+		}
+	} else {
+		h->in_use--;
+	}
+}
+
 void imap_cacheHeaders( /*@notnull@ */ Pop3 pc)
 {
 	struct connection_state *scs = state_for_pcu(pc);
 	char *msgid;
 	char buf[BUF_SIZE];
-	struct msglst *h;
 
 	if (scs == NULL) {
 		(void) imap_open(pc);
@@ -430,23 +446,6 @@ struct msglst *imap_getHeaders( /*@notnull@ */ Pop3 pc)
 	if (pc->headerCache != NULL)
 		pc->headerCache->in_use = 1;
 	return pc->headerCache;
-}
-
-void imap_releaseHeaders(Pop3 pc
-						 __attribute__ ((unused)), struct msglst *h)
-{
-	assert(h != NULL);
-	/* allow the list to be released next time around */
-	if (h->in_use <= 0) {
-		/* free the old one */
-		while (h != NULL) {
-			struct msglst *n = h->next;
-			free(h);
-			h = n;
-		}
-	} else {
-		h->in_use--;
-	}
 }
 
 /* parse the config line to setup the Pop3 structure */
