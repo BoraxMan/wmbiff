@@ -16,8 +16,11 @@
 #define ENFROB(x)
 #endif
 
+#include <unistd.h>
+
 #include "Client.h"
 #include "passwordMgr.h"
+#include "tlsComm.h"
 
 int debug_default = DEBUG_INFO;
 int Relax = 1;
@@ -276,14 +279,54 @@ int test_imap4creator(void) {
     return 0;
 }
 
-void initialize_blacklist(void) { } 
-void tlscomm_printf(UNUSED(int x), UNUSED(const char *f), ...) { }
-void tlscomm_expect(void) {  } 
-void tlscomm_close() {  } 
-int tlscomm_is_blacklisted(UNUSED(const char *x)) {  return 1; } 
-void initialize_gnutls(void) {  } 
-int sock_connect(UNUSED(const char *n), UNUSED(int p)) { return 1; } /* stdout */
-void initialize_unencrypted(void) {  } 
+
+int test_getline_from_buffer(void) {
+#define LINE_BUF_LEN 256
+    char linebuf[LINE_BUF_LEN];
+    char scratchbuf[LINE_BUF_LEN];
+    
+    /* try to ensure that even an endless loop terminates */
+    alarm(100);
+    strcpy(scratchbuf, "\r\n");
+    getline_from_buffer(scratchbuf, linebuf, LINE_BUF_LEN);
+    if(strlen(scratchbuf) != 0) {
+		printf("FAILURE: scratchbuf not snarfed\n");
+		return(1);
+	}
+    if(strlen(linebuf) != 2) {
+		printf("FAILURE: linebuf not populated\n");
+		return(1);
+	}
+    strcpy(scratchbuf, "\n");
+    getline_from_buffer(scratchbuf, linebuf, LINE_BUF_LEN);
+    if(strlen(scratchbuf) != 0) {
+		printf("FAILURE: scratchbuf not snarfed\n");
+		return(1);
+	}
+    if(strlen(linebuf) != 1) {
+		printf("FAILURE: linebuf not populated\n");
+		return(1);
+	}
+    
+    alarm(0);
+    return(0);
+}
+
+
+int print_info(UNUSED(void * state)) { return(0); }
+const char *certificate_filename = NULL;
+int SkipCertificateCheck = 0;
+int exists(UNUSED(const char *filename)) { return(0); }	
+
+
+// void initialize_blacklist(void) { } 
+// void tlscomm_printf(UNUSED(int x), UNUSED(const char *f), ...) { }
+// void tlscomm_expect(void) {  } 
+// void tlscomm_close() {  } 
+// int tlscomm_is_blacklisted(UNUSED(const char *x)) {  return 1; } 
+// void initialize_gnutls(void) {  } 
+// int sock_connect(UNUSED(const char *n), UNUSED(int p)) { return 1; } /* stdout */
+// void initialize_unencrypted(void) {  } 
 
 int main(UNUSED(int argc), UNUSED(char *argv[])) {
 
@@ -301,6 +344,11 @@ int main(UNUSED(int argc), UNUSED(char *argv[])) {
 
     Relax = 1;
     if( test_imap4creator() ) {
+        printf("SOME TESTS FAILED!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if( test_getline_from_buffer() ) {
         printf("SOME TESTS FAILED!\n");
         exit(EXIT_FAILURE);
     }
