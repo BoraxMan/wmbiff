@@ -1,3 +1,11 @@
-- Store and or verify server certificates.
+- Store and verify server certificates.
+- Prompt for passwords (in progress)
+- Add a FAQ (sighup, app size, deleted messages)
+- Make the shell method support old messages too
+- Add more shell "recipes" besides gicu.
+- Support "skins" or soft-configurable xpms for,
+   for example, 8bpp displays or non 64x64 appsizes.
+- Support on/off status LED's, for, for example,
+   grep eth0 /proc/net/dev | wc -l
 
-$Id: TODO,v 1.2 2001/11/23 07:20:39 bluehal Exp $
+$Id: TODO,v 1.3 2002/03/12 09:15:29 bluehal Exp $
