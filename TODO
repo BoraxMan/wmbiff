@@ -15,11 +15,10 @@ these todo items are welcome.
   readable.  It might be best to complain all the time, but
   only abort when a password is used from a readable file,
   or a shell command is executed from a writable file.
-* Update for GNUTLS 0.4.x 
-  GNUTLS changes its API on just about every release,
-  generally to support additional functionality.  WMBiff
-  will only release with support for one version of GNUTLS,
-  likely whatever is in Debian unstable at the time.
+* Better timeout handling
+  Sometimes my IMAP server is slow... well, it's my fault
+  that I keep a few thousand messages on it.  The current
+  timeout code will cause it to fail prematurely.
 * Store and verify server certificates. 
   Mutt will do this, but it seems to require a lot of code
   that should perhaps be part of gnutls. If anyone is
@@ -85,7 +84,7 @@ these todo items are welcome.
   If it works, tell us.  Optionally the patch at sourceforge
   could be integrated.
 
-$Id: TODO,v 1.16 2002/06/13 07:15:46 bluehal Exp $
+$Id: TODO,v 1.17 2002/07/04 00:45:15 bluehal Exp $
 
 Local Variables:
 mode: outline
