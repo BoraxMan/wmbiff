@@ -229,8 +229,10 @@ int tlscomm_expect(struct connection_state *scs,
 		TDM(DEBUG_INFO, "%s: timed out while expecting '%s'\n",
 			scs->name, prefix);
 	} else {
-		TDM(DEBUG_ERROR, "%s: expecting: '%s', saw (%d): %s\n",
-			scs->name, prefix, readbytes, linebuf);
+		TDM(DEBUG_ERROR, "%s: expecting: '%s', saw (%d): %s%s",
+			scs->name, prefix, readbytes, linebuf,
+			/* only print the newline if the linebuf lacks it */
+			(linebuf[strlen(linebuf) - 1] == '\n') ? "\n" : "");
 	}
 	return 0;					/* wait_for_it failed */
 }

@@ -404,6 +404,8 @@ void imap_cacheHeaders( /*@notnull@ */ Pop3 pc)
 						IMAP_DM(pc, DEBUG_ERROR,
 								"timedout looking for headers.: %s",
 								hdrbuf);
+						strcpy(m->from, "wmbiff");
+						strcpy(m->subj, "failure");
 					}
 				}
 				IMAP_DM(pc, DEBUG_INFO, "From: '%s' Subj: '%s'\n", m->from,
