@@ -381,9 +381,9 @@ static int tls_compare_certificates(const gnutls_datum * peercert)
 }
 
 
-int
+static void
 tls_check_certificate(struct connection_state *scs,
-					  const char *remote_hostname)
+					  const char *remote_hostname) 
 {
 	int certstat;
 	const gnutls_datum *cert_list;
@@ -392,7 +392,7 @@ tls_check_certificate(struct connection_state *scs,
 
 	if (gnutls_auth_get_type(scs->tls_state) != GNUTLS_CRD_CERTIFICATE) {
 		bad_certificate(scs, "Unable to get certificate from peer.\n");
-		return;					/* bad_cert will exit if -skip-certificate-check was not given */
+		return;	/* bad_cert will exit if -skip-certificate-check was not given */
 	}
 	certstat = gnutls_certificate_verify_peers(scs->tls_state);
 	if (certstat == GNUTLS_E_NO_CERTIFICATE_FOUND) {
@@ -474,7 +474,7 @@ tls_check_certificate(struct connection_state *scs,
 	gnutls_x509_crt_deinit(cert);
 
 	TDM(DEBUG_INFO, "certificate check ok.\n");
-	return (0);
+	return;
 }
 
 struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc,
