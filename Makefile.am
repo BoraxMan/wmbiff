@@ -36,3 +36,7 @@ ChangeLog: Makefile configure.ac
 		echo "Unable to build ChangeLog for distribution"; \
 		exit 0; \
 	fi
+
+sourceforgeupload: $(distdir).tar.gz
+	ncftpput upload.sourceforge.net incoming $(distdir).tar.gz
+	md5sum $(distdir).tar.gz
