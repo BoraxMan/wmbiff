@@ -443,6 +443,12 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc,
 			"%s: This copy of wmbiff was compiled with \n"
 			"  gnutls version %s.\n", name, LIBGNUTLS_VERSION);
 		gnutls_perror(zok);
+		if (scs->pc->u.pop_imap.serverPort != 143 /* starttls */ ) {
+			TDM(DEBUG_ERROR,
+				"%s: Please run 'gnutls-cli-debug -p %d %s' to test ssl directly.\n"
+				"  That tool provides a lower-level test of gnutls with your server.\n",
+				name, scs->pc->u.pop_imap.serverPort, remote_hostname);
+		}
 		gnutls_deinit(scs->tls_state);
 		free(scs);
 		return (NULL);
