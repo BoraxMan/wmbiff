@@ -53,8 +53,8 @@ AC_CHECK_LIB(resolv, herror)
 dnl Pre-gnutls.
 gnutls="ok"
 AC_CHECK_LIB(z, gzopen, [], [gnutls="nope"]) dnl GNUTLS seems to need libz; fail here if it's missing.
-AC_CHECK_LIB(gdbm, dbminit, [], [gnutls="nope"]) dnl GNUTLS seems to need libgdbm; fail here if it's missing.
-
+dnl perhaps not required anymore:
+dnl AC_CHECK_LIB(gdbm, dbminit, [], [gnutls="nope"]) dnl GNUTLS seems to need libgdbm; fail here if it's missing.
 
 dnl Parameter is minimum version
 dnl TODO: fix so that GCRYPT is tested only if GNUTLS fails; the dependence
