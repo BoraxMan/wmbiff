@@ -1,0 +1,75 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH WMBIFF SECTION "December 18, 1999"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+WMbiff \- A dockable Mailbox Monitor
+.SH SYNOPSIS
+.B wmbiff
+[-display <display name>] [-geometry +XPOS+YPOS] [-c <filename>] [-h] [-v]
+.br
+.SH DESCRIPTION
+This manual page documents briefly the 
+.B wmbiff
+command.
+It was written for the Debian GNU/Linux distribution because the original 
+program does not have a manual page.
+
+WMbiff displays the status of up to five mailboxes. It gives information
+about new mail, if any, or total number of messages. It also has mail
+retrieval capabilies, and can be configured to do this automatically. At the
+moment, UNIX-style and POP3 mailboxes are supported.
+
+The mailboxes are displayed in 5 different lines, each one with its own
+description of up to five chars. If no mail is present in a given mailbox,
+WMbiff will display the total number of mails in cyan. If there's new mail
+in the box, the number of new messages will be displayed in yellow. When new
+mail arrives, this number will optionally flash for a small period of time,
+and also optionally, a command can be executed on mail arrival (for example,
+opening your mail reader or playing a sound file).
+
+Pressing mouse button 1 will execute a command, defined in the user's config
+file. Mouse button 3 will execute a command to fetch mail, if defined.
+.PP
+.\" TeX users may be more comfortable with the \fB<whatever>\fP and
+.\" \fI<whatever>\fP escape sequences to invode bold face and italics, 
+.\" respectively.
+.SH OPTIONS
+.TP
+.B \-h
+Show summary of options.
+.TP
+.B \-v
+Show version of program.
+.TP
+.B \-display <display name>
+Use an alternate X Display.
+.TP
+.B \-geometry <geometry>
+Initial window position.
+.TP
+.B \-c <filename>
+Use specified config file.
+
+.SH BUGS
+Please send any bug reports or suggestions to Gennady Belyakov
+<gb@ccat.elect.ru>
+.br
+.SH SEE ALSO
+.BR /usr/share/doc/wmbiff/sample.wmbiffrc
+.SH AUTHOR
+This manual page was written by Jordi Mallach <jordi@sindominio.net>,
+for the Debian GNU/Linux system (but may be used by others).

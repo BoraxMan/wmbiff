@@ -1,0 +1,16 @@
+Source: wmbiff
+Section: x11
+Priority: optional
+Maintainer: Jordi Mallach <jordi@sindominio.net>
+Standards-Version: 3.0.1
+
+Package: wmbiff
+Architecture: any
+Depends: ${shlibs:Depends}
+Suggests: menu (>= 2.1.4)
+Description: A dockable app that displays information about mailboxes
+ wmBiff is an WindowMaker docking utility, that displays the number of read
+ and unread messages in up to five mailboxes.
+ You can also define actions to execute on new mail arrival (for example,
+ play a sound file).
+ At this moment only unix-style mailboxes are supported.

@@ -1,0 +1,31 @@
+wmbiff (0.2-2) unstable; urgency=low
+
+  * Wrote a manpage for wmbiff. I still need to write a wmbiffrc(5)
+    manpage, in the meanwhile, sample.wmbiffrc file is a good start.
+  * Removed my second surname from the maintainer's name entry.
+
+ -- Jordi Mallach <jordi@sindominio.net>  Sat, 18 Dec 1999 20:04:07 +0100
+
+wmbiff (0.2-1) unstable; urgency=low
+
+  * New upstream release.
+  * (Auto)Mail fetch support added.
+
+ -- Jordi Mallach Pérez <jordi@sindominio.net>  Sat, 27 Nov 1999 01:31:22 +0100
+
+wmbiff (0.1a-1) unstable; urgency=low
+
+  * New upstream release.
+  * This version fixes unwanted beeps on new mail arrival.
+
+ -- Jordi Mallach Pérez <jordi@sindominio.net>  Sat, 20 Nov 1999 03:10:58 +0100
+
+wmbiff (0.1-1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Jordi Mallach Pérez <jordi@sindominio.net>  Thu, 18 Nov 1999 02:53:59 +0100
+
+Local variables:
+mode: debian-changelog
+End:
