@@ -34,7 +34,7 @@ MAINTAINERCLEANFILES = Makefile.in
 indent:
 	indent -npro -kr -i4 -ts4 $(wmbiff_SOURCES) || true
 
-dist-hook-local: indent
+dist-hook-local: indent config-h-check
 
 distclean-local:
 	-rm -f wmbiff-master-contrast.xpm wmbiff-master.xpm
@@ -47,3 +47,8 @@ wmbiff-master-contrast.xpm:  wmbiff-master-led.xpm Makefile
 	sed -e 's/#\([0-9A-F]\{2\}\)[0-9A-F]\{2\}\([0-9A-F]\{2\}\)[0-9A-F]\{2\}\([0-9A-F]\{2\}\)[0-9A-F]\{2\}/#\1\2\3/'\
 	> $@ || rm $@
 
+# fail if there's a .c file that doesn't include config.h
+config-h-check:
+	ls *.c | sort > cfiles
+	grep -l config.h *.c | sort | diff - cfiles
+	rm cfiles
