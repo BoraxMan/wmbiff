@@ -180,7 +180,7 @@ int tlscomm_expect(struct connection_state *scs,
 				}
 			}
 	}
-	TDM(DEBUG_ERROR, "%s: expecting: '%s', saw: %s", scs->name, prefix,
+	TDM(DEBUG_ERROR, "%s: expecting: '%s', saw: '%s'\n", scs->name, prefix,
 		buf);
 	return 0;					/* wait_for_it failed */
 }
