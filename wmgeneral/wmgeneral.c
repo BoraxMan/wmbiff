@@ -251,14 +251,14 @@ void RedrawWindowXY(int x, int y) {
 |* AddMouseRegion															   *|
 \*******************************************************************************/
 
-void AddMouseRegion(int index, int left, int top, int right, int bottom) {
+void AddMouseRegion(int region_idx, int left, int top, int right, int bottom) {
 
-	if (index < MAX_MOUSE_REGION) {
-		mouse_region[index].enable = 1;
-		mouse_region[index].top = top;
-		mouse_region[index].left = left;
-		mouse_region[index].bottom = bottom;
-		mouse_region[index].right = right;
+	if (region_idx < MAX_MOUSE_REGION) {
+		mouse_region[region_idx].enable = 1;
+		mouse_region[region_idx].top = top;
+		mouse_region[region_idx].left = left;
+		mouse_region[region_idx].bottom = bottom;
+		mouse_region[region_idx].right = right;
 	}
 }
 
