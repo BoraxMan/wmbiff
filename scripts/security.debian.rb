@@ -1,4 +1,4 @@
-#! /usr/bin/ruby
+#! /usr/bin/ruby -w
 
 # Copyright 2002 Neil Spring <nspring@cs.washington.edu> 
 # GPL
@@ -180,11 +180,10 @@ updated = Array.new
 }
 
 # we're done.  output a count in the format expected by wmbiff.
-puts (if(updatedcount > 0) then
-        "%d new" % updatedcount 
-      else
-        "%d old" % installed.length 
-      end
-      )
+if(updatedcount > 0) then
+  puts "%d new" % [ updatedcount ] 
+else
+  puts "%d old" % [ installed.length ] 
+end
 
 puts updated.join("\n")
