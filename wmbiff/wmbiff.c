@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.30 2002/06/21 04:34:14 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.31 2002/06/23 01:26:56 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -284,15 +284,71 @@ static int wmbiffrc_permissions_check(const char *wmbiffrc_fname)
 	return (1);
 }
 
+static int periodic_mail_check(void)
+{
+	int NeedRedraw = 0;
+	static int Blink_Mode = 0;	/* Bit mask, digits are in blinking 
+								   mode or not. Each bit for separate 
+								   mailbox */
+	int Sleep_Interval;			/* is either DEFAULT_SLEEP_INTERVAL or BLINK_SLEEP_INTERVAL */
+	int i;
+	for (i = 0; i < num_mailboxes; i++) {
+		if (mbox[i].label[0] != 0) {
+			time_t curtime = time(0);
+			if (curtime >= mbox[i].prevtime + mbox[i].loopinterval) {
+				NeedRedraw = 1;
+				DM(&mbox[i], DEBUG_INFO,
+				   "working on [%d].label=>%s< [%d].path=>%s<\n", i,
+				   mbox[i].label, i, mbox[i].path);
+				DM(&mbox[i], DEBUG_INFO,
+				   "curtime=%d, prevtime=%d, interval=%d\n",
+				   (int) curtime, (int) mbox[i].prevtime,
+				   mbox[i].loopinterval);
+				mbox[i].prevtime = curtime;
+				displayMsgCounters(i, count_mail(i), &Sleep_Interval,
+								   &Blink_Mode);
+			}
+			if (mbox[i].blink_stat > 0) {
+				if (--mbox[i].blink_stat <= 0) {
+					Blink_Mode &= ~(1 << i);
+					mbox[i].blink_stat = 0;
+				}
+				displayMsgCounters(i, 1, &Sleep_Interval, &Blink_Mode);
+				NeedRedraw = 1;
+			}
+			if (mbox[i].fetchinterval > 0 && mbox[i].fetchcmd[0] != 0
+				&& curtime >=
+				mbox[i].prevfetch_time + mbox[i].fetchinterval) {
+				execCommand(mbox[i].fetchcmd);
+				mbox[i].prevfetch_time = curtime;
+			}
+		}
+	}
+
+	if (Blink_Mode == 0) {
+		for (i = 0; i < num_mailboxes; i++) {
+			mbox[i].blink_stat = 0;
+		}
+		Sleep_Interval = DEFAULT_SLEEP_INTERVAL;
+	} else {
+		Sleep_Interval = BLINK_SLEEP_INTERVAL;
+	}
+
+	if (NeedRedraw) {
+		NeedRedraw = 0;
+		RedrawWindow();
+	}
+
+	return Sleep_Interval;
+}
+
+
 void do_biff(int argc, char **argv)
 {								/*@noreturn@ */
 	int i;
 	int but_pressed_region = -1;
 	time_t curtime;
-	int NeedRedraw = 0;
 	int Sleep_Interval = DEFAULT_SLEEP_INTERVAL;	/* in msec */
-	int Blink_Mode = 0;			/* Bit mask, digits are in blinking mode or not.
-								   Each bit for separate mailbox */
 	const char **skin_xpm = NULL;
 	char *skin_file_path = search_path(skin_search_path, skin_filename);
 
@@ -321,69 +377,21 @@ void do_biff(int argc, char **argv)
 		eraseRect(x_origin, y_origin, 58, 58);
 	}
 
-	/* Initially read mail counters and resets,
-	   and initially draw labels and counters */
+	/* First time setup of button regions and labels */
 	curtime = time(0);
 	for (i = 0; i < num_mailboxes; i++) {
 		/* make it easy to recover the mbox index from a mouse click */
 		AddMouseRegion(i, x_origin, mbox_y(i), 58, mbox_y(i + 1) - 1);
 		if (mbox[i].label[0] != 0) {
-			mbox[i].prevtime = mbox[i].prevfetch_time = curtime;
+			mbox[i].prevtime = mbox[i].prevfetch_time = 0;
 			BlitString(mbox[i].label, x_origin, mbox_y(i), 0);
-			DM(&mbox[i], DEBUG_INFO,
-			   "working on [%d].label=>%s< [%d].path=>%s<\n", i,
-			   mbox[i].label, i, mbox[i].path);
-			displayMsgCounters(i, count_mail(i), &Sleep_Interval,
-							   &Blink_Mode);
 		}
 	}
 
-	RedrawWindow();
-
-	NeedRedraw = 0;
 	while (1) {
 		/* waitpid(0, NULL, WNOHANG); */
 
-		for (i = 0; i < num_mailboxes; i++) {
-			if (mbox[i].label[0] != 0) {
-				curtime = time(0);
-				if (curtime >= mbox[i].prevtime + mbox[i].loopinterval) {
-					NeedRedraw = 1;
-					DM(&mbox[i], DEBUG_INFO,
-					   "working on [%d].label=>%s< [%d].path=>%s<\n", i,
-					   mbox[i].label, i, mbox[i].path);
-					DM(&mbox[i], DEBUG_INFO,
-					   "curtime=%d, prevtime=%d, interval=%d\n",
-					   (int) curtime, (int) mbox[i].prevtime,
-					   mbox[i].loopinterval);
-					mbox[i].prevtime = curtime;
-					displayMsgCounters(i, count_mail(i), &Sleep_Interval,
-									   &Blink_Mode);
-				}
-			}
-			if (mbox[i].blink_stat > 0) {
-				if (--mbox[i].blink_stat <= 0) {
-					Blink_Mode &= ~(1 << i);
-					mbox[i].blink_stat = 0;
-				}
-				displayMsgCounters(i, 1, &Sleep_Interval, &Blink_Mode);
-				NeedRedraw = 1;
-			}
-			if (Blink_Mode == 0) {
-				mbox[i].blink_stat = 0;
-				Sleep_Interval = DEFAULT_SLEEP_INTERVAL;
-			}
-			if (mbox[i].fetchinterval > 0 && mbox[i].fetchcmd[0] != 0
-				&& curtime >=
-				mbox[i].prevfetch_time + mbox[i].fetchinterval) {
-				execCommand(mbox[i].fetchcmd);
-				mbox[i].prevfetch_time = curtime;
-			}
-		}
-		if (NeedRedraw) {
-			NeedRedraw = 0;
-			RedrawWindow();
-		}
+		Sleep_Interval = periodic_mail_check();
 
 		/* X Events */
 		while (XPending(display)) {
