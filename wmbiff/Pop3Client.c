@@ -1,4 +1,4 @@
-/* $Id: Pop3Client.c,v 1.2 2001/06/19 03:38:58 dwonis Exp $ */
+/* $Id: Pop3Client.c,v 1.3 2001/10/04 09:50:59 jordi Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -11,14 +11,24 @@
  */
 
 #include "Client.h"
+#include "charutil.h"
+#ifdef USE_DMALLOC
+#include <dmalloc.h>
+#endif
 
 #define	PCU	(pc->u).pop
+
+FILE *authenticate_md5(Pop3 pc, FILE * fp, char *buf);
+FILE *authenticate_apop(Pop3 pc, FILE * fp, char *apop_str);
 
 FILE *pop3Login(Pop3 pc)
 {
 	int fd;
 	FILE *fp;
 	char buf[BUF_SIZE];
+	char apop_str[BUF_SIZE];
+	char *ptr1, *ptr2;
+	int has_apop = 0;
 
 	if ((fd = sock_connect(PCU.serverName, PCU.serverPort)) == -1) {
 		fprintf(stderr, "Not Connected To Server '%s:%d'\n",
@@ -28,8 +38,43 @@ FILE *pop3Login(Pop3 pc)
 
 	fp = fdopen(fd, "r+");
 	fgets(buf, BUF_SIZE, fp);
-
 	fflush(fp);
+#ifdef DEBUG_POP3
+	fprintf(stderr, "%s", buf);
+#endif
+	/* Detect APOP */
+	for (ptr1 = buf + strlen(buf), ptr2 = NULL; ptr1 > buf; --ptr1) {
+		if (*ptr1 == '>') {
+			ptr2 = ptr1;
+		} else if (*ptr1 == '<') {
+			if (ptr2) {
+				has_apop = 1;
+				*(ptr2 + 1) = 0;
+				strncpy(apop_str, ptr1, BUF_SIZE);
+			}
+			break;
+		}
+	}
+
+#ifdef WITH_GCRYPT
+	/* Try to authenticate using AUTH CRAM-MD5 first */
+	fprintf(fp, "AUTH CRAM-MD5\r\n");
+	fflush(fp);
+	fgets(buf, BUF_SIZE, fp);
+#ifdef DEBUG_POP3
+	fprintf(stderr, "%s", buf);
+#endif
+
+	if (buf[0] == '+' && buf[1] == ' ') {
+		return (authenticate_md5(pc, fp, buf));
+	}
+
+	if (has_apop) {				/* APOP is better than nothing */
+		return (authenticate_apop(pc, fp, apop_str));
+	}
+#endif
+	/* A brave man has nothing to hide */
+
 	fprintf(fp, "USER %s\r\n", PCU.userName);
 	fflush(fp);
 	fgets(buf, BUF_SIZE, fp);
@@ -237,5 +282,91 @@ int parse_new_pop3_path(Pop3 pc, char *str)
 	return 1;
 }
 
+#ifdef WITH_GCRYPT
+
+FILE *authenticate_md5(Pop3 pc, FILE * fp, char *buf)
+{
+	char buf2[BUF_SIZE];
+	unsigned char *md5;
+	GCRY_MD_HD gmh;
+
+	Decode_Base64(buf + 2, buf2);
+#ifdef DEBUG_POP3
+	fprintf(stderr, "POP3 CRAM-MD5 challenge: %s\n", buf2);
+#endif
+
+	strcpy(buf, PCU.userName);
+	strcat(buf, " ");
+
+	gmh = gcry_md_open(GCRY_MD_MD5, GCRY_MD_FLAG_HMAC);
+	gcry_md_setkey(gmh, PCU.password, strlen(PCU.password));
+	gcry_md_write(gmh, (unsigned char *) buf2, strlen(buf2));
+	gcry_md_final(gmh);
+	md5 = gcry_md_read(gmh, 0);
+	//hmac_md5(buf2, strlen(buf2), PCU.password,
+	//      strlen(PCU.password), md5);
+	Bin2Hex(md5, 16, buf2);
+	gcry_md_close(gmh);
+
+	strcat(buf, buf2);
+#ifdef DEBUG_POP3
+	fprintf(stderr, "POP3 CRAM-MD5 response: %s\n", buf);
+#endif
+	Encode_Base64(buf, buf2);
+
+	fprintf(fp, "%s\r\n", buf2);
+	fflush(fp);
+	fgets(buf, BUF_SIZE, fp);
+
+	if (!strncmp(buf, "+OK", 3))
+		return fp;				/* AUTH successful */
+	else {
+		fprintf(stderr,
+				"POP3 CRAM-MD5 AUTH failed for user '%s@%s:%d'\n",
+				PCU.userName, PCU.serverName, PCU.serverPort);
+		fprintf(stderr, "It said %s", buf);
+		fprintf(fp, "QUIT\r\n");
+		fclose(fp);
+		return NULL;
+	}
+}
+
+FILE *authenticate_apop(Pop3 pc, FILE * fp, char *apop_str)
+{
+	GCRY_MD_HD gmh;
+	char buf[BUF_SIZE];
+	unsigned char *md5;
+
+#ifdef DEBUG_POP3
+	fprintf(stderr, "POP3 APOP challenge: %s\n", apop_str);
+#endif
+	strcat(apop_str, PCU.password);
+
+	gmh = gcry_md_open(GCRY_MD_MD5, 0);
+	gcry_md_write(gmh, (unsigned char *) apop_str, strlen(apop_str));
+	gcry_md_final(gmh);
+	md5 = gcry_md_read(gmh, 0);
+	Bin2Hex(md5, 16, buf);
+	gcry_md_close(gmh);
+
+#ifdef DEBUG_POP3
+	fprintf(stderr, "POP3 APOP response: %s %s\n", PCU.userName, buf);
+#endif
+	fprintf(fp, "APOP %s %s\r\n", PCU.userName, buf);
+	fflush(fp);
+	fgets(buf, BUF_SIZE, fp);
+
+	if (!strncmp(buf, "+OK", 3))
+		return fp;				/* AUTH successful */
+	else {
+		fprintf(stderr, "POP3 APOP AUTH failed for user '%s@%s:%d'\n",
+				PCU.userName, PCU.serverName, PCU.serverPort);
+		fprintf(stderr, "It said %s", buf);
+		fprintf(fp, "QUIT\r\n");
+		fclose(fp);
+		return NULL;
+	}
+}
+#endif
 
 /* vim:set ts=4: */

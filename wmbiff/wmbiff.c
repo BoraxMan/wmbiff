@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.6 2001/10/04 08:54:02 jordi Exp $ */
+/* $Id: wmbiff.c,v 1.7 2001/10/04 09:50:59 jordi Exp $ */
 
 #define	USE_POLL
 
@@ -23,6 +23,10 @@
 
 #include "Client.h"
 #include "charutil.h"
+
+#ifdef USE_DMALLOC
+#include <dmalloc.h>
+#endif
 
 #include "wmbiff-master.xpm"
 char wmbiff_mask_bits[64 * 64];
@@ -469,6 +473,8 @@ void parse_mbox_path(int item)
 	} else if (!strncasecmp(mbox[item].path, "licq:", 5)) {	/* licq history file */
 		licqCreate((&mbox[item]), mbox[item].path);
 	} else if (!strncasecmp(mbox[item].path, "imap:", 5)) {	/* imap4 account */
+		imap4Create((&mbox[item]), mbox[item].path);
+	} else if (!strncasecmp(mbox[item].path, "sslimap:", 8)) {	/* sslimap4 account */
 		imap4Create((&mbox[item]), mbox[item].path);
 	} else if (!strncasecmp(mbox[item].path, "maildir:", 8)) {	/* maildir */
 		maildirCreate((&mbox[item]), mbox[item].path);

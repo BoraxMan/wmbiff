@@ -1,0 +1,5 @@
+- Make imap regex parser limit username, password to 32
+  characters as referenced in the structure that stores them.
+- Store and or verify server certificates.
+
+$Id: TODO,v 1.1 2001/10/04 09:50:59 jordi Exp $

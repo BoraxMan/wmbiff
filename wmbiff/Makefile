@@ -1,5 +1,11 @@
-# $Id: Makefile,v 1.9 2001/10/04 08:54:02 jordi Exp $
-WMBIFF_VERSION="0.3.1"
+# $Id: Makefile,v 1.10 2001/10/04 09:50:59 jordi Exp $
+
+WMBIFF_VERSION="0.3.1ssl"
+EXTRAFLAGS = -DWITH_TLS -DWITH_GCRYPT
+LIBS   = -lgnutls -lgcrypt
+WMBIFF_VERSION = "0.3.1ssl"
+
+
 DESTDIR=
 prefix=/usr/local
 bindir=${prefix}/bin
@@ -8,17 +14,22 @@ CONF=/etc
 
 CC     = gcc
 LIBDIR = -L/usr/X11R6/lib
-LIBS   = -lXpm -lXext -lX11
-CFLAGS = -O2 -Wall
+LIBS   += -lXpm -lXext -lX11 
+CFLAGS = -O2 -Wall -Wpointer-arith
 #CFLAGS = -g -Wall -pedantic 
 
-EXTRAFLAGS = -DWMBIFF_VERSION='$(WMBIFF_VERSION)'
+EXTRAFLAGS += -DWMBIFF_VERSION='$(WMBIFF_VERSION)' 
+
 #EXTRAFLAGS += -DDEBUG_POP3 -DDEBUG_IMAP4 -DDEBUG_LICQ \
-#	-DDEBUG_MBOX -DDEBUG_MAILDIR -DDEBUG -DDEBUG_MAIL_COUNT
+#	-DDEBUG_MBOX -DDEBUG_MAILDIR -DDEBUG -DDEBUG_MAIL_COUNT \
+#       -DDEBUG_COMM
+
+#CFLAGS += -DUSE_DMALLOC
+#LIBS   += -ldmalloc
 
 OBJS =	wmbiff.o socket.o \
-	Pop3Client.o Imap4Client.o LicqClient.o mboxClient.o \
-	maildirClient.o \
+	Pop3Client.o LicqClient.o mboxClient.o \
+	maildirClient.o Imap4Client.o tlsComm.o \
 	../wmgeneral/wmgeneral.o \
 	../wmgeneral/misc.o \
 	../wmgeneral/list.o \
@@ -29,11 +40,13 @@ INSTALL_DIR	= $(INSTALL) -p -d -o root -g root -m 755
 INSTALL_PROGRAM	= $(INSTALL) -p -o root -g root -m 755
 INSTALL_FILE 	= $(INSTALL) -p -o root -g root -m 644
 
+all: wmbiff-master.xpm wmbiff
+
+Imap4Client.o: Imap4Client.c Client.h Makefile
 
 .c.o:
 	$(CC) $(CFLAGS) $(EXTRAFLAGS) -c $< -o $*.o
 
-all: wmbiff-master.xpm wmbiff
 
 wmbiff-master.xpm:
 	ln -s wmbiff-master-led.xpm wmbiff-master.xpm
@@ -74,3 +87,4 @@ install: wmbiff
 #	-- Dwayne C. Litzenberger <dlitz@dlitz.net>
 indent:
 	indent -npro -kr -i4 -ts4 *.[ch] || true
+

@@ -11,8 +11,8 @@
    Yellow digits display number of unread messages, with blinking on new
    mail arrival, if any.
    
-   At this moment unix-style (mbox), maildir POP3 and IMAP mailboxes are
-   supported. wmBiff also understands Licq's history files.
+   At this moment unix-style (mbox), maildir, POP3, APOP and IMAP mailboxes
+   are supported. wmBiff also understands Licq's history files.
    wmBiff supports up to 5 mailboxes (but you can start 2 or more
    wmbiff's with differrent configs).
    
@@ -78,7 +78,9 @@ position. All other positions will be empty.
    Dwayne C. Litzenberger (dlitz@dlitz.net)
    Mark Hurley (debian4tux@telocity.com)
    Rob Funk (rfunk@funkinet.net)
+   Neil Spring (nspring@cs.washington.edu)
    NAKAYAMA Takao (hoehoe@wakaba.jp)
+   Jay T Francis (jtf@u880.org)
 
 
      _________________________________________________________________

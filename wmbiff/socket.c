@@ -1,4 +1,4 @@
-/* $Id: socket.c,v 1.2 2001/06/19 03:38:58 dwonis Exp $ */
+/* $Id: socket.c,v 1.3 2001/10/04 09:50:59 jordi Exp $ */
 /* Copyright (C) 1998 Trent Piepho  <xyzzy@u.washington.edu>
  *           (C) 1999 Trent Piepho  <xyzzy@speakeasy.org>
  *
@@ -24,8 +24,11 @@
 #include <netdb.h>
 #include <stdio.h>
 
+#ifdef USE_DMALLOC
+#include <dmalloc.h>
+#endif
 
-int sock_connect(char *hostname, int port)
+int sock_connect(const char *hostname, int port)
 {
 	struct hostent *host;
 	struct sockaddr_in addr;

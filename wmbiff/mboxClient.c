@@ -1,4 +1,4 @@
-/* $Id: mboxClient.c,v 1.2 2001/06/19 03:38:58 dwonis Exp $ */
+/* $Id: mboxClient.c,v 1.3 2001/10/04 09:50:59 jordi Exp $ */
 /* Author:		Yong-iL Joh <tolkien@mizi.com>
    Modified:	Jorge García <Jorge.Garcia@uv.es>
    			 	Rob Funk <rfunk@funknet.net>
@@ -13,6 +13,9 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <utime.h>
+#ifdef USE_DMALLOC
+#include <dmalloc.h>
+#endif
 
 #define PCM	(pc->u).mbox
 #define FROM_STR   "From "

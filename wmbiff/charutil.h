@@ -1,4 +1,4 @@
-/* $Id: charutil.h,v 1.2 2001/06/19 03:38:58 dwonis Exp $ */
+/* $Id: charutil.h,v 1.3 2001/10/04 09:50:59 jordi Exp $ */
 /* Author: Mark Hurley  (debian4tux@telocity.com)
  *
  * Simple char util's to trim char string arrays
@@ -8,8 +8,11 @@
 #ifndef CHARUTIL
 #define CHARUTIL
 
-inline int LeftTrim(char *psValue);
-inline int RightTrim(char *psValue);
-inline int FullTrim(char *psValue);
+int FullTrim(char *psValue);
+
+void Bin2Hex(unsigned char *src, int length, char *dst);
+
+void Encode_Base64(char *src, char *dst);
+void Decode_Base64(char *src, char *dst);
 
 #endif

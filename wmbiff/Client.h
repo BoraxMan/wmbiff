@@ -1,4 +1,4 @@
-/* $Id: Client.h,v 1.4 2001/10/04 08:54:02 jordi Exp $ */
+/* $Id: Client.h,v 1.5 2001/10/04 09:50:59 jordi Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -15,6 +15,10 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#ifdef WITH_GCRYPT
+#include <gcrypt.h>
+#endif
 
 typedef struct _mbox_t *Pop3;
 typedef struct _mbox_t {
@@ -51,6 +55,14 @@ typedef struct _mbox_t {
 			int serverPort;
 			int localPort;
 		} pop;
+		struct {
+			char password[32];
+			char userName[32];
+			char serverName[256];
+			int serverPort;
+			int localPort;
+			unsigned int dossl:1;
+		} imap;
 	} u;
 
 	FILE *(*open) (Pop3);
@@ -63,9 +75,9 @@ typedef struct _mbox_t {
 
 #define BUF_SIZE 1024
 
-int sock_connect(char *hostname, int port);
+int sock_connect(const char *hostname, int port);
 int pop3Create(Pop3 pc, char *str);
-int imap4Create(Pop3 pc, char *str);
+int imap4Create(Pop3 pc, const char *str);
 int licqCreate(Pop3 pc, char *str);
 int mboxCreate(Pop3 pc, char *str);
 int maildirCreate(Pop3 pc, char *str);

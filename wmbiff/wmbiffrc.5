@@ -1,12 +1,12 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiffrc.5,v 1.4 2001/10/04 08:54:02 jordi Exp $
+.\" $Id: wmbiffrc.5,v 1.5 2001/10/04 09:50:59 jordi Exp $
 .\"
 .\" wmbiff.1 and wmbiffrc.5 are copyright 1999-2001 by 
 .\" Jordi Mallach <jordi@debian.org>
 .\"
 .\" This is free documentation, see the latest version of the GNU
 .\" General Public License for copying conditions. There is NO warranty.
-.TH WMBIFFRC 5 "March 12, 2001" "wmbiff"
+.TH WMBIFFRC 5 "October 4, 2001" "wmbiff"
 
 .SH NAME
 wmbiffrc \- configuration file for
@@ -75,6 +75,18 @@ the given values and will display info about the remote mail. This type
 accepts user, password, host and optional path to mailbox and port number.
 .RS
 imap:user:password@server[/mailbox][:port]
+.RE
+.TP
+.I sslimap
+These are IMAP4 boxes wrapped in a TLS (SSL) connection, only available if 
+wmbiff was compiled with TLS support.  Parameters are the same as those for 
+ordinary IMAP4 boxes.  Port defaults to 993. If 143 is specified, 
+wmbiff will attempt to connect unencrypted but negotiate TLS using
+IMAP's STARTTLS command.  TLS support uses gnutls, which is under development
+and may be insecure.  TLS support is only for encryption: since certificates
+are not yet checked, it is vulnerable to man-in-the-middle attack.
+.RS
+sslimap:user:password@server[/mailbox][:port]
 .RE
 .TP
 .I licq
