@@ -1,5 +1,5 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiffrc.5.in,v 1.10 2002/12/09 21:45:29 bluehal Exp $
+.\" $Id: wmbiffrc.5.in,v 1.11 2003/02/08 21:04:49 bluehal Exp $
 .\"
 .\" @configure_input@
 .\"
@@ -167,7 +167,7 @@ finger:user@host
 .RE
 .TP
 .I shell
-With this EXPERIMENTAL keyword, wmbiff will launch the
+With this keyword, wmbiff will launch the
 specified shell command and read its output (STDOUT)
 expecting an integer message count or a three-character
 string.  If "new" is in the first line, the string or number
@@ -248,10 +248,15 @@ For problems authenticating to servers, try specifying the
 authentication method explicitly as described above:
 sometimes a failed attempt to authenticate can cause later
 failures.  Some servers claim to support cram-md5 but fail:
-telling wmbiff not totry can help.
+telling wmbiff not to try can help.
 
 For other problems, run wmbiff with the -debug option.  See
 wmbiff(1) for details.
+
+While editing .wmbiffrc, you may find it useful to restart
+wmbiff using either control-shift mouse button 1, or killall
+-USR1 wmbiff.
+
 
 .SH FILES
 .TP

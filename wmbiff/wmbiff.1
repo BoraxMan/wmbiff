@@ -1,5 +1,5 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiff.1,v 1.12 2002/12/13 05:38:39 bluehal Exp $
+.\" $Id: wmbiff.1,v 1.13 2003/02/08 21:04:48 bluehal Exp $
 .\"
 .\" wmbiff.1 and wmbiffrc.5 are copyright 1999-2001 by
 .\" Jordi Mallach <jordi@debian.org>
@@ -34,7 +34,10 @@ and also optionally, a command can be executed on mail arrival (for example,
 opening your mail reader or playing a sound file).
 
 Pressing mouse button 1 will execute a command, defined in the user's config
-file. Mouse button 3 will execute a command to fetch mail, if defined.
+file. Mouse button 3 will execute a command to fetch mail, if defined.  
+To restart wmbiff, press mouse button 1 while holding control and shift keys,
+or send it SIGUSR1.
+
 .PP
 
 .SH OPTIONS
