@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.45 2003/01/19 13:13:04 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.46 2003/01/28 11:12:25 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -222,7 +222,7 @@ static void parse_mbox_path(unsigned int item)
 	/* if found, execute */
 	if (paths[i].id != NULL) {
 		if (paths[i].creator((&mbox[item]), mbox[item].path) != 0) {
-			DMA(DEBUG_ERROR, "creator for mailbox %u returned failure",
+			DMA(DEBUG_ERROR, "creator for mailbox %u returned failure\n",
 				item);
 		}
 	} else {
