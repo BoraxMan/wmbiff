@@ -1,4 +1,4 @@
-/* $Id: Pop3Client.c,v 1.14 2002/06/21 04:31:58 bluehal Exp $ */
+/* $Id: Pop3Client.c,v 1.15 2002/07/04 01:07:28 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -198,9 +198,10 @@ int pop3Create(Pop3 pc, const char *str)
 
 	grab_authList(str + regs.end[0], PCU.authList);
 
+	free(regs.end);				// added 3 jul 02, appeasing valgrind
+	free(regs.start);			// added 3 jul 02, appeasing valgrind
+
 	POP_DM(pc, DEBUG_INFO, "userName= '%s'\n", PCU.userName);
-	POP_DM(pc, DEBUG_INFO, "password= is %d characters long\n",
-		   strlen(PCU.password));
 	POP_DM(pc, DEBUG_INFO, "password is %d chars long\n",
 		   strlen(PCU.password));
 	POP_DM(pc, DEBUG_INFO, "serverName= '%s'\n", PCU.serverName);

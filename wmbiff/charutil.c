@@ -1,4 +1,4 @@
-/* $Id: charutil.c,v 1.12 2002/06/21 04:31:31 bluehal Exp $ */
+/* $Id: charutil.c,v 1.13 2002/07/04 01:07:28 bluehal Exp $ */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -221,6 +221,7 @@ int compile_and_match_regex(const char *regex, const char *str,	/*@out@ */
 	}
 #endif
 
+	regfree(&rpbuf);			// added 3 jul 02, appeasing valgrind
 	return matchedchars;
 }
 

@@ -124,6 +124,8 @@ getline_from_buffer(char *readbuffer, char *linebuffer, int linebuflen)
 	if (i != 0) {
 		/* grab the end of line too! */
 		i++;
+		/* advance past the newline */
+		p++;
 		/* copy a line into the linebuffer */
 		strncpy(linebuffer, readbuffer, (size_t) i);
 		/* sigh, null terminate */
@@ -132,10 +134,9 @@ getline_from_buffer(char *readbuffer, char *linebuffer, int linebuflen)
 		   instead with strcpy... I think. */
 		q = readbuffer;
 		if (*p != '\0') {
-			p++;
-			do {
+			while (*p != '\0') {
 				*(q++) = *(p++);
-			} while (*p != '\0');
+			}
 		}
 		/* null terminate */
 		*(q++) = *(p++);
@@ -154,17 +155,18 @@ getline_from_buffer(char *readbuffer, char *linebuffer, int linebuflen)
    certainly tlscomm_close(scs): don't _expect() anything
    unless anything else would represent failure */
 int tlscomm_expect(struct connection_state *scs,
-				   const char *prefix, char *buf, int buflen)
+				   const char *prefix, char *linebuf, int buflen)
 {
 	int prefixlen = (int) strlen(prefix);
 	int readbytes = -1;
-	memset(buf, 0, buflen);
+	memset(linebuf, 0, buflen);
 	TDM(DEBUG_INFO, "%s: expecting: %s\n", scs->name, prefix);
 	while (wait_for_it(scs->sd, EXPECT_TIMEOUT)) {
 #ifdef HAVE_GNUTLS_H
 		if (scs->state) {
+			/* BUF_SIZE - 1 leaves room for trailing \0 */
 			readbytes =
-				gnutls_read(scs->state, scs->unprocessed, BUF_SIZE);
+				gnutls_read(scs->state, scs->unprocessed, BUF_SIZE - 1);
 			if (readbytes < 0) {
 				handle_gnutls_read_error(readbytes, scs);
 				return 0;
@@ -176,35 +178,37 @@ int tlscomm_expect(struct connection_state *scs,
 		} else
 #endif
 		{
-			readbytes = read(scs->sd, scs->unprocessed, BUF_SIZE);
+			readbytes = read(scs->sd, scs->unprocessed, BUF_SIZE - 1);
 			if (readbytes < 0) {
 				TDM(DEBUG_ERROR, "%s: error reading: %s\n", scs->name,
 					strerror(errno));
 				return 0;
 			}
-			if (readbytes > BUF_SIZE) {
+			if (readbytes >= BUF_SIZE) {
 				TDM(DEBUG_ERROR, "%s: unexpected read bork!: %d %s\n",
 					scs->name, readbytes, strerror(errno));
 			}
 		}
+		/* force null termination */
+		scs->unprocessed[readbytes] = '\0';
 		if (readbytes == 0) {
 			return 0;			/* bummer */
 		} else
 			while (readbytes >= prefixlen) {
 				int linebytes;
 				linebytes =
-					getline_from_buffer(scs->unprocessed, buf, buflen);
+					getline_from_buffer(scs->unprocessed, linebuf, buflen);
 				if (linebytes == 0) {
 					readbytes = 0;
 				} else {
 					readbytes -= linebytes;
-					if (strncmp(buf, prefix, prefixlen) == 0) {
+					if (strncmp(linebuf, prefix, prefixlen) == 0) {
 						TDM(DEBUG_INFO, "%s: got: %*s", scs->name,
-							readbytes, buf);
+							readbytes, linebuf);
 						return 1;	/* got it! */
 					}
 					TDM(DEBUG_INFO, "%s: dumped(%d/%d): %.*s", scs->name,
-						linebytes, readbytes, linebytes, buf);
+						linebytes, readbytes, linebytes, linebuf);
 				}
 			}
 	}
@@ -213,7 +217,7 @@ int tlscomm_expect(struct connection_state *scs,
 			scs->name, prefix);
 	} else {
 		TDM(DEBUG_ERROR, "%s: expecting: '%s', saw (%d): %s\n",
-			scs->name, prefix, readbytes, buf);
+			scs->name, prefix, readbytes, linebuf);
 	}
 	return 0;					/* wait_for_it failed */
 }

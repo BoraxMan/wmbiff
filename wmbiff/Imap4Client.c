@@ -363,6 +363,9 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 
 	grab_authList(str + regs.end[0], PCU.authList);
 
+	free(regs.end);				// added 3 jul 02, appeasing valgrind
+	free(regs.start);			// added 3 jul 02, appeasing valgrind
+
 	IMAP_DM(pc, DEBUG_INFO, "userName= '%s'\n", PCU.userName);
 	IMAP_DM(pc, DEBUG_INFO, "password is %d characters long\n",
 			(int) strlen(PCU.password));

@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.31 2002/06/23 01:26:56 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.32 2002/07/04 01:07:28 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -73,7 +73,7 @@ void displayMsgCounters(int, int, int *, int *);
 
 void usage(void);
 void printversion(void);
-void do_biff(int argc, char **argv) __attribute__ ((noreturn));
+void do_biff(int argc, char **argv);
 void parse_mbox_path(int item);
 static void BlitString(const char *name, int x, int y, int new);
 void BlitNum(int num, int x, int y, int new);
@@ -90,6 +90,7 @@ const char *highlight = "yellow";
 const int num_mailboxes = 5;
 const int x_origin = 5;
 const int y_origin = 5;
+int forever = 1;
 
 /* where vertically the mailbox sits for blitting characters. */
 static int mbox_y(int mboxnum)
@@ -344,7 +345,7 @@ static int periodic_mail_check(void)
 
 
 void do_biff(int argc, char **argv)
-{								/*@noreturn@ */
+{
 	int i;
 	int but_pressed_region = -1;
 	time_t curtime;
@@ -388,7 +389,9 @@ void do_biff(int argc, char **argv)
 		}
 	}
 
-	while (1) {
+	do {
+		/* while (forever) {            * forever is usually true, 
+		   but not when debugging with -exit */
 		/* waitpid(0, NULL, WNOHANG); */
 
 		Sleep_Interval = periodic_mail_check();
@@ -433,6 +436,9 @@ void do_biff(int argc, char **argv)
 			}
 		}
 		XSleep(Sleep_Interval);
+	} while (forever);
+	if (skin_xpm != NULL) {
+		free(skin_xpm);			// added 3 jul 02, appeasing valgrind
 	}
 }
 
@@ -925,6 +931,11 @@ void parse_cmd(int argc, char **argv, /*@out@ */ char *config_file)
 				if (argc > (i + 1)) {
 					strncpy(config_file, argv[i + 1], 255);
 					i++;
+				}
+				break;
+			case 'e':			/* undocumented for debugging */
+				if (strcmp(arg + 1, "exit") == 0) {
+					forever = 0;
 				}
 				break;
 			default:

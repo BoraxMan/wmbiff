@@ -53,3 +53,8 @@ config-h-check:
 	ls *.c | sort > cfiles
 	grep -l config.h *.c | sort | diff - cfiles
 	rm cfiles
+
+# just a reminder of how to run valgrind to get decent output.
+valgrind:
+	valgrind --leak-check=yes ./wmbiff -exit
+
