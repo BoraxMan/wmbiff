@@ -46,7 +46,7 @@ static int permissions_ok(Pop3 pc, const char *askpass_fname)
 {
 	struct stat st;
 	if (index(askpass_fname, ' ')) {
-		DM(pc, DEBUG_ERROR,
+		DM(pc, DEBUG_INFO,
 		   "askpass has a space in it; not verifying ownership/permissions on '%s'\n",
 		   askpass_fname);
 		return (1);
