@@ -10,21 +10,25 @@
 # it's skanky that I have to look explicitly for a newer 
 # version to invoke.
 
-if [ -x /usr/bin/automake-1.6 ]; then 
+if [ -x /usr/bin/automake-1.7 ]; then 
+    echo "Using automake 1.7";
+    AUTOMAKE=automake-1.7
+    ACLOCAL=aclocal-1.7
+elif [ -x /usr/bin/automake-1.6 ]; then
     echo "Using automake 1.6";
-  AUTOMAKE=automake-1.6
-  ACLOCAL=aclocal-1.6
+    AUTOMAKE=automake-1.6
+    ACLOCAL=aclocal-1.6
 else
-  AUTOMAKE=automake
-  ACLOCAL=aclocal
+    AUTOMAKE=automake
+    ACLOCAL=aclocal
 fi
 
 # debian, at least, handles this one correctly;
 # this hack is for potential redhatters.
 if [ -x /usr/bin/autoconf2.50 ]; then 
     echo "Using autoconf 2.5x";
-  AUTOCONF=autoconf2.50
-  AUTOHEADER=autoheader2.50
+    AUTOCONF=autoconf2.50
+    AUTOHEADER=autoheader2.50
 else
     if [ -x /usr/bin/autoconf-2.53 ]; then 
         echo "Using autoconf 2.53 (redhat-hack)";
