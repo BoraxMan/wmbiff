@@ -1,4 +1,4 @@
-/* $Id: Client.h,v 1.14 2002/04/07 05:08:23 bluehal Exp $ */
+/* $Id: Client.h,v 1.15 2002/04/15 01:30:32 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -36,6 +36,8 @@ typedef struct _mbox_t {
 	int UnreadMsgs;				/* New (unread) messages in mailbox */
 	int OldMsgs;
 	int OldUnreadMsgs;
+	char TextStatus[10];		/* if set to a string, toupper() and blit that string. 
+								 * instead of a message count */
 	int blink_stat;				/* blink digits flag-counter */
 	int debug;					/* debugging status */
 
