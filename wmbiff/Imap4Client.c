@@ -417,6 +417,16 @@ void imap_cacheHeaders( /*@notnull@ */ Pop3 pc)
 						} else if (strncasecmp(hdrbuf, "From: ", 5) == 0) {
 							strncpy(m->from, hdrbuf + 6, FROM_LEN - 1);
 							m->from[FROM_LEN - 1] = '\0';
+						} else if (strncasecmp(hdrbuf, "a04 OK FETCH", 5)
+								   == 0) {
+							/* server says we're done getting this header, which
+							   may occur if the message has no subject */
+							if (m->from[0] == '\0') {
+								strcpy(m->from, " ");
+							}
+							if (m->subj[0] == '\0') {
+								strcpy(m->subj, "(no subject)");
+							}
 						}
 					} else {
 						IMAP_DM(pc, DEBUG_ERROR,
