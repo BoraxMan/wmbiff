@@ -297,8 +297,8 @@ static int print_info(GNUTLS_STATE state)
 			printf(" - Certificate Issuer's info:\n");
 			PRINT_DN(dn);
 		}
-    default:
-      printf(" - Other.\n");
+	default:
+		printf(" - Other.\n");
 	}
 
 	tmp = gnutls_protocol_get_name(gnutls_protocol_get_version(state));
@@ -402,7 +402,8 @@ void handle_gnutls_read_error(int readbytes, struct connection_state *scs)
 #else
 /* declare stubs when tls isn't compiled in */
 struct connection_state *initialize_gnutls( /*@unused@ */ int sd,
-										   /*@unused@ */ char *name)
+										   /*@unused@ */ char *name,
+										   /*@unused@ */ Pop3 pc)
 {
 	DMA(DEBUG_ERROR,
 		"FATAL: tried to initialize ssl when ssl wasn't compiled in.\n");
