@@ -1,4 +1,4 @@
-/* $Id: socket.c,v 1.4 2002/04/12 05:54:36 bluehal Exp $ */
+/* $Id: socket.c,v 1.5 2002/06/01 05:42:38 bluehal Exp $ */
 /* Copyright (C) 1998 Trent Piepho  <xyzzy@u.washington.edu>
  *           (C) 1999 Trent Piepho  <xyzzy@speakeasy.org>
  *
@@ -34,9 +34,48 @@
 /* nspring/blueHal, 10 Apr 2002; added some extra error
    printing, in line with the debug-messages-to-stdout
    philosophy of the rest of the wmbiff code */
+/* 29 May 2002; incorporated IPv6 support by 
+   Jun-ichiro itojun Hagino <itojun@iijlab.net>, thanks! */
+
 
 int sock_connect(const char *hostname, int port)
 {
+#ifdef HAVE_GETADDRINFO
+	struct addrinfo hints, *res, *res0;
+	int fd;
+	char pbuf[NI_MAXSERV];
+	int error;
+
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_socktype = SOCK_STREAM;
+	snprintf(pbuf, sizeof(pbuf), "%d", port);
+	error = getaddrinfo(hostname, pbuf, &hints, &res0);
+	if (error) {
+		printf("%s: %s\n", hostname, gai_strerror(error));
+		return -1;
+	}
+
+	fd = -1;
+	for (res = res0; res; res = res->ai_next) {
+		fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+		if (fd < 0)
+			continue;
+		if (connect(fd, res->ai_addr, res->ai_addrlen) < 0) {
+			close(fd);
+			fd = -1;
+			continue;
+		}
+		break;
+	}
+	freeaddrinfo(res0);
+	if (fd < 0) {
+		perror("Error connecting");
+		printf("socket/connect to %s failed: %s\n", hostname,
+			   strerror(errno));
+		return -1;
+	}
+	return fd;
+#else
 	struct hostent *host;
 	struct sockaddr_in addr;
 	int fd, i;
@@ -67,6 +106,7 @@ int sock_connect(const char *hostname, int port)
 		return (-1);
 	};
 	return (fd);
+#endif
 }
 
 /* vim:set ts=4: */
