@@ -8,6 +8,14 @@
 #define UNUSED(x) x
 #endif
 
+#ifdef HAVE_MEMFROB
+#define DEFROB(x) memfrob(x, strlen(x))
+#define ENFROB(x) memfrob(x, strlen(x))
+#else
+#define DEFROB(x)
+#define ENFROB(x)
+#endif
+
 #include "Client.h"
 #include "passwordMgr.h"
 
@@ -211,6 +219,13 @@ int test_imap4creator(void) {
         return 1;
     }
     CKSTRING(m.u.pop_imap.authList, "cram-md5 plaintext");
+
+    if(imap4Create(&m, "imap:harry:has#pass@bar/\"mybox\":12 CRAm-md5 plainTEXt")) {
+        return 1;
+    }
+    CKSTRING(m.u.pop_imap.userName, "harry");
+    DEFROB(m.u.pop_imap.password);
+    CKSTRING(m.u.pop_imap.password, "has#pass");
 
 
     if(pop3Create(&m, "pop3:foo:@bar:12 cram-md5 plaintext")) {
