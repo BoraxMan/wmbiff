@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.16 2002/03/06 07:15:08 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.17 2002/03/06 07:59:24 bluehal Exp $ */
 
 #define	USE_POLL
 
@@ -507,7 +507,7 @@ int Read_Config_File(char *filename, int *loopinterval)
 {
 	FILE *fp;
 	char setting[17], value[250];
-	int index;
+	int mbox_index;
 
 	if (!(fp = fopen(filename, "r"))) {
 		DMA(DEBUG_ERROR, "Unable to open %s, no settings read: %s\n",
@@ -515,26 +515,26 @@ int Read_Config_File(char *filename, int *loopinterval)
 		return 0;
 	}
 	while (!feof(fp)) {
-		if (ReadLine(fp, setting, value, &index) == -1)
+		if (ReadLine(fp, setting, value, &mbox_index) == -1)
 			continue;
 		if (!strcmp(setting, "interval")) {
 			*loopinterval = atoi(value);
-		} else if (index == -1)
+		} else if (mbox_index == -1)
 			continue;			/* Didn't read any setting.[0-5] value */
 		if (!strcmp(setting, "label.")) {
-			strcpy(mbox[index].label, value);
+			strcpy(mbox[mbox_index].label, value);
 		} else if (!strcmp(setting, "path.")) {
-			strcpy(mbox[index].path, value);
+			strcpy(mbox[mbox_index].path, value);
 		} else if (!strcmp(setting, "notify.")) {
-			strcpy(mbox[index].notify, value);
+			strcpy(mbox[mbox_index].notify, value);
 		} else if (!strcmp(setting, "action.")) {
-			strcpy(mbox[index].action, value);
+			strcpy(mbox[mbox_index].action, value);
 		} else if (!strcmp(setting, "interval.")) {
-			mbox[index].loopinterval = atoi(value);
+			mbox[mbox_index].loopinterval = atoi(value);
 		} else if (!strcmp(setting, "fetchcmd.")) {
-			strcpy(mbox[index].fetchcmd, value);
+			strcpy(mbox[mbox_index].fetchcmd, value);
 		} else if (!strcmp(setting, "fetchinterval.")) {
-			mbox[index].fetchinterval = atoi(value);
+			mbox[mbox_index].fetchinterval = atoi(value);
 		} else if (!strcmp(setting, "debug.")) {
 			int debug_value = debug_default;
 			if (strcasecmp(value, "all") == 0) {
@@ -543,13 +543,13 @@ int Read_Config_File(char *filename, int *loopinterval)
 			/* could disable debugging, but I want the command
 			   line argument to provide all information
 			   possible. */
-			mbox[index].debug = debug_value;
+			mbox[mbox_index].debug = debug_value;
 		}
 	}
-	for (index = 0; index < 5; index++)
-		if (mbox[index].label[0] != 0)
-			parse_mbox_path(index);
 	fclose(fp);
+	for (mbox_index = 0; mbox_index < 5; mbox_index++)
+		if (mbox[mbox_index].label[0] != 0)
+			parse_mbox_path(mbox_index);
 	return 1;
 }
 
