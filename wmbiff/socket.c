@@ -1,4 +1,4 @@
-/* $Id: socket.c,v 1.5 2002/06/01 05:42:38 bluehal Exp $ */
+/* $Id: socket.c,v 1.6 2002/06/01 05:45:06 bluehal Exp $ */
 /* Copyright (C) 1998 Trent Piepho  <xyzzy@u.washington.edu>
  *           (C) 1999 Trent Piepho  <xyzzy@speakeasy.org>
  *
@@ -34,7 +34,7 @@
 /* nspring/blueHal, 10 Apr 2002; added some extra error
    printing, in line with the debug-messages-to-stdout
    philosophy of the rest of the wmbiff code */
-/* 29 May 2002; incorporated IPv6 support by 
+/* 1 June 2002; incorporated IPv6 support by 
    Jun-ichiro itojun Hagino <itojun@iijlab.net>, thanks! */
 
 
