@@ -69,7 +69,7 @@ fi
 ACLOCAL=${ACLOCAL} AUTOHEADER=${AUTOHEADER} \
 AUTOCONF=${AUTOCONF} AUTOMAKE=${AUTOMAKE}  \
 ${AUTORECONF} --verbose --install --symlink && \
- ./configure && \
+ ./configure --enable-dependency-tracking \
  make
 
 #if [ -e /usr/share/aclocal/libgnutls.m4 ]; then
