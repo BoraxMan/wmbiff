@@ -1,7 +1,37 @@
 CVS Changelog.  Don't bother editing this file, because it will get overwritten
 by maint/prerelease.sh .
 
-$
+The latest changelog entry is in a different format, because it's inserted by
+CVS on commit.
+
+  $Log: CHANGES,v $
+  Revision 1.2  2001/06/19 03:52:02  dwonis
+  * Whoops!  Messed up CVS expansion in maint/prerelease.sh.  Fixed it.
+  * Also changed maint/prerelease.sh a bit.
+
+
+2001-06-19 Tuesday 03:38 UTC -- Dwayne C. Litzenberger <dlitz@dlitz.net>
+
+	* CHANGES, ChangeLog, README, RELEASE-NOTES, maint/changelog.sed,
+	maint/prerelease.sh, wmbiff/Client.h, wmbiff/Imap4Client.c,
+	wmbiff/LicqClient.c, wmbiff/Makefile, wmbiff/Pop3Client.c,
+	wmbiff/charutil.c, wmbiff/charutil.h, wmbiff/maildirClient.c,
+	wmbiff/mboxClient.c, wmbiff/sample.wmbiffrc, wmbiff/socket.c,
+	wmbiff/wmbiff.1, wmbiff/wmbiff.c, wmbiff/wmbiffrc.5: * Another big
+	patch that mucks with everything.  I probably deserve to be  
+	flamed for this practice.  Feel free... :-) * Added
+	maint/prerelease.sh script.  Run it before making any releases.  *
+	Added maint/changelog.sed.  Add your SourceForge userid here.  *
+	Moved ChangeLog to RELEASE-NOTES (see below).  * Added a new file,
+	CHANGES (created by maint/prerelease.sh) that tabulates   all the
+	CVS changes.  * Added "distclean" to wmbiff/Makefile.  * Added CVS
+	Id$ to all the files in wmbiff/ .  * I reformatted ths changelog,
+	again.	I hope this is the last time I need   to do this.  The CVS
+	logs should be used for all changes, and this file   should by
+	updated for user-visible changes only, from now on.    (Dwayne C.
+	Litzenberger)  * Updated the README to reflect that Gennady
+	Belyakov died right after releasing   wmBiff 0.2.  May your soul
+	rest in peace, Gennady.  (Dwayne C. Litzenberger)
 
 2001-06-16 Saturday 01:02 UTC -- Jordi Mallach <jordi@sindominio.net>
 
