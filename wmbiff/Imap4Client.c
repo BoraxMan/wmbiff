@@ -21,6 +21,7 @@
 #include <assert.h>
 #include <unistd.h>
 #include <errno.h>
+#include <time.h>
 
 #ifdef USE_DMALLOC
 #include <dmalloc.h>
@@ -168,14 +169,15 @@ FILE *imap_open(Pop3 pc)
 		IMAP_DM(pc, DEBUG_ERROR, "Couldn't connect to %s:%d: %s\n",
 				PCU.serverName, PCU.serverPort, strerror(errno));
 		if (errno == ETIMEDOUT) {
-			/* only give up if it was a time-consuming error */
-			/* try again later if it was just a connection refused */
-			IMAP_DM(pc, DEBUG_ERROR,
-					"Will not retry because this attempt to connect timed out.\n"
-					" This is done so that other mailboxes can be updated in a timely manner.\n"
-					" To try again to connect to %s:%d, restart wmbiff.\n",
-					PCU.serverName, PCU.serverPort);
-			bind_state_to_pcu(pc, initialize_blacklist(connection_name));
+          /* temporarily bump the interval, in a crude way:
+           fast forward time so that the mailbox isn't
+           checked for a while. */
+           pc->prevtime = time(0) + 60 * 5; /* now + 60 seconds * 5 minutes */
+          /* TCP's retry (how much time has elapsed while
+             the connect times out) is around 3 minutes;
+             here we just try to allow checking local
+             mailboxes more often while remote things are
+             unavailable or disconnected.  */
 		}
 		return NULL;
 	}
