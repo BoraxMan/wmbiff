@@ -284,7 +284,7 @@ bad_certificate(const struct connection_state *scs, const char *msg)
 	TDM(DEBUG_ERROR, "%s", msg);
 	if (!SkipCertificateCheck) {
 		TDM(DEBUG_ERROR, "to ignore this error, run wmbiff "
-			"with the -skip-certificate-check option");
+			"with the -skip-certificate-check option\n");
 		exit(1);
 	}
 }
@@ -410,10 +410,10 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc,
 														 (char *)
 														 certificate_filename,
 														 GNUTLS_X509_FMT_PEM);
-			if (zok != 0) {
+			if (zok < 0) {
 				DMA(DEBUG_ERROR,
-					"GNUTLS did not like your certificate file %s.\n",
-					certificate_filename);
+					"GNUTLS did not like your certificate file %s (%d).\n",
+					certificate_filename, zok);
 				gnutls_perror(zok);
 				exit(1);
 			}
