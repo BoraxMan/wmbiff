@@ -6,13 +6,61 @@ The latest changelog entry is in a different format, because it's inserted by
 CVS on commit.
 
   $Log: ChangeLog,v $
-  Revision 1.27  2002/04/16 07:37:37  bluehal
-  remove vestigial pc->open()
+  Revision 1.28  2002/04/20 08:53:20  bluehal
+  update meta-information for prerelease 5
 
   Revision 1.1  2002/04/07 05:08:23  bluehal
   use automake / autoconf; after checkout run ./FromCVS.sh
 
 
+
+2002-04-20 Saturday 08:13 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/sample.wmbiffrc: finish deprecating
+
+2002-04-20 Saturday 08:12 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: sample.wmbiffrc, wmbiffrc.5.in: document back-tick
+	expansion, deprecate mbox style without mbox: prefix
+
+2002-04-20 Saturday 07:54 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Client.h, LicqClient.c, ShellClient.c, mboxClient.c:
+	oops (indent)
+
+2002-04-20 Saturday 07:53 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: LicqClient.c, mboxClient.c: refactor mailbox stat()'ting
+	to reduce duplicated code and supprort backticks.
+
+2002-04-20 Saturday 07:52 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/ShellClient.c: refactor command execution code to support
+	backtick foo expansion
+
+2002-04-20 Saturday 07:50 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Makefile.am, test_wmbiff.c: add tests for bbacktick
+	expansion
+
+2002-04-20 Saturday 07:49 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Client.h: ctime has become useless; new prototypes to
+	handle backtick
+
+2002-04-16 Tuesday 08:10 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* NEWS, TODO: a little wordsmithing
+
+2002-04-16 Tuesday 07:37 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* ChangeLog, TODO, wmbiff/Client.h, wmbiff/Imap4Client.c,
+	wmbiff/LicqClient.c, wmbiff/Pop3Client.c, wmbiff/mboxClient.c,
+	wmbiff/passwordMgr.c, wmbiff/wmbiff.c: remove vestigial pc->open()
+
+2002-04-16 Tuesday 07:08 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/test-make.sh: unnecessary now that autoconf is involved
 
 2002-04-15 Monday 22:58 UTC -- Neil Spring <nspring@cs.washington.edu>
 

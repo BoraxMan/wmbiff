@@ -5,8 +5,6 @@ these todo items are welcome.
   I don't know whether gnutls supports this.  A pointer to
   documentation that describes what to do, or a way to leech
   stored certificates or CA's from mutt would be great.
-* Runtime back-tick expansion
-  Because interesting mailboxes can be defined by date.
 * \ line continuations in configuration file.
   Because shell commands can be quite long.
 * Generic constructors for mboxes.  
@@ -31,9 +29,13 @@ these todo items are welcome.
   one of them is received, we're done.
 * Reload .wmbiffrc when it changes
   This is straightforward, except for IMAP mailboxes that
-  keep a connection to the server open.  A close function 
+  keep a connection to the server open.  A close function
   will have to be implemented to shut those down gracefully.
-  Do not involve sighup or any other signals.
+  Do not involve sighup or any other signals.  Use or
+  improve fileHasChanged().
+* Runtime back-tick expansion for non-mbox
+  Because interesting mailboxes can be defined by date,
+  though its not clear any other clients can take advantage.
 * Support GSSAPI or SASL authentication
   Authentication using krb5 would be sweet.
 * Unlikely to get done, unless someone volunteers:
@@ -42,7 +44,7 @@ these todo items are welcome.
   for POP.  Unfortunately, this would only be useful for
   someone who has such a server that doesn't support IMAPS.
 
-$Id: TODO,v 1.9 2002/04/16 08:10:16 bluehal Exp $
+$Id: TODO,v 1.10 2002/04/20 08:53:20 bluehal Exp $
 
 Local Variables:
 mode: outline

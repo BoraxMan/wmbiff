@@ -1,11 +1,11 @@
-/* $Id: Client.h,v 1.18 2002/04/20 07:54:06 bluehal Exp $ */
+/* $Id: Client.h,v 1.19 2002/04/20 08:53:20 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
  *
  * Email Checker Pop3/Imap4/Licq/Gicu/mbox/maildir
  *
- * Last Updated : Mar 20, 05:32:35 CET 2001     
+ * Last Updated : $Date: 2002/04/20 08:53:20 $
  *
  */
 
