@@ -164,9 +164,11 @@ File.open('/var/lib/dpkg/status').each { |ln|
 debugmsg "%d installed, %d available" % [ installed.length, available.length ]
 
 updatedcount = 0
+updated = Array.new
 ( installed.keys & available.keys ).each { |pkg|
   if(version_a_gt_b(available[pkg], installed[pkg])) then
     updatedcount += 1
+    updated.push(pkg + ": #{available[pkg]} > #{installed[pkg]}")
   end
 }
 
@@ -177,3 +179,5 @@ puts (if(updatedcount > 0) then
         "%d old" % installed.length 
       end
       )
+
+puts updated.join("\n")
