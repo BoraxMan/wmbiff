@@ -1,6 +1,18 @@
 Release Notes
 ~~~~~~~~~~~~~
 
+Release 0.3.4 - [UNRELEASED]
+
+  * "imaps" is now prefered to "sslimap" in config files. The old type
+    is still supported for backwards compatibility.
+  * You can now specify what protocol wmbiff should use for a given Pop3
+    or IMAP mailbox. If unspecified, it will try the secure ones first,
+    falling back to unsecure if they fail. See wmbiffrc(5).
+  * Added some debug messages for tls connections.
+  * Pop3 path parsing rewrite.
+  * Manual page fixes.
+  * Compile warning fixes.
+
 Release 0.3.3 - Mon, 29 Oct 2001 14:55:00 +0100
 
   * Sanity check to IMAP code: exit if wmbiff tries to connect to more

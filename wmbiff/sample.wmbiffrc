@@ -1,4 +1,4 @@
-# $Id: sample.wmbiffrc,v 1.6 2001/10/28 23:32:55 jordi Exp $
+# $Id: sample.wmbiffrc,v 1.7 2001/11/23 15:53:17 jordi Exp $
 #
 # See wmbiffrc(5) for more info.
 #
@@ -55,8 +55,8 @@ notify.2=beep
 action.2=licq&
 
 label.3=POP3
-# pop3 format: pop3:user:password@server[:port]
-path.3=pop3:user:password@server
+# pop3 format: pop3:user:password@server[:port] [auth]
+path.3=pop3:user:password@server apop
 notify.3=my_play /home/gb/sounds/new_mail_has_arrived.wav
 action.3=rxvt -name mutt -e mutt -f /home/gb/mail/30_nftp-list
 interval.3=300		# 5 minutes
@@ -64,15 +64,15 @@ fetchinterval.3=-1
 fetchcmd.3=fetchmail
 
 label.4=IMAP4
-# IMAP4 format: imap:user:password@server[/mailbox][:port]
+# IMAP4 format: imap:user:password@server[/mailbox][:port] [auth]
 # mailbox is optional, default - INBOX
 # port is optional, default - 143
 path.4=imap:user:password@server
 interval.4=300		# 5 minutes
 
 # label.4=IMAPS
-# Secure IMAP format: sslimap:user:password@server[/mailbox][:port]
+# Secure IMAP format: imaps:user:password@server[/mailbox][:port] [auth]
 # mailbox is optional, default - INBOX
 # port is optional, default - 993
-# path.4=sslimap:user:password@server
+# path.4=imaps:user:password@server cram-md5
 # interval.4=300          # 5 minutes

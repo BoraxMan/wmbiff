@@ -1,3 +1,62 @@
+2001-11-23 Friday 07:20 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* TODO: one down
+
+2001-11-16 Friday 07:11 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Imap4Client.c, Pop3Client.c, charutil.c: regexes limit
+	password and username to 32 characters
+
+2001-11-16 Friday 06:08 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmgeneral/: wmgeneral.c, wmgeneral.h: -Wwrite-strings cleanliness
+
+2001-11-16 Friday 01:13 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Client.h, Imap4Client.c, Makefile, Pop3Client.c,
+	charutil.c: rewrite of authentication code to a) allow users to
+	specify authentication type, b) fall back to other authentication
+	methods when hash-based authentication fails (because not everybody
+	uses the cleartext password file) c) fix debug messages
+
+2001-11-16 Friday 00:40 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/charutil.h: regex helpers common to pop3 and imap4 clients
+	extracted and moved here
+
+2001-11-16 Friday 00:40 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: tlsComm.c, tlsComm.h: blacklist and debugging updates
+	for gnutls 0.2.10 and DM macro
+
+2001-11-16 Friday 00:39 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiffrc.5: authentication method list, reduced
+	indentation to fit screen better
+
+2001-11-16 Friday 00:38 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiff-master-led.xpm: made pixmap const char
+
+2001-11-16 Friday 00:37 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiff.c: -Wwrite-strings cleanliness
+
+2001-11-02 Friday 08:53 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Imap4Client.c, wmbiff.c, wmbiffrc.5: Prefer "imaps"
+	instead of "sslimap" (sslimap is still supported, but imaps is
+	documented, and a better name).
+
+2001-11-02 Friday 08:48 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/tlsComm.c: Small debugging message to help if a connection
+	ends unexpectedly.
+
+2001-10-29 Monday 13:57 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, NEWS: Released WMBiff 0.3.3.
+
 2001-10-29 Monday 13:54 UTC -- Jordi Mallach <jordi@sindominio.net>
 
 	* wmbiff/: Imap4Client.c, wmbiff.c: Indent run.
