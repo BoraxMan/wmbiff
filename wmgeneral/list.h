@@ -44,7 +44,7 @@ INLINE LinkedList* list_cons(void* head, LinkedList* tail);
 
 INLINE int list_length(LinkedList* list);
 
-INLINE void* list_nth(int index, LinkedList* list);
+INLINE void* list_nth(int n, LinkedList* list);
 
 INLINE void list_remove_head(LinkedList** list);
 

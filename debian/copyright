@@ -1,9 +1,11 @@
-This package was debianized by Jordi Mallach <jordi@sindominio.net> on
+This package was debianized by Jordi Mallach <jordi@debian.org> on
 Thu, 18 Nov 1999 02:53:59 +0100.
 
-It was downloaded from http://ccat.elect.ru/wmbiff/
+It was downloaded from http://sourceforge.net/projects/wmbiff.
 
-Upstream Author: Gennady Belyakov <gb@ccat.elect.ru>
+Upstream Author: Gennady Belyakov <gb@ccat.elect.ru>,
+		 Yong-iL Joh <tolkien@mizi.com>
+		 and others.
 
 Copyright:
 

@@ -1,9 +1,12 @@
-   
+
                                   Introducing
                                        
-   wmBiff is an WindowMaker docking utility, that displays number of
+   WMBiff is an WindowMaker docking utility, that displays number of
    total messages count or unread mail messages count in differrent
    mailboxes.
+
+   WMBiff was created by Gennady Belyakov in 1999, and was continued by
+   a team of volunteers after his death.
 
    Green ( cyan? :) ) digits display total number of messages, if there
    are no unread messages in it.
@@ -11,8 +14,9 @@
    Yellow digits display number of unread messages, with blinking on new
    mail arrival, if any.
    
-   At this moment only unix-style and POP3 mailboxes are supported.
-   wmBiff supports up to 5 mailboxes (but you can start 2 or more
+   At this moment unix-style (mbox), maildir, POP3, APOP and IMAP mailboxes
+   are supported. WMBiff also understands Licq's history files.
+   WMBiff supports up to 5 mailboxes (but you can start 2 or more
    wmbiff's with differrent configs).
    
    Pressing on a 1st (left) mouse button will execute appropriate mail
@@ -27,11 +31,19 @@
                           Compiling and Installation
                                        
 Extract the archive:
-        tar -xvzf wmbiff-0.2.tar.gz
+        tar -xvzf wmbiff-0.x.tar.gz
 
 Enter the wmbiff directory and edit the Makefile:
-        cd wmbiff-0.2/
+        cd wmbiff-0.x/
         vi Makefile
+
+For crypto support either:
+*) Install gnutls and libgrcypt packages from your distribution.
+*) Download them from http://www.gnupg.org/mirrors.html.
+Choose a mirror, then download from the alpha/gnutls and
+alpha/libgcrypt directories.
+*) Disable crypt by uncommenting the "WITHOUT_CRYPTO" line
+in the Makefile.
 
 Make the binary:
         make
@@ -68,14 +80,64 @@ position. All other positions will be empty.
    
    Many thanks for:
    Angus Mackay (amackay@gusnet.cx)
-   Jordi Mallach Perez (jordi@sindominio.net)
+   Jordi Mallach Pérez (jordi@sindominio.net)
    Eugene Bobin (gene@utb.ru)
    Helmut 'Kolbi' Kolb (office@kolbi.net)
    Vladimir Popov (pva48@mail.ru)
-   
+   Jorge García (Jorge.Garcia@uv.es)
+   Nick Clarey (nclarey@3glab.com)
+   Dwayne C. Litzenberger (dlitz@dlitz.net)
+   Mark Hurley (debian4tux@telocity.com)
+   Rob Funk (rfunk@funkinet.net)
+   Neil Spring (nspring@cs.washington.edu)
+   NAKAYAMA Takao (hoehoe@wakaba.jp)
+   Jay T Francis (jtf@u880.org)
+   David Smith (davidsmith@acm.org)
+   Benoît Rouits (brouits@free.fr)
+
      _________________________________________________________________
    
-   Any suggestions/bug reports please send to
-   
-    Gennady Belyakov gb@ccat.elect.ru
+   Any suggestions/bug reports please send to our mailing list,
+ 
+    wmbiff-devel@lists.sourceforge.net
+
+     _________________________________________________________________
+
+UPDATE [2001-06-18]:
+
+On Tuesday, 22 May 2001, Jordi Mallach sent the following email to the
+wmbiff-devel list:
+
+    Hello,
+    I just found evidence of what I had believed for a long time.
+    
+    http://www.monkey.org/openbsd/archive/ports/0101/msg00311.html
+    
+    Gennady Belyakov passed away right after releasing 0.2 and when he
+    stopped answering mail :|
+    
+    I guess we need to update the docs.
+    
+    Jordi
+
+Here is the message, if that URL becomes unavailable:
+
+    To: ports@openbsd.org 
+    Subject: Re: mail/wmbiff update 
+    From: Vladimir Popov <pva48@mail.ru> 
+    Date: Sat, 27 Jan 2001 09:34:15 +0500 
+    
+    On Fri, Jan 26, 2001 at 01:02:59PM +0000, Christian Weisgerber wrote:
+    > 
+    > The major issue I have with this port is that the master site/home
+    > page is unreachable.
+    > 
+    
+    Well, wmbiff's author Gennady Belyakov passed away in late November 1999.
+    That's why that url isn't any longer valid.
+    
+    --
+    Vladimir
+
+May your soul rest in peace, Gennady.
 
