@@ -1,15 +1,13 @@
-/* $Id: wmbiff.c,v 1.40 2002/12/29 00:57:47 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.41 2002/12/29 01:36:12 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-#define	USE_POLL
-
 #include <time.h>
 #include <ctype.h>
 
-#ifdef USE_POLL
+#ifdef HAVE_POLL
 #include <poll.h>
 #else
 #include <sys/time.h>
@@ -60,7 +58,7 @@ const char *globalnotify = NULL;
 /* /usr/local/share/wmbiff if compiled locally. */
 /* / is there in case a user wants to specify a complete path */
 /* . is there for development. */
-const char *skin_search_path = DEFAULT_SKIN_PATH;
+static const char *skin_search_path = DEFAULT_SKIN_PATH;
 /* for gnutls */
 const char *certificate_filename = NULL;	/* not yet supported */
 
@@ -68,35 +66,20 @@ const char *certificate_filename = NULL;	/* not yet supported */
 #define DEFAULT_FONT  "-*-fixed-*-r-*-*-10-*-*-*-*-*-*-*"
 const char *font = NULL;
 
-int ReadLine(FILE *, char *, char *, int *);
-int Read_Config_File(char *, int *);
-int count_mail(int);
-void parse_cmd(int, char **, char *);
-void init_biff(char *);
-void displayMsgCounters(int, int, int *, int *);
-
-void usage(void);
-void printversion(void);
-void do_biff(int argc, char **argv);
-void parse_mbox_path(int item);
-static void BlitString(const char *name, int x, int y, int new);
-void BlitNum(int num, int x, int y, int new);
-void ClearDigits(int i);
-void XSleep(int millisec);
-void sigchld_handler(int sig);
+// static void BlitString(const char *name, int x, int y, int new);
 
 int debug_default = DEBUG_ERROR;
 
 /* color from wmbiff's xpm, down to 24 bits. */
-const char *foreground = "#21B3AF";
-const char *highlight = "yellow";
+static const char *foreground = "#21B3AF";
+static const char *highlight = "yellow";
 int SkipCertificateCheck = 0;
-int notWithdrawn = 0;
+static int notWithdrawn = 0;
 
-int num_mailboxes = 1;
-const int x_origin = 5;
-const int y_origin = 5;
-int forever = 1;
+static int num_mailboxes = 1;
+static const int x_origin = 5;
+static const int y_origin = 5;
+static int forever = 1;
 
 /* where vertically the mailbox sits for blitting characters. */
 static int mbox_y(int mboxnum)
@@ -104,7 +87,223 @@ static int mbox_y(int mboxnum)
 	return ((11 * mboxnum) + y_origin);
 }
 
-void init_biff(char *config_file)
+/* special shortcuts for longer shell client commands */
+static int gicuCreate(Pop3 pc, const char *path)
+{
+	char buf[255];
+	if (isdigit(path[5])) {
+		sprintf(buf,
+				"shell:::echo `gnomeicu-client -u%s msgcount` new",
+				path + 5);
+	} else {
+		sprintf(buf, "shell:::echo `gnomeicu-client msgcount` new");
+	}
+	return (shellCreate(pc, buf));
+}
+
+static int fingerCreate(Pop3 pc, const char *path)
+{
+	char buf[255];
+	sprintf(buf, "shell:::finger -lm %s | "
+			"perl -ne '(/^new mail/i && print \"new\");' "
+			"-e '(/^mail last read/i && print \"old\");' "
+			"-e '(/^no( unread)? mail/i && print \"no\");'", path + 7);
+	return (shellCreate(pc, buf));
+}
+
+/* 	Read a line from a file to obtain a pair setting=value
+	skips # and leading spaces
+	NOTE: if setting finish with 0, 1, 2, 3 or 4 last char are deleted and
+	index takes its value... if not index will get -1
+	Returns -1 if no setting=value
+*/
+static int ReadLine(FILE * fp, char *setting, char *value, int *mbox_index)
+{
+	char buf[BUF_SIZE];
+	char *p, *q;
+	int len;
+
+	*setting = '\0';
+	*value = '\0';
+	*mbox_index = -1;
+
+	if (!fp || feof(fp) || !fgets(buf, BUF_SIZE - 1, fp))
+		return -1;
+
+	len = strlen(buf);
+
+	if (buf[len - 1] == '\n') {
+		buf[len - 1] = 0;		/* strip linefeed */
+	}
+	for (p = (char *) buf; *p != '#' && *p; p++);
+	*p = 0;						/* Strip comments */
+	if (!(p = strtok(buf, "=")))
+		return -1;
+	if (!(q = strtok(NULL, "\n")))
+		return -1;
+
+	/* Chg - Mark Hurley
+	 * Date: May 8, 2001
+	 * Removed for loop (which removed leading spaces)
+	 * Leading & Trailing spaces need to be removed
+	 * to Fix Debian bug #95849
+	 */
+	FullTrim(p);
+	FullTrim(q);
+
+	/* strcpy(setting, p); nspring replaced with sscanf dec 2002 */
+	strcpy(value, q);
+
+	if (sscanf(p, "%[a-z.]%d", setting, mbox_index) == 2) {
+		/* mailbox-specific configuration, ends in a digit */
+		if (*mbox_index < 0 || *mbox_index >= MAX_NUM_MAILBOXES) {
+			DMA(DEBUG_ERROR, "invalid mailbox number %d\n", *mbox_index);
+			exit(EXIT_FAILURE);
+		}
+	} else if (sscanf(p, "%[a-z]", setting) == 1) {
+		/* global configuration, all text. */
+		*mbox_index = -1;
+	} else {
+		/* we found an uncommented line that has an equals,
+		   but is non-alphabetic. */
+		DMA(DEBUG_INFO, "unparsed setting %s\n", p);
+		return -1;
+	}
+
+	DMA(DEBUG_INFO, "@%s.%d=%s@\n", setting, *mbox_index, value);
+	return 1;
+}
+
+struct path_demultiplexer {
+	const char *id;				/* followed by a colon */
+	int (*creator) (Pop3 pc, const char *path);
+};
+
+static struct path_demultiplexer paths[] = {
+	{"pop3:", pop3Create},
+	{"shell:", shellCreate},
+	{"gicu:", gicuCreate},
+	{"licq:", licqCreate},
+	{"finger:", fingerCreate},
+	{"imap:", imap4Create},
+	{"imaps:", imap4Create},
+	{"sslimap:", imap4Create},
+	{"pop3:", pop3Create},
+	{"maildir:", maildirCreate},
+	{"mbox:", mboxCreate},
+	{NULL, NULL}
+};
+
+
+static void parse_mbox_path(int item)
+{
+	int i;
+	/* find the creator */
+	for (i = 0;
+		 paths[i].id != NULL
+		 && strncasecmp(mbox[item].path, paths[i].id, strlen(paths[i].id));
+		 i++);
+	/* if found, execute */
+	if (paths[i].id != NULL) {
+		if (paths[i].creator((&mbox[item]), mbox[item].path) != 0) {
+			DMA(DEBUG_ERROR, "creator for mailbox %d returned failure",
+				item);
+		}
+	} else {
+		/* default are mbox */
+		mboxCreate((&mbox[item]), mbox[item].path);
+	}
+}
+
+static int Read_Config_File(char *filename, int *loopinterval)
+{
+	FILE *fp;
+	char setting[17], value[BUF_SIZE];
+	int mbox_index;
+
+	if (!(fp = fopen(filename, "r"))) {
+		DMA(DEBUG_ERROR, "Unable to open %s, no settings read: %s\n",
+			filename, strerror(errno));
+		return 0;
+	}
+	while (!feof(fp)) {
+		if (ReadLine(fp, setting, value, &mbox_index) == -1)
+			continue;
+
+		/* settings that can be global go here. */
+		if (!strcmp(setting, "interval")) {
+			*loopinterval = atoi(value);
+			continue;
+		} else if (!strcmp(setting, "askpass")) {
+			const char *askpass = strdup(value);
+			if (mbox_index == -1) {
+				int i;
+				DMA(DEBUG_INFO, "setting all to askpass %s\n", askpass);
+				for (i = 0; i < MAX_NUM_MAILBOXES; i++)
+					mbox[i].askpass = askpass;
+			} else {
+				mbox[mbox_index].askpass = askpass;
+			}
+			continue;
+		} else if (!strcmp(setting, "skinfile")) {
+			skin_filename = strdup(value);
+			continue;
+		} else if (!strcmp(setting, "certfile")) {	/* not yet supported */
+			certificate_filename = strdup(value);
+			continue;
+		} else if (!strcmp(setting, "globalnotify")) {
+			globalnotify = strdup(value);
+			continue;
+		} else if (mbox_index == -1) {
+			DMA(DEBUG_INFO, "Unknown global setting '%s'\n", setting);
+			continue;			/* Didn't read any setting.[0-5] value */
+		}
+
+		if (mbox_index >= MAX_NUM_MAILBOXES) {
+			DMA(DEBUG_ERROR, "Don't have %d mailboxes.\n", mbox_index);
+			continue;
+		}
+		if (mbox_index + 1 > num_mailboxes
+			&& mbox_index + 1 <= MAX_NUM_MAILBOXES) {
+			num_mailboxes = mbox_index + 1;
+		}
+		/* now only local settings */
+		if (!strcmp(setting, "label.")) {
+			strcpy(mbox[mbox_index].label, value);
+		} else if (!strcmp(setting, "path.")) {
+			strcpy(mbox[mbox_index].path, value);
+		} else if (!strcmp(setting, "notify.")) {
+			strcpy(mbox[mbox_index].notify, value);
+		} else if (!strcmp(setting, "action.")) {
+			strcpy(mbox[mbox_index].action, value);
+		} else if (!strcmp(setting, "interval.")) {
+			mbox[mbox_index].loopinterval = atoi(value);
+		} else if (!strcmp(setting, "fetchcmd.")) {
+			strcpy(mbox[mbox_index].fetchcmd, value);
+		} else if (!strcmp(setting, "fetchinterval.")) {
+			mbox[mbox_index].fetchinterval = atoi(value);
+		} else if (!strcmp(setting, "debug.")) {
+			int debug_value = debug_default;
+			if (strcasecmp(value, "all") == 0) {
+				debug_value = DEBUG_ALL;
+			}
+			/* could disable debugging, but I want the command
+			   line argument to provide all information
+			   possible. */
+			mbox[mbox_index].debug = debug_value;
+		} else {
+			DMA(DEBUG_INFO, "Unknown setting '%s'\n", setting);
+		}
+	}
+	fclose(fp);
+	for (mbox_index = 0; mbox_index < num_mailboxes; mbox_index++)
+		if (mbox[mbox_index].label[0] != 0)
+			parse_mbox_path(mbox_index);
+	return 1;
+}
+
+
+static void init_biff(char *config_file)
 {
 	int i, loopinterval = DEFAULT_LOOP;
 
@@ -182,7 +381,7 @@ void init_biff(char *config_file)
 	}
 }
 
-char **LoadXPM(const char *pixmap_filename)
+static char **LoadXPM(const char *pixmap_filename)
 {
 	char **xpm;
 	int success;
@@ -217,7 +416,7 @@ int exists(const char *filename)
 
 /* acts like execvp, with code inspired by it */
 /* mustfree */
-char *search_path(const char *path, const char *find_me)
+static char *search_path(const char *path, const char *find_me)
 {
 	char *buf;
 	const char *p;
@@ -291,12 +490,101 @@ static int wmbiffrc_permissions_check(const char *wmbiffrc_fname)
 	return (1);
 }
 
+static void ClearDigits(int i)
+{
+	if (font) {
+		eraseRect(39, mbox_y(i), 58, mbox_y(i + 1) - 1);
+	} else {
+		/* overwrite the colon */
+		copyXPMArea((10 * (CHAR_WIDTH + 1)), 64, (CHAR_WIDTH + 1),
+					(CHAR_HEIGHT + 1), 35, mbox_y(i));
+		/* blank out the number fields. */
+		copyXPMArea(39, 84, (3 * (CHAR_WIDTH + 1)), (CHAR_HEIGHT + 1), 39,
+					mbox_y(i));
+	}
+}
+
+/* Blits a string at given co-ordinates. If a ``new''
+   parameter is nonzero, all digits will be yellow */
+static void BlitString(const char *name, int x, int y, int new)
+{
+	if (font != NULL) {
+		/* an alternate behavior - draw the string using a font
+		   instead of the pixmap.  should allow pretty colors */
+		drawString(x, y + CHAR_HEIGHT, name, new ? highlight : foreground,
+				   0);
+	} else {
+		/* normal, LED-like behavior. */
+		int i, c, k = x;
+		for (i = 0; name[i]; i++) {
+			c = toupper(name[i]);
+			if (c >= 'A' && c <= 'Z') {	/* it's a letter */
+				c -= 'A';
+				copyXPMArea(c * (CHAR_WIDTH + 1), (new ? 95 : 74),
+							(CHAR_WIDTH + 1), (CHAR_HEIGHT + 1), k, y);
+				k += (CHAR_WIDTH + 1);
+			} else {			/* it's a number or symbol */
+				c -= '0';
+				if (new) {
+					copyXPMArea((c * (CHAR_WIDTH + 1)) + 65, 0,
+								(CHAR_WIDTH + 1), (CHAR_HEIGHT + 1), k, y);
+				} else {
+					copyXPMArea((c * (CHAR_WIDTH + 1)), 64,
+								(CHAR_WIDTH + 1), (CHAR_HEIGHT + 1), k, y);
+				}
+				k += (CHAR_WIDTH + 1);
+			}
+		}
+	}
+}
+
+
+/* Blits number to give coordinates.. two 0's, right justified */
+static void BlitNum(int num, int x, int y, int new)
+{
+	char buf[32];
+
+	sprintf(buf, "%02i", num);
+
+	if (font != NULL) {
+		const char *color = (new) ? highlight : foreground;
+		drawString(x + (CHAR_WIDTH * 2 + 4), y + CHAR_HEIGHT, buf,
+				   color, 1);
+	} else {
+		int newx = x;
+
+		if (num > 99)
+			newx -= (CHAR_WIDTH + 1);
+		if (num > 999)
+			newx -= (CHAR_WIDTH + 1);
+
+		BlitString(buf, newx, y, new);
+	}
+}
+
+/* helper function for displayMsgCounters, which has outgrown its name */
+static void blitMsgCounters(int i)
+{
+	int y_row = mbox_y(i);		/* constant for each mailbox */
+	ClearDigits(i);				/* Clear digits */
+	if ((mbox[i].blink_stat & 0x01) == 0) {
+		int newmail = (mbox[i].UnreadMsgs > 0) ? 1 : 0;
+		if (mbox[i].TextStatus[0] != '\0') {
+			BlitString(mbox[i].TextStatus, 39, y_row, newmail);
+		} else {
+			int mailcount =
+				(newmail) ? mbox[i].UnreadMsgs : mbox[i].TotalMsgs;
+			BlitNum(mailcount, 45, y_row, newmail);
+		}
+	}
+}
+
 /*
  * void execnotify(1) : runs notify command (if given)
  */
-void execnotify(const char *notifycmd)
+static void execnotify(const char *notifycmd)
 {
-	if (notifycmd != 0) {		/* need to call notify() ? */
+	if (notifycmd != NULL) {	/* need to call notify() ? */
 		if (!strcasecmp(notifycmd, "beep")) {	/* Internal keyword ? */
 			/* Yes, bell */
 			XBell(display, 100);
@@ -304,11 +592,82 @@ void execnotify(const char *notifycmd)
 			/* Yes, nothing */
 		} else {
 			/* Else call external notifyer */
-			execCommand((char *) notifycmd);
+			execCommand(notifycmd);
 		}
 	}
 }
 
+
+static void
+displayMsgCounters(int i, int mail_stat, int *Sleep_Interval,
+				   int *Blink_Mode)
+{
+	switch (mail_stat) {
+	case 2:					/* New mail has arrived */
+		/* Enter blink-mode for digits */
+		mbox[i].blink_stat = BLINK_TIMES * 2;
+		*Sleep_Interval = BLINK_SLEEP_INTERVAL;
+		*Blink_Mode |= (1 << i);	/* Global blink flag set for this mailbox */
+		blitMsgCounters(i);
+		execnotify(mbox[i].notify);
+
+		/* Autofetch on new mail arrival? */
+		if (mbox[i].fetchinterval == -1 && mbox[i].fetchcmd[0] != 0) {
+			execCommand(mbox[i].fetchcmd);	/* yes */
+		}
+		break;
+	case 1:					/* mailbox has been rescanned/changed */
+		blitMsgCounters(i);
+		break;
+	case 0:
+		break;
+	case -1:					/* Error was detected */
+		ClearDigits(i);			/* Clear digits */
+		BlitString("XX", 45, mbox_y(i), 0);
+		break;
+	}
+}
+
+/** counts mail in spool-file
+   Returned value:
+   -1 : Error was encountered
+   0  : mailbox status wasn't changed
+   1  : mailbox was changed (NO new mail)
+   2  : mailbox was changed AND new mail has arrived
+**/
+static int count_mail(int item)
+{
+	int rc = 0;
+
+	if (!mbox[item].checkMail) {
+		return -1;
+	}
+
+	if (mbox[item].checkMail(&(mbox[item])) < 0) {
+		/* we failed to obtain any numbers therefore set
+		 * them to -1's ensuring the next pass (even if
+		 * zero) will be captured correctly
+		 */
+		mbox[item].TotalMsgs = -1;
+		mbox[item].UnreadMsgs = -1;
+		mbox[item].OldMsgs = -1;
+		mbox[item].OldUnreadMsgs = -1;
+		return -1;
+	}
+
+	if (mbox[item].UnreadMsgs > mbox[item].OldUnreadMsgs &&
+		mbox[item].UnreadMsgs > 0) {
+		rc = 2;					/* New mail detected */
+	} else if (mbox[item].UnreadMsgs < mbox[item].OldUnreadMsgs ||
+			   mbox[item].TotalMsgs != mbox[item].OldMsgs) {
+		rc = 1;					/* mailbox was changed - NO new mail */
+	} else {
+		rc = 0;					/* mailbox wasn't changed */
+	}
+	mbox[item].OldMsgs = mbox[item].TotalMsgs;
+	mbox[item].OldUnreadMsgs = mbox[item].UnreadMsgs;
+	return rc;
+}
 
 static int periodic_mail_check(void)
 {
@@ -366,7 +725,6 @@ static int periodic_mail_check(void)
 	if (NewMail == 1) {
 		execnotify(globalnotify);
 	}
-
 
 	if (Blink_Mode == 0) {
 		for (i = 0; i < num_mailboxes; i++) {
@@ -448,7 +806,41 @@ static char **CreateBackingXPM(int width, int height,
 	return (ret);
 }
 
-void do_biff(int argc, char **argv)
+/*
+ * NOTE: this function assumes that the ConnectionNumber() macro
+ *       will return the file descriptor of the Display struct
+ *       (it does under XFree86 and solaris' openwin X)
+ */
+static void XSleep(int millisec)
+{
+#ifdef HAVE_POLL
+	struct pollfd timeout;
+
+	timeout.fd = ConnectionNumber(display);
+	timeout.events = POLLIN;
+
+	poll(&timeout, 1, millisec);
+#else
+	struct timeval to;
+	struct timeval *timeout = NULL;
+	fd_set readfds;
+	int max_fd;
+
+	if (millisec >= 0) {
+		timeout = &to;
+		to.tv_sec = millisec / 1000;
+		to.tv_usec = (millisec % 1000) * 1000;
+	}
+	FD_ZERO(&readfds);
+	FD_SET(ConnectionNumber(display), &readfds);
+	max_fd = ConnectionNumber(display);
+
+	select(max_fd + 1, &readfds, NULL, NULL, timeout);
+#endif
+}
+
+
+static void do_biff(int argc, char **argv)
 {
 	int i;
 	int but_pressed_region = -1;
@@ -555,446 +947,44 @@ void do_biff(int argc, char **argv)
 	}
 }
 
-/* helper function for displayMsgCounters, which has outgrown its name */
-static void blitMsgCounters(int i)
-{
-	int y_row = mbox_y(i);		/* constant for each mailbox */
-	ClearDigits(i);				/* Clear digits */
-	if ((mbox[i].blink_stat & 0x01) == 0) {
-		int newmail = (mbox[i].UnreadMsgs > 0) ? 1 : 0;
-		if (mbox[i].TextStatus[0] != '\0') {
-			BlitString(mbox[i].TextStatus, 39, y_row, newmail);
-		} else {
-			int mailcount =
-				(newmail) ? mbox[i].UnreadMsgs : mbox[i].TotalMsgs;
-			BlitNum(mailcount, 45, y_row, newmail);
-		}
-	}
-}
-
-void
-displayMsgCounters(int i, int mail_stat, int *Sleep_Interval,
-				   int *Blink_Mode)
-{
-	switch (mail_stat) {
-	case 2:					/* New mail has arrived */
-		/* Enter blink-mode for digits */
-		mbox[i].blink_stat = BLINK_TIMES * 2;
-		*Sleep_Interval = BLINK_SLEEP_INTERVAL;
-		*Blink_Mode |= (1 << i);	/* Global blink flag set for this mailbox */
-		blitMsgCounters(i);
-		execnotify(mbox[i].notify);
-
-		/* Autofetch on new mail arrival? */
-		if (mbox[i].fetchinterval == -1 && mbox[i].fetchcmd[0] != 0) {
-			execCommand(mbox[i].fetchcmd);	/* yes */
-		}
-		break;
-	case 1:					/* mailbox has been rescanned/changed */
-		blitMsgCounters(i);
-		break;
-	case 0:
-		break;
-	case -1:					/* Error was detected */
-		ClearDigits(i);			/* Clear digits */
-		BlitString("XX", 45, mbox_y(i), 0);
-		break;
-	}
-}
-
-/** counts mail in spool-file
-   Returned value:
-   -1 : Error was encountered
-   0  : mailbox status wasn't changed
-   1  : mailbox was changed (NO new mail)
-   2  : mailbox was changed AND new mail has arrived
-**/
-int count_mail(int item)
-{
-	int rc = 0;
-
-	if (!mbox[item].checkMail) {
-		return -1;
-	}
-
-	if (mbox[item].checkMail(&(mbox[item])) < 0) {
-		/* we failed to obtain any numbers therefore set
-		 * them to -1's ensuring the next pass (even if
-		 * zero) will be captured correctly
-		 */
-		mbox[item].TotalMsgs = -1;
-		mbox[item].UnreadMsgs = -1;
-		mbox[item].OldMsgs = -1;
-		mbox[item].OldUnreadMsgs = -1;
-		return -1;
-	}
-
-	if (mbox[item].UnreadMsgs > mbox[item].OldUnreadMsgs &&
-		mbox[item].UnreadMsgs > 0) {
-		rc = 2;					/* New mail detected */
-	} else if (mbox[item].UnreadMsgs < mbox[item].OldUnreadMsgs ||
-			   mbox[item].TotalMsgs != mbox[item].OldMsgs) {
-		rc = 1;					/* mailbox was changed - NO new mail */
-	} else {
-		rc = 0;					/* mailbox wasn't changed */
-	}
-	mbox[item].OldMsgs = mbox[item].TotalMsgs;
-	mbox[item].OldUnreadMsgs = mbox[item].UnreadMsgs;
-	return rc;
-}
-
-/* Blits a string at given co-ordinates
-   If a ``new'' parameter is given, all digits will be yellow
-*/
-static void BlitString(const char *name, int x, int y, int new)
-{
-	if (font != NULL) {
-		/* an alternate behavior - draw the string using a font
-		   instead of the pixmap.  should allow pretty colors */
-		drawString(x, y + CHAR_HEIGHT, name, new ? highlight : foreground,
-				   0);
-	} else {
-		/* normal, LED-like behavior. */
-		int i, c, k = x;
-		for (i = 0; name[i]; i++) {
-			c = toupper(name[i]);
-			if (c >= 'A' && c <= 'Z') {	/* it's a letter */
-				c -= 'A';
-				copyXPMArea(c * (CHAR_WIDTH + 1), (new ? 95 : 74),
-							(CHAR_WIDTH + 1), (CHAR_HEIGHT + 1), k, y);
-				k += (CHAR_WIDTH + 1);
-			} else {			/* it's a number or symbol */
-				c -= '0';
-				if (new) {
-					copyXPMArea((c * (CHAR_WIDTH + 1)) + 65, 0,
-								(CHAR_WIDTH + 1), (CHAR_HEIGHT + 1), k, y);
-				} else {
-					copyXPMArea((c * (CHAR_WIDTH + 1)), 64,
-								(CHAR_WIDTH + 1), (CHAR_HEIGHT + 1), k, y);
-				}
-				k += (CHAR_WIDTH + 1);
-			}
-		}
-	}
-}
-
-/* Blits number to give coordinates.. two 0's, right justified */
-void BlitNum(int num, int x, int y, int new)
-{
-	char buf[32];
-
-	sprintf(buf, "%02i", num);
-
-	if (font != NULL) {
-		const char *color = (new) ? highlight : foreground;
-		drawString(x + (CHAR_WIDTH * 2 + 4), y + CHAR_HEIGHT, buf,
-				   color, 1);
-	} else {
-		int newx = x;
-
-		if (num > 99)
-			newx -= (CHAR_WIDTH + 1);
-		if (num > 999)
-			newx -= (CHAR_WIDTH + 1);
-
-		BlitString(buf, newx, y, new);
-	}
-}
-
-void ClearDigits(int i)
-{
-	if (font) {
-		eraseRect(39, mbox_y(i), 58, mbox_y(i + 1) - 1);
-	} else {
-		/* overwrite the colon */
-		copyXPMArea((10 * (CHAR_WIDTH + 1)), 64, (CHAR_WIDTH + 1),
-					(CHAR_HEIGHT + 1), 35, mbox_y(i));
-		/* blank out the number fields. */
-		copyXPMArea(39, 84, (3 * (CHAR_WIDTH + 1)), (CHAR_HEIGHT + 1), 39,
-					mbox_y(i));
-	}
-}
-
-/* 	Read a line from a file to obtain a pair setting=value
-	skips # and leading spaces
-	NOTE: if setting finish with 0, 1, 2, 3 or 4 last char are deleted and
-	index takes its value... if not index will get -1
-	Returns -1 if no setting=value
-*/
-int ReadLine(FILE * fp, char *setting, char *value, int *mbox_index)
-{
-	char buf[BUF_SIZE];
-	char *p, *q;
-	int len;
-
-	*setting = '\0';
-	*value = '\0';
-	*mbox_index = -1;
-
-	if (!fp || feof(fp) || !fgets(buf, BUF_SIZE - 1, fp))
-		return -1;
-
-	len = strlen(buf);
-
-	if (buf[len - 1] == '\n') {
-		buf[len - 1] = 0;		/* strip linefeed */
-	}
-	for (p = (char *) buf; *p != '#' && *p; p++);
-	*p = 0;						/* Strip comments */
-	if (!(p = strtok(buf, "=")))
-		return -1;
-	if (!(q = strtok(NULL, "\n")))
-		return -1;
-
-	/* Chg - Mark Hurley
-	 * Date: May 8, 2001
-	 * Removed for loop (which removed leading spaces)
-	 * Leading & Trailing spaces need to be removed
-	 * to Fix Debian bug #95849
-	 */
-	FullTrim(p);
-	FullTrim(q);
-
-	/* strcpy(setting, p); nspring replaced with sscanf dec 2002 */
-	strcpy(value, q);
-
-	if (sscanf(p, "%[a-z.]%d", setting, mbox_index) == 2) {
-		/* mailbox-specific configuration, ends in a digit */
-		if (*mbox_index < 0 || *mbox_index >= MAX_NUM_MAILBOXES) {
-			DMA(DEBUG_ERROR, "invalid mailbox number %d\n", *mbox_index);
-			exit(EXIT_FAILURE);
-		}
-	} else if (sscanf(p, "%[a-z]", setting) == 1) {
-		/* global configuration, all text. */
-		*mbox_index = -1;
-	} else {
-		/* we found an uncommented line that has an equals,
-		   but is non-alphabetic. */
-		DMA(DEBUG_INFO, "unparsed setting %s\n", p);
-		return -1;
-	}
-
-	DMA(DEBUG_INFO, "@%s.%d=%s@\n", setting, *mbox_index, value);
-	return 1;
-}
-
-/* special shortcuts for longer shell client commands */
-int gicuCreate(Pop3 pc, const char *path)
-{
-	char buf[255];
-	if (isdigit(path[5])) {
-		sprintf(buf,
-				"shell:::echo `gnomeicu-client -u%s msgcount` new",
-				path + 5);
-	} else {
-		sprintf(buf, "shell:::echo `gnomeicu-client msgcount` new");
-	}
-	return (shellCreate(pc, buf));
-}
-
-int fingerCreate(Pop3 pc, const char *path)
-{
-	char buf[255];
-	sprintf(buf, "shell:::finger -lm %s | "
-			"perl -ne '(/^new mail/i && print \"new\");' "
-			"-e '(/^mail last read/i && print \"old\");' "
-			"-e '(/^no( unread)? mail/i && print \"no\");'", path + 7);
-	return (shellCreate(pc, buf));
-}
-
-struct path_demultiplexer {
-	const char *id;				/* followed by a colon */
-	int (*creator) (Pop3 pc, const char *path);
-};
-
-static struct path_demultiplexer paths[] = {
-	{"pop3:", pop3Create},
-	{"shell:", shellCreate},
-	{"gicu:", gicuCreate},
-	{"licq:", licqCreate},
-	{"finger:", fingerCreate},
-	{"imap:", imap4Create},
-	{"imaps:", imap4Create},
-	{"sslimap:", imap4Create},
-	{"pop3:", pop3Create},
-	{"maildir:", maildirCreate},
-	{"mbox:", mboxCreate},
-	{NULL, NULL}
-};
-
-void parse_mbox_path(int item)
-{
-	int i;
-	/* find the creator */
-	for (i = 0;
-		 paths[i].id != NULL
-		 && strncasecmp(mbox[item].path, paths[i].id, strlen(paths[i].id));
-		 i++);
-	/* if found, execute */
-	if (paths[i].id != NULL) {
-		if (paths[i].creator((&mbox[item]), mbox[item].path) != 0) {
-			DMA(DEBUG_ERROR, "creator for mailbox %d returned failure",
-				item);
-		}
-	} else {
-		/* default are mbox */
-		mboxCreate((&mbox[item]), mbox[item].path);
-	}
-}
-
-int Read_Config_File(char *filename, int *loopinterval)
-{
-	FILE *fp;
-	char setting[17], value[BUF_SIZE];
-	int mbox_index;
-
-	if (!(fp = fopen(filename, "r"))) {
-		DMA(DEBUG_ERROR, "Unable to open %s, no settings read: %s\n",
-			filename, strerror(errno));
-		return 0;
-	}
-	while (!feof(fp)) {
-		if (ReadLine(fp, setting, value, &mbox_index) == -1)
-			continue;
-
-		/* settings that can be global go here. */
-		if (!strcmp(setting, "interval")) {
-			*loopinterval = atoi(value);
-			continue;
-		} else if (!strcmp(setting, "askpass")) {
-			const char *askpass = strdup(value);
-			if (mbox_index == -1) {
-				int i;
-				DMA(DEBUG_INFO, "setting all to askpass %s\n", askpass);
-				for (i = 0; i < MAX_NUM_MAILBOXES; i++)
-					mbox[i].askpass = askpass;
-			} else {
-				mbox[mbox_index].askpass = askpass;
-			}
-			continue;
-		} else if (!strcmp(setting, "skinfile")) {
-			skin_filename = strdup(value);
-			continue;
-		} else if (!strcmp(setting, "certfile")) {	/* not yet supported */
-			certificate_filename = strdup(value);
-			continue;
-		} else if (!strcmp(setting, "globalnotify")) {
-			globalnotify = strdup(value);
-			continue;
-		} else if (mbox_index == -1) {
-			DMA(DEBUG_INFO, "Unknown global setting '%s'\n", setting);
-			continue;			/* Didn't read any setting.[0-5] value */
-		}
-
-		if (mbox_index >= MAX_NUM_MAILBOXES) {
-			DMA(DEBUG_ERROR, "Don't have %d mailboxes.\n", mbox_index);
-			continue;
-		}
-		if (mbox_index + 1 > num_mailboxes
-			&& mbox_index + 1 <= MAX_NUM_MAILBOXES) {
-			num_mailboxes = mbox_index + 1;
-		}
-		/* now only local settings */
-		if (!strcmp(setting, "label.")) {
-			strcpy(mbox[mbox_index].label, value);
-		} else if (!strcmp(setting, "path.")) {
-			strcpy(mbox[mbox_index].path, value);
-		} else if (!strcmp(setting, "notify.")) {
-			strcpy(mbox[mbox_index].notify, value);
-		} else if (!strcmp(setting, "action.")) {
-			strcpy(mbox[mbox_index].action, value);
-		} else if (!strcmp(setting, "interval.")) {
-			mbox[mbox_index].loopinterval = atoi(value);
-		} else if (!strcmp(setting, "fetchcmd.")) {
-			strcpy(mbox[mbox_index].fetchcmd, value);
-		} else if (!strcmp(setting, "fetchinterval.")) {
-			mbox[mbox_index].fetchinterval = atoi(value);
-		} else if (!strcmp(setting, "debug.")) {
-			int debug_value = debug_default;
-			if (strcasecmp(value, "all") == 0) {
-				debug_value = DEBUG_ALL;
-			}
-			/* could disable debugging, but I want the command
-			   line argument to provide all information
-			   possible. */
-			mbox[mbox_index].debug = debug_value;
-		} else {
-			DMA(DEBUG_INFO, "Unknown setting '%s'\n", setting);
-		}
-	}
-	fclose(fp);
-	for (mbox_index = 0; mbox_index < num_mailboxes; mbox_index++)
-		if (mbox[mbox_index].label[0] != 0)
-			parse_mbox_path(mbox_index);
-	return 1;
-}
-
-/*
- * NOTE: this function assumes that the ConnectionNumber() macro
- *       will return the file descriptor of the Display struct
- *       (it does under XFree86 and solaris' openwin X)
- */
-void XSleep(int millisec)
-{
-#ifdef USE_POLL
-	struct pollfd timeout;
-
-	timeout.fd = ConnectionNumber(display);
-	timeout.events = POLLIN;
-
-	poll(&timeout, 1, millisec);
-#else
-	struct timeval to;
-	struct timeval *timeout = NULL;
-	fd_set readfds;
-	int max_fd;
-
-	if (millisec >= 0) {
-		timeout = &to;
-		to.tv_sec = millisec / 1000;
-		to.tv_usec = (millisec % 1000) * 1000;
-	}
-	FD_ZERO(&readfds);
-	FD_SET(ConnectionNumber(display), &readfds);
-	max_fd = ConnectionNumber(display);
-
-	select(max_fd + 1, &readfds, NULL, NULL, timeout);
-#endif
-}
-
-void sigchld_handler(int sig __attribute__ ((unused)))
+static void sigchld_handler(int sig __attribute__ ((unused)))
 {
 	while (waitpid(0, NULL, WNOHANG) > 0);
 	signal(SIGCHLD, sigchld_handler);
 }
 
-int main(int argc, char *argv[])
+static void usage(void)
 {
-	char uconfig_file[256];
-
-	parse_cmd(argc, argv, uconfig_file);
-
-	/* decide what the config file is */
-	if (uconfig_file[0] != 0) {	/* user-specified config file */
-		DMA(DEBUG_INFO, "Using user-specified config file '%s'.\n",
-			uconfig_file);
-	} else {
-		sprintf(uconfig_file, "%s/.wmbiffrc", getenv("HOME"));
-	}
-
-	if (wmbiffrc_permissions_check(uconfig_file) == 0) {
-		DMA(DEBUG_ERROR,
-			"WARNING: In future versions of WMBiff, .wmbiffrc MUST be\n"
-			"owned by the user, and not readable or writable by others.\n\n");
-	}
-	init_biff(uconfig_file);
-	signal(SIGCHLD, sigchld_handler);
-	signal(SIGPIPE, SIG_IGN);	/* added for gnutls */
-	do_biff(argc, argv);
-	return 0;
+	printf("\nwmBiff v%s"
+		   " - incoming mail checker\n"
+		   "Gennady Belyakov and others (see the README file)\n"
+		   "Please report bugs to %s\n"
+		   "\n"
+		   "usage:\n"
+		   "    -c <filename>             use specified config file\n"
+		   "    -debug                    enable debugging\n"
+		   "    -display <display name>   use specified X display\n"
+		   "    -fg <color>               foreground color\n"
+		   "    -font <font>              font instead of LED\n"
+		   "    -geometry +XPOS+YPOS      initial window position\n"
+		   "    -h                        this help screen\n"
+		   "    -hi <color>               highlight color for new mail\n"
+#ifdef USE_GNUTLS
+		   "    -skip-certificate-check   using TLS, don't validate the\n"
+		   "                              server's certificate\n"
+#endif
+		   "    -v                        print the version number\n"
+		   "    +w                        not withdrawn: run as a window\n"
+		   "\n", PACKAGE_VERSION, PACKAGE_BUGREPORT);
 }
 
-void parse_cmd(int argc, char **argv, /*@out@ */ char *config_file)
+static void printversion(void)
+{
+	printf("wmbiff v%s\n", PACKAGE_VERSION);
+}
+
+
+static void parse_cmd(int argc, char **argv, /*@out@ */ char *config_file)
 {
 	int i;
 
@@ -1102,35 +1092,32 @@ void parse_cmd(int argc, char **argv, /*@out@ */ char *config_file)
 	}
 }
 
-void usage(void)
+int main(int argc, char *argv[])
 {
-	printf("\nwmBiff v%s"
-		   " - incoming mail checker\n"
-		   "Gennady Belyakov and others (see the README file)\n"
-		   "Please report bugs to %s\n"
-		   "\n"
-		   "usage:\n"
-		   "    -c <filename>             use specified config file\n"
-		   "    -debug                    enable debugging\n"
-		   "    -display <display name>   use specified X display\n"
-		   "    -fg <color>               foreground color\n"
-		   "    -font <font>              font instead of LED\n"
-		   "    -geometry +XPOS+YPOS      initial window position\n"
-		   "    -h                        this help screen\n"
-		   "    -hi <color>               highlight color for new mail\n"
-#ifdef USE_GNUTLS
-		   "    -skip-certificate-check   using TLS, don't validate the\n"
-		   "                              server's certificate\n"
-#endif
-		   "    -v                        print the version number\n"
-		   "    +w                        not withdrawn: run as a window\n"
-		   "\n", PACKAGE_VERSION, PACKAGE_BUGREPORT);
+	char uconfig_file[256];
+
+	parse_cmd(argc, argv, uconfig_file);
+
+	/* decide what the config file is */
+	if (uconfig_file[0] != '\0') {	/* user-specified config file */
+		DMA(DEBUG_INFO, "Using user-specified config file '%s'.\n",
+			uconfig_file);
+	} else {
+		sprintf(uconfig_file, "%s/.wmbiffrc", getenv("HOME"));
+	}
+
+	if (wmbiffrc_permissions_check(uconfig_file) == 0) {
+		DMA(DEBUG_ERROR,
+			"WARNING: In future versions of WMBiff, .wmbiffrc MUST be\n"
+			"owned by the user, and not readable or writable by others.\n\n");
+	}
+	init_biff(uconfig_file);
+	signal(SIGCHLD, sigchld_handler);
+	signal(SIGPIPE, SIG_IGN);	/* added for gnutls */
+	do_biff(argc, argv);
+	return 0;
 }
 
-void printversion(void)
-{
-	printf("wmbiff v%s\n", PACKAGE_VERSION);
-}
 
 
 /* vim:set ts=4: */
