@@ -39,7 +39,7 @@ Enter the wmbiff directory and follow INSTALL's directions.
 
 For crypto support either:
  *) Install gnutls and libgrcypt packages from your distribution.
- *) Download them from http://www.gnupg.org/mirrors.html.
+ *) Download them from http://www.gnupg.org/(en)/download/mirrors.html
    Choose a mirror, then download from the alpha/gnutls and
    alpha/libgcrypt directories.
  *) Do nothing; the configure script will note its absence.
