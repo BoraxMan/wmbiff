@@ -9,7 +9,9 @@ EXTRA_wmbiff_SOURCES = gnutls-common.c gnutls-common.h
 wmbiff_LDADD = -L../wmgeneral -lwmgeneral @LIBGCRYPT_LIBS@ @GNUTLS_COMMON_O@
 wmbiff_DEPENDENCIES = ../wmgeneral/libwmgeneral.a Makefile @GNUTLS_COMMON_O@
 test_wmbiff_SOURCES = ShellClient.c charutil.c charutil.h Client.h \
-	test_wmbiff.c passwordMgr.c Imap4Client.c regulo.c Pop3Client.c
+	test_wmbiff.c passwordMgr.c Imap4Client.c regulo.c Pop3Client.c \
+	tlsComm.c tlsComm.h socket.c 
+EXTRA_test_wmbiff_SOURCES = gnutls-common.c gnutls-common.h	
 test_wmbiff_LDADD = @LIBGCRYPT_LIBS@ 
 man_MANS = wmbiff.1 wmbiffrc.5
 skindir = $(datadir)/wmbiff/skins
