@@ -442,7 +442,7 @@ static int authenticate_md5(Pop3 pc,
 	}
 
 	tlscomm_printf(scs, "a007 AUTHENTICATE CRAM-MD5\r\n");
-	if (!tlscomm_expect(scs, "+ ", buf, BUF_SIZE))
+	if (tlscomm_expect(scs, "+ ", buf, BUF_SIZE) == 0)
 		goto expect_failure;
 
 	Decode_Base64(buf + 2, buf2);
@@ -464,7 +464,7 @@ static int authenticate_md5(Pop3 pc,
 	Encode_Base64(buf, buf2);
 
 	tlscomm_printf(scs, "%s\r\n", buf2);
-	if (!tlscomm_expect(scs, "a007 ", buf, BUF_SIZE))
+	if (tlscomm_expect(scs, "a007 ", buf, BUF_SIZE) == 0)
 		goto expect_failure;
 
 	if (!strncmp(buf, "a007 OK", 7))

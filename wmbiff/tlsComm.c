@@ -432,7 +432,8 @@ void handle_gnutls_read_error(int readbytes, struct connection_state *scs)
 			TDM(DEBUG_ERROR, "* Received HelloRequest message\n");
 	}
 	TDM(DEBUG_ERROR,
-		"%s: error reading: %s\n", scs->name, gnutls_strerror(readbytes));
+		"%s: gnutls error reading: %s\n",
+		scs->name, gnutls_strerror(readbytes));
 }
 
 #else
