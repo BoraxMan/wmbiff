@@ -136,11 +136,12 @@ static void get_password_from_keychain(Pop3 pc, const char *username,
 	}
 
 	if (pwdlen < *password_len) {
-		strcpy(password, secpwd);
-		*password_len = strlen(password);
+		strncpy(password, secpwd, pwdlen);
+		password[pwdlen] = '\0';
+		*password_len = pwdlen;
 	} else {
 		DM(pc, DEBUG_ERROR,
-		   "passmgr: warning: your password appears longer (%d) than expected (%d)\n",
+		   "passmgr: warning: your password appears longer (%lu) than expected (%d)\n",
 		   strlen(secpwd), *password_len - 1);
 	}
 	rc = SecKeychainItemFreeContent(NULL, secpwd);
@@ -189,7 +190,7 @@ static void get_password_from_command(Pop3 pc, const char *username,
 		strncpy(password, password_ptr, *password_len);
 		if (password[*password_len - 1] != '\0') {
 			DM(pc, DEBUG_ERROR,
-			   "passmgr: warning: your password appears longer (%d) than expected (%d)\n",
+			   "passmgr: warning: your password appears longer (%lu) than expected (%d)\n",
 			   strlen(password_ptr), *password_len - 1);
 		}
 		free(password_ptr);
