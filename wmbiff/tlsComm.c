@@ -49,6 +49,11 @@ void handle_gnutls_read_error(int readbytes, struct connection_state *scs);
 
 void tlscomm_close(struct connection_state *scs)
 {
+#ifdef DEBUG_COMM
+	fprintf(stderr, "%s: closing.\n",
+			(scs->name != NULL) ? scs->name : "null");
+#endif
+
 	/* not ok to call this more than once */
 	if (scs->state) {
 #ifdef WITH_TLS
