@@ -24,18 +24,22 @@ if test -n "$GCC"; then
 fi
 
 dnl Pre-gnutls.
-AC_CHECK_LIB(z, gzopen) dnl GNUTLS seems to need libz; fail here if it's missing.
-AC_CHECK_LIB(gdbm, dbminit) dnl GNUTLS seems to need libgdbm; fail here if it's missing.
+gnutls="ok"
+AC_CHECK_LIB(z, gzopen, , gnutls="nope") dnl GNUTLS seems to need libz; fail here if it's missing.
+AC_CHECK_LIB(gdbm, dbminit, , gnutls="nope") dnl GNUTLS seems to need libgdbm; fail here if it's missing.
 
 dnl Parameter is minimum version 
 dnl TODO: fix so that GCRYPT is tested only if GNUTLS fails; the dependence
 dnl between them makes this turn redundant
 
-AM_PATH_LIBGNUTLS(0.3.3, [LIBS="$LIBS $LIBGNUTLS_LIBS"
+if test "$gnutls" == "ok"; then
+ AM_PATH_LIBGNUTLS(0.3.3, [LIBS="$LIBS $LIBGNUTLS_LIBS"
                          CFLAGS="$CFLAGS $LIBGNUTLS_CFLAGS"])
+ AC_CHECK_HEADERS(gnutls.h) 
+fi
 AM_PATH_LIBGCRYPT(1.1.5, [LIBS="$LIBS $LIBGCRYPT_LIBS"
                          CFLAGS="$CFLAGS $LIBGCRYPT_CFLAGS"])
-AC_CHECK_HEADERS(gnutls.h gcrypt.h) 
+AC_CHECK_HEADERS(gcrypt.h) 
 
 dnl regex stuff.
 AC_CHECK_HEADERS(regex.h gnuregex.h) dnl linux has regex.h, BSD gnuregex
