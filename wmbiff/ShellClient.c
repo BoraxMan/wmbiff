@@ -25,8 +25,7 @@ int shellCmdCheck(Pop3 pc)
 	if ((F = popen(pc->path, "r")) == NULL) {
 		DM(pc, DEBUG_ERROR, "popen: error while reading '%s': %s\n",
 		   pc->path, strerror(errno));
-		pc->TotalMsgs = pc->UnreadMsgs = -1;
-		return 1;
+		return -1;
 	}
 
 	/* doesn't really need to be handled separately, but it
@@ -35,9 +34,8 @@ int shellCmdCheck(Pop3 pc)
 		DM(pc, DEBUG_ERROR,
 		   "'%s' returned something other than an integer message count.\n",
 		   pc->path);
-		pc->TotalMsgs = pc->UnreadMsgs = -1;
 		pclose(F);
-		return 1;
+		return -1;
 	}
 
 	pc->TotalMsgs = pc->UnreadMsgs + count_status;
