@@ -39,6 +39,7 @@ GNUTLS_MAN_STATUS="This copy of WMBiff was not compiled with GNUTLS."
 if test "$gnutls" = "ok"; then
  AM_PATH_LIBGNUTLS(0.3.3, [LIBS="$LIBS $LIBGNUTLS_LIBS"
                          CFLAGS="$CFLAGS $LIBGNUTLS_CFLAGS"
+                         CPPFLAGS="$CPPFLAGS $LIBGNUTLS_CFLAGS"
                          GNUTLS_MAN_STATUS="This copy of WMBiff was compiled with GNUTLS." ])
  AC_CHECK_HEADERS(gnutls.h) 
 else
@@ -47,6 +48,7 @@ fi
 GCRYPT_MAN_STATUS="This copy of WMBiff was not compiled with gcrypt."
 AM_PATH_LIBGCRYPT(1.1.5, [LIBS="$LIBS $LIBGCRYPT_LIBS"
                          CFLAGS="$CFLAGS $LIBGCRYPT_CFLAGS"
+                         CPPFLAGS="$CPPFLAGS $LIBGCRYPT_CFLAGS"
                          GCRYPT_MAN_STATUS="This copy of WMBiff was compiled with gcrypt."])
 AC_CHECK_HEADERS(gcrypt.h) 
 
