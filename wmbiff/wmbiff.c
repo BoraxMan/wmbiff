@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.54 2003/04/16 08:18:35 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.55 2003/06/08 06:59:45 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -20,6 +20,7 @@
 
 #include <X11/Xlib.h>
 #include <X11/xpm.h>
+#include <X11/cursorfont.h>
 
 #include <errno.h>
 #include <string.h>
@@ -84,7 +85,12 @@ static int notWithdrawn = 0;
 static unsigned int num_mailboxes = 1;
 static const int x_origin = 5;
 static const int y_origin = 5;
-static int forever = 1;
+static int forever = 1;			/* keep running. */
+
+extern Window win;
+extern Window iconwin;
+
+Cursor busy_cursor, ready_cursor;
 
 static __inline /*@out@ */ void *malloc_ordie(size_t len)
 {
@@ -341,6 +347,7 @@ static void init_biff(char *config_file)
 		mbox[i].fetchcmd[0] = '\0';
 		mbox[i].loopinterval = 0;
 		mbox[i].getHeaders = NULL;
+		mbox[i].releaseHeaders = NULL;
 		mbox[i].debug = debug_default;
 		mbox[i].askpass = DEFAULT_ASKPASS;
 	}
@@ -720,7 +727,14 @@ static int periodic_mail_check(void)
 				   (int) curtime, (int) mbox[i].prevtime,
 				   mbox[i].loopinterval);
 				mbox[i].prevtime = curtime;
+
+				XDefineCursor(display, iconwin, busy_cursor);
+				RedrawWindow();
+
 				mailstat = count_mail(i);
+
+				XUndefineCursor(display, iconwin);
+
 				if ((mailstat == 2) && (mbox[i].notify[0] == '\0')) {
 					/* for global notify */
 					NewMail = 1;
@@ -741,7 +755,14 @@ static int periodic_mail_check(void)
 			if (mbox[i].fetchinterval > 0 && mbox[i].fetchcmd[0] != '\0'
 				&& curtime >=
 				mbox[i].prevfetch_time + mbox[i].fetchinterval) {
+
+				XDefineCursor(display, iconwin, busy_cursor);
+				RedrawWindow();
+
 				(void) execCommand(mbox[i].fetchcmd);
+
+				XUndefineCursor(display, iconwin);
+
 				mbox[i].prevfetch_time = curtime;
 			}
 		}
@@ -883,9 +904,6 @@ static void restart_wmbiff(int sig
 	exit(EXIT_FAILURE);
 }
 
-extern Window win;
-extern Window iconwin;
-
 static void do_biff(int argc, const char **argv)
 {
 	unsigned int i;
@@ -920,6 +938,11 @@ static void do_biff(int argc, const char **argv)
 
 	openXwindow(argc, argv, bkg_xpm, skin_xpm, wmbiff_mask_bits,
 				wmbiff_mask_width, wmbiff_mask_height, notWithdrawn);
+
+	/* now that display is set, we can create the cursors
+	   (mouse pointer shapes) */
+	busy_cursor = XCreateFontCursor(display, XC_watch);
+	ready_cursor = XCreateFontCursor(display, XC_left_ptr);
 
 	if (font != NULL) {
 		if (loadFont(font) < 0) {
@@ -1262,11 +1285,10 @@ int main(int argc, const char *argv[])
 	signal(SIGCHLD, sigchld_handler);
 	signal(SIGUSR1, restart_wmbiff);
 	signal(SIGPIPE, SIG_IGN);	/* write() may fail */
+
 	do_biff(argc, argv);
 	return 0;
 }
-
-
 
 /* vim:set ts=4: */
 /*
