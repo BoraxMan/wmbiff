@@ -179,6 +179,7 @@ int shellCmdCheck(Pop3 pc)
 		}
 		/* see if we should print as new or not */
 		pc->UnreadMsgs = (strstr(commandOutput, "new")) ? 1 : 0;
+		pc->TotalMsgs = -1; /* we might alternat numeric /string */
 	} else {
 		SH_DM(pc, DEBUG_ERROR,
 			  "'%s' returned something other than an integer message count"
