@@ -63,9 +63,9 @@ INLINE int list_length(LinkedList * list)
 /* Return the Nth element of LIST, where N count from zero.  If N 
    larger than the list length, NULL is returned  */
 
-INLINE void *list_nth(int index, LinkedList * list)
+INLINE void *list_nth(int idx, LinkedList * list)
 {
-	while (index-- != 0) {
+	while (idx-- != 0) {
 		if (list->tail)
 			list = list->tail;
 		else
