@@ -184,14 +184,17 @@ static void get_password_from_command(Pop3 pc, const char *username,
             exit(EXIT_FAILURE);
         }
         strncpy(password, password_ptr, *password_len);
-        free(password_ptr);
         if( password[*password_len-1] != '\0' ) {
             DM(pc, DEBUG_ERROR,
                "passmgr: warning: your password appears longer (%d) than expected (%d)\n", 
                strlen(password_ptr), *password_len - 1);
         }
+        free(password_ptr);
         password[*password_len-1] = '\0';
         *password_len = strlen(password);
+    } else {
+        DM(pc, DEBUG_ERROR,
+           "passmgr: permissions check of '%s' failed.", pc->askpass);
     }
 }
 
