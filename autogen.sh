@@ -43,6 +43,9 @@ else
     fi
 fi
 
+# something complains if ChangeLog does not exist
+touch ChangeLog
+
 if [ ! -e autoconf/libgnutls.m4 ] ; then
     echo "WARNING: autoconf/libgnutls.m4 does not exist.  autogen is unlikely to work."
 fi
