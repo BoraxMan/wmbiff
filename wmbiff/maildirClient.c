@@ -1,11 +1,11 @@
-/* $Id: maildirClient.c,v 1.8 2002/06/21 04:31:31 bluehal Exp $ */
+/* $Id: maildirClient.c,v 1.9 2002/09/14 18:51:46 dwonis Exp $ */
 /* Author : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
    Modified : Dwayne C. Litzenberger ( dlitz@dlitz.net )
  * 
  * Maildir checker.
  *
- * Last Updated : $Date: 2002/06/21 04:31:31 $
+ * Last Updated : $Date: 2002/09/14 18:51:46 $
  *
  */
 
@@ -54,6 +54,8 @@ int maildirCheckHistory(Pop3 pc)
 	struct stat st_cur;
 	struct utimbuf ut;
 	char path_new[256], path_cur[256];
+	char path_newtmp[512];
+	char *fn;
 
 	int count_new = 0, count_cur = 0;
 
@@ -63,6 +65,18 @@ int maildirCheckHistory(Pop3 pc)
 	strcat(path_new, "/new/");
 	strcpy(path_cur, pc->path);
 	strcat(path_cur, "/cur/");
+	strcpy(path_newtmp, path_new);
+	strcat(path_newtmp, ".wmbiff.dircache_flush.XXXXXX");
+
+	if (pc->u.maildir.dircache_flush) {
+		/* hack to clear directory cache for network-mounted maildirs*/
+		if (fn = mktemp(path_newtmp)) {
+			unlink(fn);
+		} else {
+			DM(pc, DEBUG_ERROR, "Can't create dircache flush file '%s': %s\n",
+		   		path_newtmp, strerror(errno));
+		}
+	}
 
 	/* maildir */
 	if (stat(path_new, &st_new)) {
@@ -121,6 +135,8 @@ int maildirCheckHistory(Pop3 pc)
 
 int maildirCreate(Pop3 pc, const char *str)
 {
+	int i;
+	char c;
 	/* Maildir format: maildir:fullpathname */
 
 	pc->TotalMsgs = 0;
@@ -128,7 +144,23 @@ int maildirCreate(Pop3 pc, const char *str)
 	pc->OldMsgs = -1;
 	pc->OldUnreadMsgs = -1;
 	pc->checkMail = maildirCheckHistory;
-	strcpy(pc->path, str + 8);	/* cut off ``maildir:'' */
+	pc->u.maildir.dircache_flush = 0;
+
+	/* special flags */
+	if (*(str + 8) == ':') { /* path is of the format maildir::flags:path */
+		c = ' ';
+		for (i = 1; c != ':' && c != '\0'; i++) {
+			c = *(str + 8 + i);
+			switch (c) {
+			case 'F':
+				pc->u.maildir.dircache_flush = 1;
+				DM(pc, DEBUG_INFO, "maildir: dircache_flush enabled\n");
+			}
+		}
+	} else {
+		i = 0;
+	}
+	strcpy(pc->path, str + 8 + i);	/* cut off ``maildir:'' */
 
 	DM(pc, DEBUG_INFO, "maildir: str = '%s'\n", str);
 	DM(pc, DEBUG_INFO, "maildir: path= '%s'\n", pc->path);

@@ -1,11 +1,11 @@
-/* $Id: Client.h,v 1.26 2002/06/21 04:29:58 bluehal Exp $ */
+/* $Id: Client.h,v 1.27 2002/09/14 18:51:46 dwonis Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
  *
  * Email Checker Pop3/Imap4/Licq/Gicu/mbox/maildir/finger
  *
- * Last Updated : $Date: 2002/06/21 04:29:58 $
+ * Last Updated : $Date: 2002/09/14 18:51:46 $
  *
  */
 
@@ -51,6 +51,7 @@ typedef struct _mbox_t {
 			off_t size_new;
 			time_t mtime_cur;
 			off_t size_cur;
+			unsigned int dircache_flush:1; /* hack to flush directory caches */
 		} maildir;
 		struct {
 			char password[32];
