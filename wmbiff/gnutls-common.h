@@ -1,6 +1,7 @@
-/* taken from gnutls 0.4.3's distribution, tiny edit 
-   for including the system gnutls. */
-#include <gnutls.h>
+#define PORT 5556
+#define SERVER "127.0.0.1"
 
-int print_info(GNUTLS_STATE state);
+#include <gnutls/gnutls.h>
+
+int print_info( GNUTLS_STATE state);
 int print_list(void);

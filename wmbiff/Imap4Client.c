@@ -313,7 +313,7 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 	/* IMAP4 format: imap:user:password@server/mailbox[:port] */
 	/* If 'str' line is badly formatted, wmbiff won't display the mailbox. */
 	if (strncmp("sslimap:", str, 8) == 0 || strncmp("imaps:", str, 6) == 0) {
-#ifdef HAVE_GNUTLS_H
+#ifdef HAVE_GNUTLS_GNUTLS_H
 		static int haveBeenWarned;
 		PCU.dossl = 1;
 		if (!haveBeenWarned) {

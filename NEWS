@@ -1,5 +1,8 @@
 Release Notes
 ~~~~~~~~~~~~~
+Release 0.4.7 - August 16, 2002
+  * GNUTLS v0.5.1, gcrypt v1.1.8 required. (no other changes)
+
 Release 0.4.6 - July 19, 2002
   * Ignore sigpipe so that apm suspend works with IMAP/TLS.
   * Memory handling bugfixes to appease valgrind.
@@ -345,4 +348,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.27 2002/07/19 18:51:18 bluehal Exp $
+$Id: NEWS,v 1.28 2002/08/16 07:55:03 bluehal Exp $

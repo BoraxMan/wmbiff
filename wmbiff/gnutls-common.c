@@ -1,13 +1,6 @@
-/* taken from gnutls 0.4.3's distribution, tiny edit 
-   for including the system gnutls.  define EXTRA_BROKEN
-   so long as it's inconvenient to include gnutls-extra.h 
-   and link with -lgnutls-extra */
-#define EXTRA_BROKEN
 #include <stdio.h>
-#include <gnutls.h>
-#ifndef EXTRA_BROKEN
-#include <gnutls-extra.h>
-#endif
+#include <gnutls/gnutls.h>
+#include <gnutls/extra.h>
 #include <time.h>
 
 #define PRINTX(x,y) if (y[0]!=0) printf(" #   %s %s\n", x, y)
@@ -21,15 +14,14 @@
 #define PRINT_PGP_NAME(X) PRINTX( "NAME:", X.name); \
 	PRINTX( "EMAIL:", X.email)
 
-static const char *my_ctime(time_t * tv)
-{
-	static char buf[256];
-	struct tm *tp;
+static const char* my_ctime( time_t* tv) {
+static char buf[256];
+struct tm* tp;
 
-	tp = localtime(tv);
-	strftime(buf, sizeof buf, "%a %b %e %H:%M:%S %Z %Y\n", tp);
+tp = localtime(tv);
+strftime(buf, sizeof buf, "%a %b %e %H:%M:%S %Z %Y\n", tp);
 
-	return buf;
+return buf;
 
 }
 
@@ -55,16 +47,15 @@ void print_x509_info(GNUTLS_STATE state)
 	if (cert_list_size <= 0)
 		return;
 
-
 	printf(" - Certificate info:\n");
 
-	printf(" # Certificate is valid since: %s", my_ctime(&activet));
-	printf(" # Certificate expires: %s", my_ctime(&expiret));
+	printf(" # Certificate is valid since: %s", my_ctime( &activet));
+	printf(" # Certificate expires: %s", my_ctime( &expiret));
 
 	/* Print the fingerprint of the certificate
 	 */
 	if (gnutls_x509_fingerprint
-		(GNUTLS_DIG_MD5, &cert_list[0], digest, &digest_size) >= 0) {
+	    (GNUTLS_DIG_MD5, &cert_list[0], digest, &digest_size) >= 0) {
 		print = printable;
 		for (i = 0; i < digest_size; i++) {
 			sprintf(print, "%.2x ", (unsigned char) digest[i]);
@@ -77,7 +68,7 @@ void print_x509_info(GNUTLS_STATE state)
 	 */
 
 	if (gnutls_x509_extract_certificate_serial
-		(&cert_list[0], serial, &serial_size) >= 0) {
+	    (&cert_list[0], serial, &serial_size) >= 0) {
 		print = printable;
 		for (i = 0; i < serial_size; i++) {
 			sprintf(print, "%.2x ", (unsigned char) serial[i]);
@@ -90,16 +81,15 @@ void print_x509_info(GNUTLS_STATE state)
 	 * certificate.
 	 */
 	printf(" # Certificate version: #%d\n",
-		   gnutls_x509_extract_certificate_version(&cert_list[0]));
+	       gnutls_x509_extract_certificate_version(&cert_list[0]));
 
-	algo =
-		gnutls_x509_extract_certificate_pk_algorithm(&cert_list[0], &bits);
+	algo = gnutls_x509_extract_certificate_pk_algorithm( &cert_list[0], &bits);
 	printf(" # Certificate public key algorithm: ");
 
-	if (algo == GNUTLS_PK_RSA) {
+	if (algo==GNUTLS_PK_RSA) {
 		printf("RSA\n");
 		printf(" #   Modulus: %d bits\n", bits);
-	} else if (algo == GNUTLS_PK_DSA) {
+	} else if (algo==GNUTLS_PK_DSA) {
 		printf("DSA\n");
 		printf(" #   Exponent: %d bits\n", bits);
 	} else {
@@ -115,6 +105,70 @@ void print_x509_info(GNUTLS_STATE state)
 
 }
 
+#ifdef undef_wmbiff_dont_need_no_extra
+void print_openpgp_info(GNUTLS_STATE state)
+{
+
+	gnutls_openpgp_name pgp_name;
+	char digest[20];
+	int digest_size = sizeof(digest), i;
+	char printable[120];
+	char *print;
+	const gnutls_datum *cert_list;
+	int cert_list_size = 0;
+	time_t expiret = gnutls_certificate_expiration_time_peers(state);
+	time_t activet = gnutls_certificate_activation_time_peers(state);
+
+	cert_list = gnutls_certificate_get_peers(state, &cert_list_size);
+
+	if (cert_list_size > 0) {
+		int algo, bits;
+
+		printf(" # Key was created at: %s", my_ctime( &activet));
+		printf(" # Key expires: ");
+		if (expiret != 0)
+			printf("%s", my_ctime( &expiret));
+		else
+			printf("Never\n");
+		
+		if (gnutls_openpgp_fingerprint
+		    (&cert_list[0], digest, &digest_size) >= 0) {
+			print = printable;
+			for (i = 0; i < digest_size; i++) {
+				sprintf(print, "%.2x ",
+					(unsigned char) digest[i]);
+				print += 3;
+			}
+
+			printf(" # PGP Key version: %d\n", 
+				gnutls_openpgp_extract_key_version(&cert_list[0]));
+
+			algo = gnutls_openpgp_extract_key_pk_algorithm( &cert_list[0], &bits);
+		
+			printf(" # PGP Key public key algorithm: ");
+
+			if (algo==GNUTLS_PK_RSA) {
+				printf("RSA\n");
+				printf(" #   Modulus: %d bits\n", bits);
+			} else if (algo==GNUTLS_PK_DSA) {
+				printf("DSA\n");
+				printf(" #   Exponent: %d bits\n", bits);
+			} else {
+				printf("UNKNOWN\n");
+			}
+
+			printf(" # PGP Key fingerprint: %s\n",
+			       printable);
+
+			gnutls_openpgp_extract_key_name(&cert_list
+							      [0], 0, &pgp_name);
+			PRINT_PGP_NAME(pgp_name);
+
+		}
+
+	}
+}
+#endif
 
 void print_cert_vrfy(GNUTLS_STATE state)
 {
@@ -158,34 +212,36 @@ int print_info(GNUTLS_STATE state)
 	switch (cred) {
 	case GNUTLS_CRD_ANON:
 		printf("- Anonymous DH using prime of %d bits, secret key "
-			   "of %d bits, and peer's public key is %d bits.\n",
-			   gnutls_dh_get_prime_bits(state),
-			   gnutls_dh_get_secret_bits(state),
-			   gnutls_dh_get_peers_public_bits(state));
+			"of %d bits, and peer's public key is %d bits.\n",
+		       gnutls_dh_get_prime_bits(state), gnutls_dh_get_secret_bits(state),
+		       gnutls_dh_get_peers_public_bits(state));
 		break;
 	case GNUTLS_CRD_SRP:
-#ifndef EXTRA_BROKEN
+#ifdef undef_wmbiff_dont_need_no_extra
 		/* This should be only called in server
 		 * side.
 		 */
 		if (gnutls_srp_server_get_username(state) != NULL)
 			printf("- SRP authentication. Connected as '%s'\n",
-				   gnutls_srp_server_get_username(state));
+			       gnutls_srp_server_get_username(state));
 #endif
 		break;
 	case GNUTLS_CRD_CERTIFICATE:
 		switch (gnutls_cert_type_get(state)) {
 		case GNUTLS_CRT_X509:
-			printf("- Peer requested X.509 certificate authentication.\n");
+			printf
+			    ("- Peer requested X.509 certificate authentication.\n");
 
 			print_x509_info(state);
 
 			break;
 		case GNUTLS_CRT_OPENPGP:{
 				printf
-					("- Peer requested OpenPGP certificate authentication.\n");
+				    ("- Peer requested OpenPGP certificate authentication.\n");
 
-				/* print_openpgp_info(state); */
+#ifdef undef_wmbiff_dont_need_no_extra
+				print_openpgp_info(state);
+#endif
 
 				break;
 			}
@@ -197,10 +253,9 @@ int print_info(GNUTLS_STATE state)
 		 */
 		if (kx == GNUTLS_KX_DHE_RSA || kx == GNUTLS_KX_DHE_DSS) {
 			printf("- Ephemeral DH using prime of %d bits, secret key "
-				   "of %d bits, and peer's public key is %d bits.\n",
-				   gnutls_dh_get_prime_bits(state),
-				   gnutls_dh_get_secret_bits(state),
-				   gnutls_dh_get_peers_public_bits(state));
+				"of %d bits, and peer's public key is %d bits.\n",
+			       gnutls_dh_get_prime_bits(state), gnutls_dh_get_secret_bits(state),
+			       gnutls_dh_get_peers_public_bits(state));
 		}
 	}
 
@@ -258,4 +313,21 @@ void print_list(void)
 	printf(", NULL\n");
 
 	return;
+}
+
+void print_license(void)
+{
+   fprintf(stdout,
+	   "\nCopyright (C) 2001-2002 Nikos Mavroyanopoulos\n"
+	     "This program is free software; you can redistribute it and/or modify \n"
+	     "it under the terms of the GNU General Public License as published by \n"
+	     "the Free Software Foundation; either version 2 of the License, or \n"
+	     "(at your option) any later version. \n" "\n"
+	     "This program is distributed in the hope that it will be useful, \n"
+	     "but WITHOUT ANY WARRANTY; without even the implied warranty of \n"
+	     "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the \n"
+	     "GNU General Public License for more details. \n" "\n"
+	     "You should have received a copy of the GNU General Public License \n"
+	     "along with this program; if not, write to the Free Software \n"
+	     "Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.\n\n");
 }

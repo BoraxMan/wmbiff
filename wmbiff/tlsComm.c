@@ -19,8 +19,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
-#ifdef HAVE_GNUTLS_H
-#include <gnutls.h>
+#ifdef HAVE_GNUTLS_GNUTLS_H
+#define USE_GNUTLS
+#include <gnutls/gnutls.h>
 #endif
 #ifdef USE_DMALLOC
 #include <dmalloc.h>
@@ -48,7 +49,7 @@ extern const char *certificate_filename;
 struct connection_state {
 	int sd;
 	char *name;
-#ifdef HAVE_GNUTLS_H
+#ifdef USE_GNUTLS
 	GNUTLS_STATE state;
 	GNUTLS_CERTIFICATE_CLIENT_CREDENTIALS xcred;
 #else
@@ -71,7 +72,7 @@ void tlscomm_close(struct connection_state *scs)
 
 	/* not ok to call this more than once */
 	if (scs->state) {
-#ifdef HAVE_GNUTLS_H
+#ifdef USE_GNUTLS
 		gnutls_bye(scs->state, GNUTLS_SHUT_RDWR);
 		gnutls_certificate_free_sc(scs->xcred);
 		gnutls_deinit(scs->state);
@@ -162,7 +163,7 @@ int tlscomm_expect(struct connection_state *scs,
 	memset(linebuf, 0, buflen);
 	TDM(DEBUG_INFO, "%s: expecting: %s\n", scs->name, prefix);
 	while (wait_for_it(scs->sd, EXPECT_TIMEOUT)) {
-#ifdef HAVE_GNUTLS_H
+#ifdef USE_GNUTLS
 		if (scs->state) {
 			/* BUF_SIZE - 1 leaves room for trailing \0 */
 			readbytes =
@@ -242,7 +243,7 @@ void tlscomm_printf(struct connection_state *scs, const char *format, ...)
 	va_end(args);
 
 	if (scs->sd != -1) {
-#ifdef HAVE_GNUTLS_H
+#ifdef USE_GNUTLS
 		if (scs->state) {
 			int written = gnutls_write(scs->state, buf, bytes);
 			if (written < bytes) {
@@ -263,7 +264,7 @@ void tlscomm_printf(struct connection_state *scs, const char *format, ...)
 }
 
 /* most of this file only makes sense if using TLS. */
-#ifdef HAVE_GNUTLS_H
+#ifdef USE_GNUTLS
 #include "gnutls-common.h"
 
 /* a start of a hack at verifying certificates.  does not
