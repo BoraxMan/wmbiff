@@ -6,13 +6,51 @@ The latest changelog entry is in a different format, because it's inserted by
 CVS on commit.
 
   $Log: ChangeLog,v $
-  Revision 1.34  2002/06/24 07:18:09  bluehal
-  roughly finished 0.4.4
+  Revision 1.35  2002/06/26 18:56:22  bluehal
+  migrate to newer autoconf (2.5) to try to debug making-from-scratch problem and get rid of acconfig.h cruft
 
   Revision 1.1  2002/04/07 05:08:23  bluehal
   use automake / autoconf; after checkout run ./FromCVS.sh
 
 
+
+2002-06-25 Tuesday 23:52 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* Makefile.am: tiny automake 1.6 fix (doesn't appear to use
+	stamp-h.  who knew.)
+
+2002-06-25 Tuesday 23:33 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* autoconf/libgnutls.m4: trivial upstream bugfix
+
+2002-06-25 Tuesday 23:29 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Makefile.am: never underestimate the complexity of
+	solutions involving automake
+
+2002-06-25 Tuesday 23:24 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* configure.in, wmbiff/Makefile.am: corrections to conditional
+	compilation of gnutls-common for automake 1.5 (and thereby the true
+	automake way)
+
+2002-06-25 Tuesday 23:15 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* configure.in, wmbiff/Makefile.am: only compile gnutls-common.[ch]
+	if gnutls is configured in (duh), and only check for gcrypt.h if
+	libgcrypt is installed and current
+
+2002-06-24 Monday 07:18 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* ChangeLog, FromCVS.sh, NEWS: roughly finished 0.4.4
+
+2002-06-24 Monday 07:16 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/tlsComm.c: restore certificate checking
+
+2002-06-24 Monday 07:15 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: gnutls-common.c, gnutls-common.h: indent run
 
 2002-06-24 Monday 01:23 UTC -- Neil Spring <nspring@cs.washington.edu>
 

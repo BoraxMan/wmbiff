@@ -1,12 +1,18 @@
 #!/bin/sh
 
 # runs all the things necessary to rebuild files from CVS.
-autoheader -l autoconf && \
+# no longer needed autoheader -l autoconf && \
+# aclocal must be run before autoheader, so that 
+# autoheader knows to create config.h, because automake
+# complains if any macro other than its own specifies
+# the file
+
 if [ -e /usr/share/aclocal/libgnutls.m4 ]; then
    aclocal;
 else 
    aclocal -I autoconf;
 fi
+ autoheader && \
  automake -a && \
  autoconf && \
  ./configure && \
