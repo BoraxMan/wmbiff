@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.12 2002/03/01 08:41:29 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.13 2002/03/01 11:58:23 jordi Exp $ */
 
 #define	USE_POLL
 
@@ -643,10 +643,12 @@ void usage(void)
 {
 	printf("\nwmBiff v" WMBIFF_VERSION
 		   " - incoming mail checker\n"
-		   "Gennady Belyakov <gb@ccat.elect.ru> and others (see the README file)\n"
+		   "Gennady Belyakov and others (see the README file)\n"
+		   "Please report bugs to wmbiff-devel@lists.sourceforge.net\n"
 		   "\n"
 		   "usage:\n"
-		   "    -display <display name>\n"
+		   "    -debug                    enable debugging\n"
+		   "    -display <display name>   use specified X display\n"
 		   "    -geometry +XPOS+YPOS      initial window position\n"
 		   "    -c <filename>             use specified config file\n"
 		   "    -h                        this help screen\n"
