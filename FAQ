@@ -4,6 +4,20 @@ Subscribe to wmbiff-devel@lists.sourceforge.net.
 
 echo "subscribe wmbiff-devel" | mail majordomo@lists.sourceforge.net
 
+* Why doesn't WMBiff update immediately after I read my mail?
+
+WMBiff looks only at the flags associated with mail messages
+to decide if they've been read.  If your mail reader doesn't
+bother to update those flags immediately after you read a
+message, WMBiff has (essentially) no way of knowing that
+you've read the message.
+
+There are some workarounds.  In mutt, you can ask it to sync
+the mailbox using the sync-mailbox command: it will write
+the mailbox file to disk (or back to the IMAP server) so
+that WMBiff can update its counters.  The sync-mailbox
+command is bound to the $ key by default.
+
 * WMBiff doesn't work.  How do I submit a bug?
 
 See the Troubleshooting section of the wmbiffrc man
