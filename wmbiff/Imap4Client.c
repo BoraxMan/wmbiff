@@ -44,8 +44,10 @@ static struct fdmap_struct {
 
 
 /* authentication callbacks */
+#ifdef WITH_GCRYPT
 static int authenticate_md5(Pop3 pc, struct connection_state *scs,
 							const char *capabilities);
+#endif
 static int authenticate_plaintext(Pop3 pc, struct connection_state *scs,
 								  const char *capabilities);
 
@@ -58,7 +60,9 @@ static struct imap_authentication_method {
 						  const char *capabilities);
 } auth_methods[] = {
 	{
+#ifdef WITH_GCRYPT
 	"cram-md5", authenticate_md5}, {
+#endif
 	"plaintext", authenticate_plaintext}, {
 	NULL, NULL}
 };
@@ -392,11 +396,11 @@ static int authenticate_plaintext(Pop3 pc,
 	return (0);
 }
 
+#ifdef WITH_GCRYPT
 static int authenticate_md5(Pop3 pc,
 							struct connection_state *scs,
 							const char *capabilities)
 {
-#ifdef WITH_GCRYPT
 	char buf[BUF_SIZE];
 	char buf2[BUF_SIZE];
 	unsigned char *md5;
@@ -446,8 +450,5 @@ static int authenticate_md5(Pop3 pc,
 			"tlscomm_expect failed during cram-md5 auth: %s", buf);
 	IMAP_DM(pc, DEBUG_ERROR, "failed to authenticate using cram-md5.");
 	return 0;
-#else
-	/* not compiled with gcrypt. */
-	return 0;
-#endif
 }
+#endif
