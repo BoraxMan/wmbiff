@@ -1,6 +1,6 @@
 # Makefile for wmbiff
 #
-# $Id: Makefile,v 1.23 2002/03/01 08:41:29 bluehal Exp $
+# $Id: Makefile,v 1.24 2002/03/01 11:28:05 jordi Exp $
 
 # Disable gnutls crypto?
 #WITHOUT_CRYPTO=	1
@@ -105,7 +105,7 @@ install: wmbiff
 	$(INSTALL_DIR) $(BINDIR)
 	$(INSTALL_DIR) $(MANDIR)/man1
 	$(INSTALL_DIR) $(MANDIR)/man5
-	$(INSTALL_PROGRAM) wmbiff $(BINDIR)
+	$(INSTALL_PRG) wmbiff $(BINDIR)
 	$(INSTALL_FILE) wmbiff.1 $(MANDIR)/man1
 	$(INSTALL_FILE) wmbiffrc.5 $(MANDIR)/man5
 
