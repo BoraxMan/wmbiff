@@ -6,13 +6,86 @@ The latest changelog entry is in a different format, because it's inserted by
 CVS on commit.
 
   $Log: ChangeLog,v $
-  Revision 1.24  2002/04/09 07:52:11  bluehal
-  bump version to 0.4.0pre3 - permissions checking for .wmbiffrc added.
+  Revision 1.25  2002/04/15 01:47:09  bluehal
+  0.4.0pre4 - finger support, text from shell support, minor code reorganization
 
   Revision 1.1  2002/04/07 05:08:23  bluehal
   use automake / autoconf; after checkout run ./FromCVS.sh
 
 
+
+2002-04-15 Monday 01:38 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* AUTHORS, README: add Andelko Horvat to the list of contributors,
+	remove author list from README
+
+2002-04-15 Monday 01:30 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/test-wmbiffrc.shell: test finger as well
+
+2002-04-15 Monday 01:30 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Client.h: TextStatus to hold a three-character status
+	message
+
+2002-04-15 Monday 01:30 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiff.c: support TextString as status; factor
+	blitMsgCounters as displayMsgCounters was starting to get ugly, add
+	finger recipe to use ShellClient instead of a separate module
+
+2002-04-15 Monday 01:26 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/passwordMgr.c: use chomp to remove the newline from
+	ssh-askpass output
+
+2002-04-15 Monday 01:26 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: charutil.c, charutil.h: duplicate perl's chomp()
+
+2002-04-15 Monday 01:26 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/ShellClient.c: return sigchld to default hander before
+	using popen; handle text input. Much complexity, I hope it's worth
+	it.
+
+2002-04-15 Monday 01:25 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiff-master-led.xpm: support yellow text
+
+2002-04-15 Monday 01:24 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Makefile.am: derive wmbiff-master-contrast.xpm from
+	wmbiff-master-led.xpm
+
+2002-04-12 Friday 05:54 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/socket.c: extra debugging messages, to be in-line with our
+	-debug to stdout philosophy
+
+2002-04-11 Thursday 21:49 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* .cvsignore, wmbiff/.cvsignore, wmgeneral/.cvsignore: Ignorable
+	flies.
+
+2002-04-11 Thursday 21:39 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* autoconf/: install-sh, missing, mkinstalldirs: Shouldn't be in
+	CVS...
+
+2002-04-11 Thursday 18:24 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* configure.in, wmbiff/.cvsignore: attempt to fix Jordi's configure
+	bug
+
+2002-04-11 Thursday 07:24 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Pop3Client.c: APOP bugfix (unreleased bug)
+
+2002-04-09 Tuesday 07:52 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* ChangeLog, configure.in: bump version to 0.4.0pre3 - permissions
+	checking for .wmbiffrc added.
 
 2002-04-09 Tuesday 07:47 UTC -- Neil Spring <nspring@cs.washington.edu>
 

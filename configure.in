@@ -9,7 +9,7 @@ dnl  version
 
 AC_INIT(configure.in)
 AC_CONFIG_AUX_DIR(autoconf)
-AM_INIT_AUTOMAKE(wmbiff, 0.4.0pre3)
+AM_INIT_AUTOMAKE(wmbiff, 0.4.0pre4)
 dnl AUTOHEADER="$AUTOHEADER -l \\\\\\\$\(srcdir)/autoconf"
 AM_CONFIG_HEADER(config.h)
 AC_SUBST(VERSION)
@@ -41,6 +41,8 @@ if test "$gnutls" = "ok"; then
                          CFLAGS="$CFLAGS $LIBGNUTLS_CFLAGS"
                          GNUTLS_MAN_STATUS="This copy of WMBiff was compiled with GNUTLS." ])
  AC_CHECK_HEADERS(gnutls.h) 
+else
+ AC_MSG_RESULT(GNUTLS support requires libz.a and libgdbm.a)
 fi
 GCRYPT_MAN_STATUS="This copy of WMBiff was not compiled with gcrypt."
 AM_PATH_LIBGCRYPT(1.1.5, [LIBS="$LIBS $LIBGCRYPT_LIBS"
