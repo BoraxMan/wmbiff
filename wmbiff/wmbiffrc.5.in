@@ -1,5 +1,7 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiffrc.5.in,v 1.6 2002/09/18 23:43:49 bluehal Exp $
+.\" $Id: wmbiffrc.5.in,v 1.7 2002/10/14 01:47:18 bluehal Exp $
+.\"
+.\" @configure_input@
 .\"
 .\" wmbiff.1 and wmbiffrc.5 are copyright 1999-2002 by 
 .\" Jordi Mallach <jordi@debian.org>
