@@ -516,6 +516,7 @@ void openXwindow(int argc, char *argv[], const char *pixmap_bytes[],
 				 ButtonPressMask | ExposureMask | ButtonReleaseMask |
 				 PointerMotionMask | StructureNotifyMask);
 
+	/* wname is argv[0] */
 	if (XStringListToTextProperty(&wname, 1, &name) == 0) {
 		fprintf(stderr, "%s: can't allocate window name\n", wname);
 		exit(1);
