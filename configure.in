@@ -9,7 +9,7 @@ dnl  version
 
 AC_INIT(configure.in)
 AC_CONFIG_AUX_DIR(autoconf)
-AM_INIT_AUTOMAKE(wmbiff, 0.4.3)
+AM_INIT_AUTOMAKE(wmbiff, 0.4.4)
 dnl AUTOHEADER="$AUTOHEADER -l \\\\\\\$\(srcdir)/autoconf"
 AM_CONFIG_HEADER(config.h)
 AC_SUBST(VERSION)
@@ -38,10 +38,11 @@ dnl Parameter is minimum version
 dnl TODO: fix so that GCRYPT is tested only if GNUTLS fails; the dependence
 dnl between them makes this turn redundant
 
+
 GNUTLS_MAN_STATUS="This copy of WMBiff was not compiled with GNUTLS."
 if test "$gnutls" = "ok"; then
- AM_PATH_LIBGNUTLS(0.3.3, [LIBS="$LIBS $LIBGNUTLS_LIBS"
-                         CFLAGS="$CFLAGS $LIBGNUTLS_CFLAGS"
+ AM_PATH_LIBGNUTLS(0.4.3, [LIBS="$LIBS $LIBGNUTLS_LIBS"
+                          CFLAGS="$CFLAGS $LIBGNUTLS_CFLAGS"
                          CPPFLAGS="$CPPFLAGS $LIBGNUTLS_CFLAGS"
                          GNUTLS_MAN_STATUS="This copy of WMBiff was compiled with GNUTLS." ])
  AC_CHECK_HEADERS(gnutls.h) 
@@ -49,11 +50,11 @@ else
  AC_MSG_RESULT(GNUTLS support requires libz.a and libgdbm.a, so will be disabled)
 fi
 GCRYPT_MAN_STATUS="This copy of WMBiff was not compiled with gcrypt."
-AM_PATH_LIBGCRYPT(1.1.5, [LIBS="$LIBS $LIBGCRYPT_LIBS"
-                         CFLAGS="$CFLAGS $LIBGCRYPT_CFLAGS"
+AM_PATH_LIBGCRYPT(1.1.7, [CFLAGS="$CFLAGS $LIBGCRYPT_CFLAGS"
                          CPPFLAGS="$CPPFLAGS $LIBGCRYPT_CFLAGS"
                          GCRYPT_MAN_STATUS="This copy of WMBiff was compiled with gcrypt."])
 AC_CHECK_HEADERS(gcrypt.h) 
+
 
 AC_SUBST(GNUTLS_MAN_STATUS)
 AC_SUBST(GCRYPT_MAN_STATUS)
@@ -73,11 +74,24 @@ AC_CHECK_LIB(Xext, XextAddDisplay)
 AC_CHECK_LIB(Xpm, XpmCreateImageFromXpmImage)
 
 AC_CHECK_HEADERS(X11/xpm.h, [], [AC_CHECK_HEADERS(xpm.h, [], AC_MSG_ERROR([xpm.h is needed]))])
+dnl AM_PATH_GTK(1.2.10, , AC_MSG_WARN(Cannot find GTK: Is gtk-config in path?))
+dnl AM_PATH_GDK_PIXBUF(0.15.0, [CFLAGS="$CFLAGS $GDK_PIXBUF_CFLAGS"],
+                           dnl AC_MSG_ERROR(Cannot find gdk-pixbuf))
+dnl GNOME_INIT_HOOK([ ], failure)
+dnl GNOME_ORBIT_HOOK([GNOME_LIBS="$GNOME_LIBS $ORBIT_LIBS"
+dnl                   GNOME_CFLAGS="$GNOME_CFLAGS $ORBIT_CFLAGS"], failure)
+dnl GNOME_GNORBA_HOOK([GNOME_LIBS="$GNOME_LIBS $GNORBA_LIBS"
+dnl                   GNOME_CFLAGS="$GNOME_CFLAGS $GNORBA_CFLAGS"], failure)
+
+dnl AC_SUBST(GNOME_LIBS)
+dnl AC_SUBST(GNOME_CFLAGS)
+
+
 
 dnl Password prompting stuff.
 AC_PATH_PROGS(DEFAULT_ASKPASS, ssh-askpass x11-ssh-askpass ssh-askpass-gnome, /usr/bin/ssh-askpass)
 AC_PATH_PROG(CVS2CL, cvs2cl)
-AC_DEFINE_UNQUOTED(DEFAULT_ASKPASS, "$DEFAULT_ASKPASS")
+AC_DEFINE_UNQUOTED(DEFAULT_ASKPASS, "$DEFAULT_ASKPASS", [Program to use for querying the user for a password: redefine if not on a debian system])
 
 dnl Skin files; note - this is duplicated in wmbiff/Makefile.am
 dnl haven't thought of a way around it.
@@ -90,7 +104,7 @@ dnl where to install em
 AC_SUBST(SKINDIR)
 dnl where to find em
 AC_DEFINE_UNQUOTED(DEFAULT_SKIN_PATH, 
-                   "$SKINDIR:/usr/share/wmbiff/skins:/usr/local/share/wmbiff/skins:.")
+                   "$SKINDIR:/usr/share/wmbiff/skins:/usr/local/share/wmbiff/skins:.", [Path to use when finding skins (modified pixmaps)] )
 
 dnl We're done.
 AC_OUTPUT(Makefile wmbiff/Makefile wmgeneral/Makefile wmbiff/wmbiffrc.5 autoconf/Makefile)
