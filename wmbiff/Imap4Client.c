@@ -1,4 +1,4 @@
-/* $Id: Imap4Client.c,v 1.3 2001/06/19 03:38:58 dwonis Exp $ */
+/* $Id: Imap4Client.c,v 1.4 2001/06/23 00:09:32 oskuro Exp $ */
 /* Author : Yong-iL Joh ( tolkien@mizi.com )
    Modified: Jorge García ( Jorge.Garcia@uv.es )
  * 
@@ -50,10 +50,32 @@ FILE *imap4Login(Pop3 pc)
 int imap4CheckMail(Pop3 pc)
 {
 	FILE *f;
+	char buf[BUF_SIZE];
 
 	f = pc->open(pc);
 	if (f == NULL)
 		return -1;
+
+	fflush(f);
+	fprintf(f, "a003 STATUS %s (MESSAGES UNSEEN)\r\n", pc->path);
+	fflush(f);
+	fgets(buf, 127, f);
+	if (buf[0] != '*') {		/* Looking for "* STATUS ..." */
+		fprintf(stderr, "Error Receiving Stats '%s@%s:%d'\n\t%s\n",
+				PCU.userName, PCU.serverName, PCU.serverPort, buf);
+		fclose(f);
+		return -1;
+	} else {
+		sscanf(buf, "* STATUS %*s (MESSAGES %d UNSEEN %d)",
+			   &(pc->TotalMsgs), &(pc->UnreadMsgs));
+#ifdef DEBUG_IMAP4
+		fprintf(stderr, "[%s:%d] %s", __FILE__, __LINE__, buf);
+#endif
+		fgets(buf, 127, f);
+#ifdef DEBUG_IMAP4
+		fprintf(stderr, "[%s:%d] %s", __FILE__, __LINE__, buf);
+#endif
+	}
 
 	fflush(f);
 
