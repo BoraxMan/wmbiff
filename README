@@ -37,10 +37,13 @@ Enter the wmbiff directory and edit the Makefile:
         cd wmbiff-0.x/
         vi Makefile
 
-If you want crypto support disabled, comment the "WITH_TLS" and
-"WITH_GCRYPT" defines in the Makefile. It is enabled by default, and
-you need to have libgcrypt and GNUtls installed in the system to compile
-it.
+For crypto support either:
+*) Install gnutls and libgrcypt packages from your distribution.
+*) Download them from http://www.gnupg.org/mirrors.html.
+Choose a mirror, then download from the alpha/gnutls and
+alpha/libgcrypt directories.
+*) Disable crypt by uncommenting the "WITHOUT_CRYPTO" line
+in the Makefile.
 
 Make the binary:
         make
