@@ -1,6 +1,14 @@
 Release Notes
 ~~~~~~~~~~~~~
 
+Release 0.3.8 - Tue, 26 Mar 2002 17:17:07 +0100
+
+  * Added GnomeICU support.
+  * Added an experimental shell command method which reads the output
+    for a given command. See wmbiffrc(5) for details.
+  * Debug support moved to runtime, using the -debug switch.
+  * Fix for the install rule in Makefile.
+
 Release 0.3.7 - Sun,  3 Feb 2002 23:46:44 +0100
 
   * No, 0.3.6 never happened :)
@@ -271,4 +279,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.15 2002/02/03 22:48:19 jordi Exp $
+$Id: NEWS,v 1.16 2002/03/26 16:30:32 jordi Exp $

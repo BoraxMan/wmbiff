@@ -1,6 +1,6 @@
 # Makefile for wmbiff
 #
-# $Id: Makefile,v 1.27 2002/03/06 07:15:08 bluehal Exp $
+# $Id: Makefile,v 1.28 2002/03/26 16:30:32 jordi Exp $
 
 # Disable gnutls crypto?
 #WITHOUT_CRYPTO=	1
@@ -24,7 +24,7 @@ CFLAGS?=	-O2 -Wall -Wpointer-arith
 # Nothing below here should need to be changed
 ###########################################################
 
-WMBIFF_VERSION=	"0.3.7"
+WMBIFF_VERSION=	"0.3.8"
 EXTRAFLAGS=	-DWMBIFF_VERSION='$(WMBIFF_VERSION)' 
 
 # Default linux owners

@@ -1,7 +1,155 @@
-  $Log: ChangeLog,v $
-  Revision 1.21  2002/02/03 22:48:19  jordi
-  Released WMBiff 0.3.7.
+2002-03-18 Monday 21:13 UTC -- Neil Spring <nspring@cs.washington.edu>
 
+	* TODO: add failure handling in expect
+
+2002-03-18 Monday 09:47 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmgeneral/wmgeneral.h: un-shadow index
+
+2002-03-18 Monday 09:46 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmgeneral/wmgeneral.c: un-shadow a global variable
+
+2002-03-14 Thursday 08:51 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* README: correct and expand upon crypto instructions
+
+2002-03-12 Tuesday 23:53 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Client.h, Imap4Client.c, Pop3Client.c, ShellClient.c,
+	tlsComm.c: fixed misunderstanding of the use of ## in macros with
+	strings - the compiler does the concatenation, not the preprocessor
+
+2002-03-12 Tuesday 09:15 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* TODO: additional todo list items
+
+2002-03-11 Monday 00:11 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/tlsComm.c: slightly better message on expect failure
+
+2002-03-09 Saturday 08:50 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/ShellClient.c: debug messages cleanup; start handling
+	pclose errors; remove open() function pointer assignment; #include
+	fix
+
+2002-03-09 Saturday 08:03 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmgeneral/: list.h, wmgeneral.c: minor warning cleanups
+
+2002-03-08 Friday 19:26 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* README: credit Ben
+
+2002-03-07 Thursday 22:20 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/ShellClient.c: fix error return status (ben's 'lil' patch)
+
+2002-03-07 Thursday 07:04 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/ShellClient.c: appropriate credits
+
+2002-03-06 Wednesday 18:01 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/ShellClient.c: fix my sloppy mistake in shell path parsing
+
+2002-03-06 Wednesday 07:59 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/ShellClient.c: misplaced string.h
+
+2002-03-06 Wednesday 07:59 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiff.c: rename in Read_Config_File for more 'index'
+	purging
+
+2002-03-06 Wednesday 07:44 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/ShellClient.c: fix a potential file descriptor leak
+
+2002-03-06 Wednesday 07:15 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Client.h, Makefile, ShellClient.c, mboxClient.c,
+	sample.wmbiffrc, test-wmbiffrc.shell, wmbiff.1, wmbiff.c,
+	wmbiffrc.5: Draft shell command and gnomeicu support from Benoît
+	Rouits with minor modifications 1) implement gicu using the shell
+	module rather than as a separate module, 2) edit Ben's shell format
+	to have extra colons for extensibility, 3) add some extra error
+	checking in the shell method.  I also added a test wmbiffrc that
+	can be used to verify that the gicu and shell methods "work".
+
+2002-03-05 Tuesday 05:02 UTC -- Dwayne C. Litzenberger <dlitz@dlitz.net>
+
+	* wmbiff/maildirClient.c: cosmetic changes
+
+2002-03-04 Monday 06:57 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/mboxClient.c: convert a lingering fprintf to DM
+
+2002-03-02 Saturday 23:25 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Imap4Client.c, Makefile, wmbiff.c: a little -Wshadow and
+	-Wcast-qual cleanup (or, eliminate the use of 'index' as a variable
+	name)
+
+2002-03-02 Saturday 22:38 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Client.h: add preprocessor define to handle portability of
+	__attribute__ tag to non-gcc compilers (untested)
+
+2002-03-02 Saturday 06:42 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/tlsComm.c: indent run (oops)
+
+2002-03-02 Saturday 06:41 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Pop3Client.c, Imap4Client.c: minor reorganization of
+	gcrypt-needing authentication schemes
+
+2002-03-02 Saturday 06:39 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/tlsComm.c: attribute tags for warning cleanup w/o gnutls
+
+2002-03-02 Saturday 06:36 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiff.c: gcc attribute tags, minor debug message cleanup
+
+2002-03-02 Saturday 06:31 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Makefile: rearrange which compiler warnings are implied by
+	DEBUG
+
+2002-03-02 Saturday 05:58 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Client.h: use off_t instead of size_t in Licq and Maildir
+	for file sizes from stat()
+
+2002-03-02 Saturday 05:50 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/tlsComm.c: bugfix to support compilation without crypto
+
+2002-03-01 Friday 11:58 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* wmbiff/wmbiff.c: Added -debug to help text.  Removed Gennady's
+	mail address and added our devel list.
+
+2002-03-01 Friday 11:28 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* wmbiff/Makefile: Fixed install rule in Makefile.
+
+2002-03-01 Friday 08:41 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Client.h, Imap4Client.c, LicqClient.c, Makefile,
+	Pop3Client.c, maildirClient.c, mboxClient.c, tlsComm.c, tlsComm.h,
+	wmbiff.1, wmbiff.c, wmbiffrc.5: Replaced DEBUG_x preprocessor
+	defines with a -debug option and debug configuration keyword. 
+	Replaced most debugging messages with a DM (debug message) macro. 
+	Removed gnutls version 0.2.x support.  Added troubleshooting
+	section to man page.
+
+2002-02-03 Sunday 22:48 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, NEWS: Released WMBiff 0.3.7.
 
 2002-02-03 Sunday 22:43 UTC -- Jordi Mallach <jordi@sindominio.net>
 
