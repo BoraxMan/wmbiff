@@ -1,4 +1,4 @@
-/* $Id: charutil.c,v 1.13 2002/07/04 01:07:28 bluehal Exp $ */
+/* $Id: charutil.c,v 1.14 2002/12/29 02:31:26 bluehal Exp $ */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -12,22 +12,18 @@
 #endif
 #include "charutil.h"
 
-static __inline__ int LeftTrim(char *psValue)
+static __inline__ void LeftTrim(char *psValue)
 {
-
 	char *psTmp = psValue;
 
 	while (*psTmp == ' ' || *psTmp == '\t')
 		psTmp++;
 
 	strcpy(psValue, psTmp);
-
-	return EXIT_SUCCESS;
 }
 
-static __inline__ int RightTrim(char *psValue)
+static __inline__ void RightTrim(char *psValue)
 {
-
 	long lLength = strlen(psValue) - 1;
 
 	while ((psValue[lLength] == ' ' || psValue[lLength] == '\t')
@@ -36,17 +32,12 @@ static __inline__ int RightTrim(char *psValue)
 	}
 
 	psValue[++lLength] = '\000';
-	return EXIT_SUCCESS;
 }
 
-int FullTrim(char *psValue)
+void FullTrim(char *psValue)
 {
-
-	if (LeftTrim(psValue) != 0)
-		return EXIT_FAILURE;
-	if (RightTrim(psValue) != 0)
-		return EXIT_FAILURE;
-	return EXIT_SUCCESS;
+  RightTrim(psValue);
+  LeftTrim(psValue);
 }
 
 void Bin2Hex(unsigned char *src, int length, char *dst)
@@ -242,3 +233,11 @@ char *strdup_ordie(const char *c)
 	}
 	return (ret);
 }
+/* vim:set ts=4: */
+/*
+ * Local Variables:
+ * tab-width: 4
+ * c-indent-level: 4
+ * c-basic-offset: 4
+ * End:
+ */

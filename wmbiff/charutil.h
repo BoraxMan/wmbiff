@@ -1,4 +1,4 @@
-/* $Id: charutil.h,v 1.8 2002/04/29 02:01:51 bluehal Exp $ */
+/* $Id: charutil.h,v 1.9 2002/12/29 02:31:26 bluehal Exp $ */
 /* Author: Mark Hurley  (debian4tux@telocity.com)
  *
  * Character / string manipulation utilities. 
@@ -20,7 +20,7 @@
 #endif
 #endif
 
-int FullTrim(char *psValue);
+void FullTrim(char *psValue);
 
 void Bin2Hex(unsigned char *src, int length, char *dst);
 
