@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.53 2003/04/16 08:14:34 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.54 2003/04/16 08:18:35 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -952,18 +952,18 @@ static void do_biff(int argc, const char **argv)
 		/* X Events */
 		while (XPending(display)) {
 			XEvent Event;
-            const char *press_action;
+			const char *press_action;
 
 			XNextEvent(display, &Event);
 
 			switch (Event.type) {
 			case Expose:
-                if(Event.xany.window != win && 
-                   Event.xany.window != iconwin ) {
-                    msglst_redraw();
-                } else {
-                    RedrawWindow();
-                }
+				if (Event.xany.window != win &&
+					Event.xany.window != iconwin) {
+					msglst_redraw();
+				} else {
+					RedrawWindow();
+				}
 				break;
 			case DestroyNotify:
 				XCloseDisplay(display);
@@ -972,30 +972,33 @@ static void do_biff(int argc, const char **argv)
 			case ButtonPress:
 				but_pressed_region =
 					CheckMouseRegion(Event.xbutton.x, Event.xbutton.y);
-                switch (Event.xbutton.button) {
-                case 1:
-                    press_action = mbox[but_pressed_region].action;
-                    break;
-                case 2:
-                    press_action = mbox[but_pressed_region].button2;
-                    break;
-                case 3:
-                    press_action = mbox[but_pressed_region].fetchcmd;
-                    break;
-                default:
-                    press_action = NULL;
-                    break;
-                        
-                }
-                if(press_action && strcmp(press_action, "msglst") == 0) {
-					msglst_show(&mbox[but_pressed_region], Event.xbutton.x_root, Event.xbutton.y_root);
-                }
+				switch (Event.xbutton.button) {
+				case 1:
+					press_action = mbox[but_pressed_region].action;
+					break;
+				case 2:
+					press_action = mbox[but_pressed_region].button2;
+					break;
+				case 3:
+					press_action = mbox[but_pressed_region].fetchcmd;
+					break;
+				default:
+					press_action = NULL;
+					break;
+
+				}
+				if (press_action && strcmp(press_action, "msglst") == 0) {
+					msglst_show(&mbox[but_pressed_region],
+								Event.xbutton.x_root,
+								Event.xbutton.y_root);
+				}
 				break;
 			case ButtonRelease:
-				but_released_region = CheckMouseRegion(Event.xbutton.x, Event.xbutton.y);
+				but_released_region =
+					CheckMouseRegion(Event.xbutton.x, Event.xbutton.y);
 				if (but_pressed_region == (int) i
 					&& but_pressed_region >= 0) {
-                    const char *click_action;
+					const char *click_action;
 
 					switch (Event.xbutton.button) {
 					case 1:	/* Left mouse-click */
@@ -1004,25 +1007,26 @@ static void do_biff(int argc, const char **argv)
 							(Event.xbutton.state & ShiftMask)) {
 							restart_wmbiff(0);
 						}
-                        click_action = mbox[but_released_region].action;
+						click_action = mbox[but_released_region].action;
 						break;
 					case 2:	/* Middle mouse-click */
-                        click_action = mbox[but_released_region].button2;
-                        break;
-					case 3:	/* Right mouse-click */
-                        click_action = mbox[but_released_region].fetchcmd;
+						click_action = mbox[but_released_region].button2;
 						break;
-                    default:
-                        click_action = NULL;
-                        break;
+					case 3:	/* Right mouse-click */
+						click_action = mbox[but_released_region].fetchcmd;
+						break;
+					default:
+						click_action = NULL;
+						break;
 					}
-                    if(click_action != NULL && click_action[0] != '\0' && strcmp(click_action, "msglst")) {
-                        (void) execCommand(click_action);
-                    }
+					if (click_action != NULL && click_action[0] != '\0'
+						&& strcmp(click_action, "msglst")) {
+						(void) execCommand(click_action);
+					}
 				}
 
-                /* a button was released, hide the message list if open */
-                msglst_hide();
+				/* a button was released, hide the message list if open */
+				msglst_hide();
 
 				but_pressed_region = -1;
 				/* RedrawWindow(); */

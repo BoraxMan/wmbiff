@@ -173,55 +173,57 @@ int tlscomm_expect(struct connection_state *scs,
 	int readbytes = -1;
 	memset(linebuf, 0, buflen);
 	TDM(DEBUG_INFO, "%s: expecting: %s\n", scs->name, prefix);
-    /*     if(scs->unprocessed[0]) {
-        TDM(DEBUG_INFO, "%s: buffered: %s\n", scs->name, scs->unprocessed);
-        } */
-	while (scs->unprocessed[0] != '\0' || wait_for_it(scs->sd, EXPECT_TIMEOUT)) {
-        if(scs->unprocessed[0] == '\0') {
+	/*     if(scs->unprocessed[0]) {
+	   TDM(DEBUG_INFO, "%s: buffered: %s\n", scs->name, scs->unprocessed);
+	   } */
+	while (scs->unprocessed[0] != '\0'
+		   || wait_for_it(scs->sd, EXPECT_TIMEOUT)) {
+		if (scs->unprocessed[0] == '\0') {
 #ifdef USE_GNUTLS
-            if (scs->tls_state) {
-                /* BUF_SIZE - 1 leaves room for trailing \0 */
-                readbytes =
-                    gnutls_read(scs->tls_state, scs->unprocessed, BUF_SIZE - 1);
-                if (readbytes < 0) {
-                    handle_gnutls_read_error(readbytes, scs);
-                    return 0;
-                }
-            } else
+			if (scs->tls_state) {
+				/* BUF_SIZE - 1 leaves room for trailing \0 */
+				readbytes =
+					gnutls_read(scs->tls_state, scs->unprocessed,
+								BUF_SIZE - 1);
+				if (readbytes < 0) {
+					handle_gnutls_read_error(readbytes, scs);
+					return 0;
+				}
+			} else
 #endif
-                {
-                    readbytes = read(scs->sd, scs->unprocessed, BUF_SIZE - 1);
-                    if (readbytes < 0) {
-                        TDM(DEBUG_ERROR, "%s: error reading: %s\n", scs->name,
-                            strerror(errno));
-                        return 0;
-                    }
-                }
-            /* force null termination */
-            scs->unprocessed[readbytes] = '\0';
-            if (readbytes == 0) {
-                return 0;			/* bummer */
-            }
+			{
+				readbytes = read(scs->sd, scs->unprocessed, BUF_SIZE - 1);
+				if (readbytes < 0) {
+					TDM(DEBUG_ERROR, "%s: error reading: %s\n", scs->name,
+						strerror(errno));
+					return 0;
+				}
+			}
+			/* force null termination */
+			scs->unprocessed[readbytes] = '\0';
+			if (readbytes == 0) {
+				return 0;		/* bummer */
+			}
 		} else {
-            readbytes = strlen(scs->unprocessed);
-        }
-        while (readbytes >= prefixlen) {
-            int linebytes;
-            linebytes =
-                getline_from_buffer(scs->unprocessed, linebuf, buflen);
-            if (linebytes == 0) {
-                readbytes = 0;
-            } else {
-                readbytes -= linebytes;
-                if (strncmp(linebuf, prefix, prefixlen) == 0) {
-                    TDM(DEBUG_INFO, "%s: got: %*s", scs->name,
-                        linebytes, linebuf);
-                    return 1;	/* got it! */
-                }
-                TDM(DEBUG_INFO, "%s: dumped(%d/%d): %.*s", scs->name,
-                    linebytes, readbytes, linebytes, linebuf);
-            }
-        }
+			readbytes = strlen(scs->unprocessed);
+		}
+		while (readbytes >= prefixlen) {
+			int linebytes;
+			linebytes =
+				getline_from_buffer(scs->unprocessed, linebuf, buflen);
+			if (linebytes == 0) {
+				readbytes = 0;
+			} else {
+				readbytes -= linebytes;
+				if (strncmp(linebuf, prefix, prefixlen) == 0) {
+					TDM(DEBUG_INFO, "%s: got: %*s", scs->name,
+						linebytes, linebuf);
+					return 1;	/* got it! */
+				}
+				TDM(DEBUG_INFO, "%s: dumped(%d/%d): %.*s", scs->name,
+					linebytes, readbytes, linebytes, linebuf);
+			}
+		}
 	}
 	if (readbytes == -1) {
 		TDM(DEBUG_INFO, "%s: timed out while expecting '%s'\n",
@@ -312,7 +314,7 @@ int tls_check_certificate(struct connection_state *scs,
 		bad_certificate(scs, "server's certificate has been revoked.\n");
 	} else if (certstat & GNUTLS_CERT_INVALID) {
 		bad_certificate(scs, "server's certificate is invalid.\n"
-                        "there may be a problem with the certificate stored in your certfile");
+						"there may be a problem with the certificate stored in your certfile");
 	} else if (certstat & GNUTLS_CERT_NOT_TRUSTED) {
 		TDM(DEBUG_INFO, "server's certificate is not trusted.\n");
 		TDM(DEBUG_INFO,
@@ -321,7 +323,8 @@ int tls_check_certificate(struct connection_state *scs,
 
 	/* not checking for not-yet-valid certs... this would make sense
 	   if we weren't just comparing to stored ones */
-	cert_list = gnutls_certificate_get_peers(scs->tls_state, &cert_list_size);
+	cert_list =
+		gnutls_certificate_get_peers(scs->tls_state, &cert_list_size);
 
 	if (gnutls_x509_extract_certificate_expiration_time(&cert_list[0]) <
 		time(NULL)) {
@@ -363,7 +366,7 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc,
 	static int gnutls_initialized;
 	int zok;
 	struct connection_state *scs = malloc(sizeof(struct connection_state));
-    memset(scs, 0, sizeof(struct connection_state)); /* clears the unprocessed buffer */
+	memset(scs, 0, sizeof(struct connection_state));	/* clears the unprocessed buffer */
 
 	scs->pc = pc;
 
@@ -388,9 +391,11 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc,
 		};
 		/* mutt with gnutls doesn't use kx_srp or kx_anon_dh */
 		const int mac[] = { GNUTLS_MAC_SHA, GNUTLS_MAC_MD5, 0 };
-		assert(gnutls_protocol_set_priority(scs->tls_state, protocols) == 0);
+		assert(gnutls_protocol_set_priority(scs->tls_state, protocols) ==
+			   0);
 		assert(gnutls_cipher_set_priority(scs->tls_state, ciphers) == 0);
-		assert(gnutls_compression_set_priority(scs->tls_state, compress) == 0);
+		assert(gnutls_compression_set_priority(scs->tls_state, compress) ==
+			   0);
 		assert(gnutls_kx_set_priority(scs->tls_state, key_exch) == 0);
 		assert(gnutls_mac_set_priority(scs->tls_state, mac) == 0);
 		/* no client private key */
@@ -420,7 +425,8 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc,
 			}
 		}
 
-		gnutls_cred_set(scs->tls_state, GNUTLS_CRD_CERTIFICATE, scs->xcred);
+		gnutls_cred_set(scs->tls_state, GNUTLS_CRD_CERTIFICATE,
+						scs->xcred);
 		gnutls_transport_set_ptr(scs->tls_state, sd);
 		do {
 			zok = gnutls_handshake(scs->tls_state);
@@ -493,7 +499,7 @@ struct connection_state *initialize_unencrypted(int sd,
 	struct connection_state *ret = malloc(sizeof(struct connection_state));
 	assert(sd >= 0);
 	assert(ret != NULL);
-    memset(ret, 0, sizeof(struct connection_state)); /* clears the unprocessed buffer */
+	memset(ret, 0, sizeof(struct connection_state));	/* clears the unprocessed buffer */
 	ret->sd = sd;
 	ret->name = name;
 	ret->tls_state = NULL;

@@ -1,11 +1,11 @@
-/* $Id: Client.h,v 1.31 2003/04/16 08:16:48 bluehal Exp $ */
+/* $Id: Client.h,v 1.32 2003/04/16 08:18:32 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
  *
  * Email Checker Pop3/Imap4/Licq/Gicu/mbox/maildir/finger
  *
- * Last Updated : $Date: 2003/04/16 08:16:48 $
+ * Last Updated : $Date: 2003/04/16 08:18:32 $
  *
  */
 
@@ -73,7 +73,7 @@ typedef struct _mbox_t {
 	} u;
 
 	int (*checkMail) ( /*@notnull@ */ Pop3);
-    struct msglst *(*getHeaders) ( /*@notnull@ */ Pop3);
+	struct msglst *(*getHeaders) ( /*@notnull@ */ Pop3);
 
 	time_t prevtime;
 	time_t prevfetch_time;
