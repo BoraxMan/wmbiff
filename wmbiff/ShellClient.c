@@ -12,11 +12,36 @@
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>
+#include <signal.h>
+#include <assert.h>
+#include "charutil.h"
 #ifdef USE_DMALLOC
 #include <dmalloc.h>
 #endif
 
 #define SH_DM(pc, lvl, args...) DM(pc, lvl, "shell: " args)
+
+/* kind_popen bumps off the sigchld handler - we care whether
+   a checking program fails. */
+
+sighandler_t old_signal_handler;
+
+FILE *kind_popen(const char *command, const char *type)
+{
+	FILE *ret;
+	assert(strcmp(type, "r") == 0);
+	assert(old_signal_handler == NULL);
+	old_signal_handler = signal(SIGCHLD, SIG_DFL);
+	ret = popen(command, type);
+	if (ret == NULL) {
+		DMA(DEBUG_ERROR, "popen: error while reading '%s': %s\n",
+			command, strerror(errno));
+		signal(SIGCHLD, old_signal_handler);
+		old_signal_handler = NULL;
+	}
+	return (ret);
+}
 
 /* kind_pclose checks the return value from pclose and prints
    some nice error messages about it.  ordinarily, this would be 
@@ -24,58 +49,101 @@
    children immediately (needed when spawning other child processes),
    so no error checking can be done here until that's disabled */
 
-/* TODO: block or unbind sigchld before popen, and reenable on pclose */
-static void kind_pclose(FILE * F, const char *command, Pop3 pc)
+/* returns as a mailcheck function does: -1 on fail, 0 on success */
+static int kind_pclose(FILE * F, const char *command, Pop3 pc)
 {
 	int exit_status = pclose(F);
+
+	if (old_signal_handler != NULL) {
+		signal(SIGCHLD, old_signal_handler);
+		old_signal_handler = NULL;
+	}
+
 	if (exit_status != 0) {
 		if (exit_status == -1) {
 			/* wmbiff has a sigchld handler already, so wait is likely 
 			   to fail */
-			if (errno != ECHILD) {
-				SH_DM(pc, DEBUG_ERROR, "pclose '%s' failed: %s\n",
-					  command, strerror(errno));
-			}
+			SH_DM(pc, DEBUG_ERROR, "pclose '%s' failed: %s\n",
+				  command, strerror(errno));
+			return (-1);
 		} else {
 			SH_DM(pc, DEBUG_ERROR,
 				  "'%s' exited with non-zero status %d\n", command,
 				  exit_status);
+			return (-1);
 		}
 	}
+	return (0);
 }
 
 int shellCmdCheck(Pop3 pc)
 {
 	FILE *F;
 	int count_status = 0;
+	char linebuf[256];
 
 	if (pc == NULL)
 		return -1;
 	SH_DM(pc, DEBUG_INFO, ">Mailbox: '%s'\n", pc->path);
 
-	if ((F = popen(pc->path, "r")) == NULL) {
-		SH_DM(pc, DEBUG_ERROR, "popen: error while reading '%s': %s\n",
-			  pc->path, strerror(errno));
+	/* run the program and disable the signal handler (if successful) */
+	if ((F = kind_popen(pc->path, "r")) == NULL) {
 		return -1;
 	}
 
-	/* doesn't really need to be handled separately, but it
-	   seems worth an error message */
-	if (fscanf(F, "%d\n", &(count_status)) != 1) {
+	/* fetch the first line of input */
+	pc->TextStatus[0] = '\0';
+	if (fgets(linebuf, 256, F) == NULL) {
 		SH_DM(pc, DEBUG_ERROR,
-			  "'%s' returned something other than an integer message count.\n",
+			  "fgets: unable to read the output of '%s': %s\n", pc->path,
+			  strerror(errno));
+		kind_pclose(F, pc->path, pc);
+		return -1;
+	}
+	chomp(linebuf);
+	SH_DM(pc, DEBUG_INFO, "'%s' returned '%s'\n", pc->path, linebuf);
+
+	/* see if it's numeric; the numeric check is somewhat 
+	   useful, as wmbiff renders 4-digit numbers, but not
+	   4-character strings. */
+	if (sscanf(linebuf, "%d", &(count_status)) == 1) {
+		if (strstr(linebuf, "new")) {
+			pc->UnreadMsgs = count_status;
+			pc->TotalMsgs = 0;
+		} else if (strstr(linebuf, "old")) {
+			pc->UnreadMsgs = 0;
+			pc->TotalMsgs = count_status;
+		} else {
+			/* this default should be configurable. */
+			pc->UnreadMsgs = 0;
+			pc->TotalMsgs = count_status;
+		}
+	} else if (sscanf(linebuf, "%9s\n", pc->TextStatus) == 1) {
+		/* validate the string input */
+		int i;
+		for (i = 0;
+			 pc->TextStatus[i] != '\0' && isalnum(pc->TextStatus[i])
+			 && i < 10; i++);
+		if (pc->TextStatus[i] != '\0') {
+			SH_DM(pc, DEBUG_ERROR,
+				  "sorry, wmbiff supports only alphanumeric (isalnum()) strings ('%s' is not ok)\n",
+				  pc->TextStatus);
+			pc->TextStatus[i] = '\0';	/* null terminate it at the first bad char. */
+		}
+		/* see if we should print as new or not */
+		pc->UnreadMsgs = (strstr(linebuf, "new")) ? 1 : 0;
+	} else {
+		SH_DM(pc, DEBUG_ERROR,
+			  "'%s' returned something other than an integer message count or short string.\n",
 			  pc->path);
 		kind_pclose(F, pc->path, pc);
 		return -1;
 	}
 
-	pc->TotalMsgs = pc->UnreadMsgs + count_status;
-	pc->UnreadMsgs = count_status;
-	SH_DM(pc, DEBUG_INFO, "from: %d status: %d\n", pc->TotalMsgs,
-		  pc->UnreadMsgs);
+	SH_DM(pc, DEBUG_INFO, "from: %s status: %s %d %d\n",
+		  pc->path, pc->TextStatus, pc->TotalMsgs, pc->UnreadMsgs);
 
-	kind_pclose(F, pc->path, pc);
-	return 0;
+	return (kind_pclose(F, pc->path, pc));
 }
 
 int shellCreate(Pop3 pc, const char *str)
