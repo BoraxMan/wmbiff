@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.48 2003/02/08 07:06:08 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.49 2003/03/02 01:04:23 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -862,7 +862,7 @@ const char **restart_args;
 
 static void restart_wmbiff(int sig
 #ifdef HAVE___ATTRIBUTE__
-							__attribute__ ((unused))
+						   __attribute__ ((unused))
 #endif
 	)
 {
@@ -959,11 +959,11 @@ static void do_biff(int argc, const char **argv)
 					&& but_pressed_region >= 0) {
 					switch (Event.xbutton.button) {
 					case 1:	/* Left mouse-click */
-                        /* C-S-left will restart wmbiff. */
-                        if ((Event.xbutton.state & ControlMask) && 
-                            (Event.xbutton.state & ShiftMask)) {
-                            restart_wmbiff(0);
-                        } else if (mbox[i].action[0] != '\0') {
+						/* C-S-left will restart wmbiff. */
+						if ((Event.xbutton.state & ControlMask) &&
+							(Event.xbutton.state & ShiftMask)) {
+							restart_wmbiff(0);
+						} else if (mbox[i].action[0] != '\0') {
 							(void) execCommand(mbox[i].action);
 						}
 						break;
@@ -1031,7 +1031,7 @@ static void printversion(void)
 }
 
 
-static void parse_cmd(int argc, const char **argv, /*@out@ */
+static void parse_cmd(int argc, const char **argv,	/*@out@ */
 					  char *config_file)
 {
 	int i;

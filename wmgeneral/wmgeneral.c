@@ -446,9 +446,9 @@ void setMaskXY(int x, int y)
 /*******************************************************************************\
 |* openXwindow																   *|
 \*******************************************************************************/
-void openXwindow(int argc, const char *argv[], const char *pixmap_bytes_bkg[],
-				 const char *pixmap_bytes_src[],
-				 char *pixmask_bits,
+void openXwindow(int argc, const char *argv[],
+				 const char *pixmap_bytes_bkg[],
+				 const char *pixmap_bytes_src[], char *pixmask_bits,
 				 int pixmask_width, int pixmask_height, int notWithdrawn)
 {
 
@@ -568,7 +568,7 @@ void openXwindow(int argc, const char *argv[], const char *pixmap_bytes_bkg[],
 
 	XSetWMHints(display, win, &mywmhints);
 
-	XSetCommand(display, win, (char **)argv, argc);
+	XSetCommand(display, win, (char **) argv, argc);
 	XMapWindow(display, win);
 
 	if (geometry) {
