@@ -1,5 +1,5 @@
-# $Id: Makefile,v 1.7 2001/06/19 03:38:58 dwonis Exp $
-WMBIFF_VERSION="0.3.1"
+# $Id: Makefile,v 1.8 2001/09/24 11:58:39 oskuro Exp $
+WMBIFF_VERSION="0.3.2"
 DESTDIR=
 prefix=/usr/local
 bindir=${prefix}/bin
@@ -17,7 +17,7 @@ EXTRAFLAGS = -DWMBIFF_VERSION='$(WMBIFF_VERSION)'
 #	-DDEBUG_MBOX -DDEBUG_MAILDIR -DDEBUG -DDEBUG_MAIL_COUNT
 
 OBJS =	wmbiff.o socket.o \
-	Pop3Client.o Imap4Client.o LicqClient.o mboxClient.o \
+	ApopClient.o Pop3Client.o Imap4Client.o LicqClient.o mboxClient.o \
 	maildirClient.o \
 	../wmgeneral/wmgeneral.o \
 	../wmgeneral/misc.o \

@@ -1,5 +1,5 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiff.1,v 1.2 2001/06/19 03:38:58 dwonis Exp $
+.\" $Id: wmbiff.1,v 1.3 2001/09/24 11:58:39 oskuro Exp $
 .\"
 .\" wmbiff.1 and wmbiffrc.5 are copyright 1999-2001 by
 .\" Jordi Mallach <jordi@debian.org>
@@ -20,9 +20,9 @@ WMBiff \- A dockable Mailbox Monitor
 WMbiff displays the status of up to five mailboxes. It gives information
 about new mail, if any, or total number of messages. It also has mail
 retrieval capabilies, and can be configured to do this automatically. At the
-moment, UNIX-style, POP3 and IMAP4 mailboxes are supported. WMbiff also
-supports Licq history files, displaying the number of new messages in your
-running Licq session, as if they were mail.
+moment, UNIX-style, maildir, POP3, APOP and IMAP4 mailboxes are supported.
+WMbiff also supports Licq history files, displaying the number of new
+messages in your running Licq session, as if they were mail.
 
 The mailboxes are displayed in 5 different lines, each one with its own
 description of up to five chars. If no mail is present in a given mailbox,
@@ -54,8 +54,8 @@ Initial window position.
 Use specified config file.
 
 .SH BUGS
-Please send any bug reports or suggestions to Gennady Belyakov
-<gb@ccat.elect.ru>.
+Please send any bug reports or suggestions to the WMBiff Development
+Mailing List <wmbiff-devel@lists.sourceforge.net>.
 .br
 
 .SH FILES
@@ -66,6 +66,11 @@ peruser wmbiff configuration file.
 .SH AUTHOR
 This manual page was written by Jordi Mallach <jordi@sindominio.net>,
 originally for the Debian GNU/Linux system (but may be used by others).
+.br
+WMBiff was first maintained by Gennady Belyakov. Since January 2001 it is
+maintained group of people that have added lots of new features to the
+original program. Please see the README document for a list of all the people
+involved.
 
 .SH SEE ALSO
 .PD 0

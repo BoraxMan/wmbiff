@@ -1,11 +1,12 @@
-/* $Id: Client.h,v 1.2 2001/06/19 03:38:58 dwonis Exp $ */
+/* $Id: Client.h,v 1.3 2001/09/24 11:58:39 oskuro Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
+   Modified : NAKAYAMA Takao ( hoehoe@wakaba.jp )
  *
- * Email Checker Pop3/Imap4/Licq/mbox/maildir
+ * Email Checker Pop3/APOP/Imap4/Licq/mbox/maildir
  *
- * Last Updated : Mar 20, 05:32:35 CET 2001     
+ * Last Updated : Mon Sep  3 21:48:26 JST 2001     
  *
  */
 
@@ -64,12 +65,15 @@ typedef struct _mbox_t {
 #define BUF_SIZE 1024
 
 int sock_connect(char *hostname, int port);
+int apopCreate(Pop3 pc, char *str);
 int pop3Create(Pop3 pc, char *str);
 int imap4Create(Pop3 pc, char *str);
 int licqCreate(Pop3 pc, char *str);
 int mboxCreate(Pop3 pc, char *str);
 int maildirCreate(Pop3 pc, char *str);
 FILE *openMailbox(Pop3 pc);
+int parse_old_apop_path(Pop3 pc, char *str);
+int parse_new_apop_path(Pop3 pc, char *str);
 int parse_old_pop3_path(Pop3 pc, char *str);
 int parse_new_pop3_path(Pop3 pc, char *str);
 
