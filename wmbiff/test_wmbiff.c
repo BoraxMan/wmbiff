@@ -12,6 +12,7 @@
 #include "passwordMgr.h"
 
 int debug_default = DEBUG_INFO;
+int Relax = 1;
 
 /* return 1 if fail, 0 if success */
 int test_backtickExpand(void) {
@@ -201,6 +202,36 @@ int test_imap4creator(void) {
     CKINT(m.u.pop_imap.serverPort, 12);
     CKSTRING(m.u.pop_imap.authList, "auth");
 
+    if(imap4Create(&m, "imap:foo:@bar/\"mybox\":12 cram-md5 plaintext")) {
+        return 1;
+    }
+    CKSTRING(m.u.pop_imap.authList, "cram-md5 plaintext");
+
+    if(imap4Create(&m, "imap:foo:@bar/\"mybox\":12 CRAm-md5 plainTEXt")) {
+        return 1;
+    }
+    CKSTRING(m.u.pop_imap.authList, "cram-md5 plaintext");
+
+
+    if(pop3Create(&m, "pop3:foo:@bar:12 cram-md5 plaintext")) {
+        return 1;
+    }
+    CKSTRING(m.u.pop_imap.authList, "cram-md5 plaintext");
+
+    /* should not parse this; it is ambiguous. */
+    if( ! imap4Create(&m, "imap:foo:mi@ta@bar/mybox") && !Relax ) {
+        return 1;
+    }
+
+    /* should not parse this; it is ambiguous. */
+    if( ! imap4Create(&m, "imap:user pa ss bar/\"space box\" 12") && !Relax) {
+        return 1;
+    }
+
+    /* should not parse this; it is ambiguous. */
+    if( ! pop3Create(&m, "pop3:user pa ss bar 12") && ! Relax) {
+        return 1;
+    }
     
     return 0;
 }
@@ -215,15 +246,27 @@ int sock_connect(UNUSED(const char *n), UNUSED(int p)) { return 1; } /* stdout *
 void initialize_unencrypted(void) {  } 
 
 int main(UNUSED(int argc), UNUSED(char *argv[])) {
+
     if( test_backtickExpand() || 
-        test_passwordMgr() ||
-        test_imap4creator()) {
+        test_passwordMgr()) {
         printf("SOME TESTS FAILED!\n");
         exit(EXIT_FAILURE);
-    } else {
-        printf("Success! on all tests.\n");
-        exit(EXIT_SUCCESS);
+    } 
+
+    Relax = 0;
+    if( test_imap4creator() ) {
+        printf("SOME TESTS FAILED!\n");
+        exit(EXIT_FAILURE);
     }
+
+    Relax = 1;
+    if( test_imap4creator() ) {
+        printf("SOME TESTS FAILED!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Success! on all tests.\n");
+    exit(EXIT_SUCCESS);
 }
 
 /* vim:set ts=4: */

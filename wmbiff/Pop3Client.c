@@ -1,4 +1,4 @@
-/* $Id: Pop3Client.c,v 1.16 2003/01/19 13:13:04 bluehal Exp $ */
+/* $Id: Pop3Client.c,v 1.17 2003/03/02 02:17:14 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -21,6 +21,8 @@
 #ifdef USE_DMALLOC
 #include <dmalloc.h>
 #endif
+
+extern int Relax;
 
 #define	PCU	(pc->u).pop_imap
 #define POP_DM(pc, lvl, args...) DM(pc, lvl, "pop3: " args)
@@ -169,8 +171,10 @@ int pop3Create(Pop3 pc, const char *str)
 	   use of '@' in passwords
 	 */
 	const char *regexes[] = {
-		"pop3:([^: ]{1,32}) ([^ ]{1,32}) ([^: ]+)( [0-9]+)? *",
-		"pop3:([^: ]{1,32}):([^@]{0,32})@([^: ]+)(:[0-9]+)? *",
+		"pop3:([^: ]{1,32}):([^@]{0,32})@([A-Za-z][-A-Za-z0-9_.]+)(:[0-9]+)?(  *([CcAaPp][-A-Za-z5 ]*))?$",
+		"pop3:([^: ]{1,32}) ([^ ]{1,32}) ([A-Za-z][-A-Za-z0-9_.]+)( [0-9]+)?(  *([CcAaPp][-A-Za-z5 ]*))?$",
+		//      "pop3:([^: ]{1,32}) ([^ ]{1,32}) ([^: ]+)( [0-9]+)? *",
+		// "pop3:([^: ]{1,32}):([^@]{0,32})@([^: ]+)(:[0-9]+)? *",
 		NULL
 	};
 	struct regulo regulos[] = {
@@ -178,11 +182,20 @@ int pop3Create(Pop3 pc, const char *str)
 		{2, PCU.password, regulo_strcpy},
 		{3, PCU.serverName, regulo_strcpy},
 		{4, &PCU.serverPort, regulo_atoi},
+		{6, PCU.authList, regulo_strcpy_tolower},
 		{0, NULL, NULL}
 	};
 
+	if (Relax) {
+		regexes[0] =
+			"pop3:([^: ]{1,32}):([^@]{0,32})@([^/: ]+)(:[0-9]+)?(  *(.*))?$";
+		regexes[1] =
+			"pop3:([^: ]{1,32}) ([^ ]{1,32}) ([^/: ]+)( [0-9]+)?(  *(.*))?$";
+	}
+
 	/* defaults */
 	PCU.serverPort = 110;
+	PCU.authList[0] = '\0';
 
 	for (matchedchars = 0, i = 0;
 		 regexes[i] != NULL && matchedchars <= 0; i++) {
@@ -192,12 +205,13 @@ int pop3Create(Pop3 pc, const char *str)
 	/* failed to match either regex */
 	if (matchedchars <= 0) {
 		pc->label[0] = '\0';
-		POP_DM(pc, DEBUG_ERROR, "Couldn't parse line %s (%d)\n", str,
-			   matchedchars);
+		POP_DM(pc, DEBUG_ERROR, "Couldn't parse line %s (%d)\n"
+			   "  If this used to work, run wmbiff with the -relax option, and\n "
+			   "  send mail to wmbiff-devel@lists.sourceforge.net with the hostname\n"
+			   "  of your mail server.\n", str, matchedchars);
 		return -1;
 	}
-
-	grab_authList(str + matchedchars, PCU.authList);
+	// grab_authList(str + matchedchars, PCU.authList);
 
 	POP_DM(pc, DEBUG_INFO, "userName= '%s'\n", PCU.userName);
 	POP_DM(pc, DEBUG_INFO, "password is %d chars long\n",

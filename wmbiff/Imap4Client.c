@@ -30,9 +30,7 @@
 
 #define	PCU	(pc->u).pop_imap
 
-#ifdef __LCLINT__
-void asprintf( /*@out@ */ char **out, char *fmt, ...);
-#endif
+extern int Relax;
 
 #define IMAP_DM(pc, lvl, args...) DM(pc, lvl, "imap4: " args)
 
@@ -317,9 +315,11 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 {
 	int i;
 	int matchedchars;
+	/* special characters aren't allowed in hostnames, rfc 1034 */
 	const char *regexes[] = {
-		".*imaps?:([^: ]{1,32}):([^@]{0,32})@([^/: ]+)(/(\"[^\"]+\")|([^: ]+))?(:[0-9]+)? *",
-		".*imaps?:([^: ]{1,32}) ([^ ]{1,32}) ([^/: ]+)(/(\"[^\"]+\")|([^: ]+))?( [0-9]+)? *",
+		// type : username     :   password @ hostname (/ name)?(:port)?
+		".*imaps?:([^: ]{1,32}):([^@]{0,32})@([A-Za-z][-A-Za-z0-9_.]+)(/(\"[^\"]+\")|([^:@ ]+))?(:[0-9]+)?(  *([CcAaPp][-A-Za-z5 ]*))?$",
+		".*imaps?:([^: ]{1,32}) ([^ ]{1,32}) ([A-Za-z][-A-Za-z0-9_.]+)(/(\"[^\"]+\")|([^: ]+))?( [0-9]+)?(  *([CcAaPp][-A-Za-z5 ]*))?$",
 		NULL
 	};
 	char *unaliased_str;
@@ -330,8 +330,16 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 		{3, PCU.serverName, regulo_strcpy},
 		{4, pc->path, regulo_strcpy_skip1},
 		{7, &PCU.serverPort, regulo_atoi},
+		{9, PCU.authList, regulo_strcpy_tolower},
 		{0, NULL, NULL}
 	};
+
+	if (Relax) {
+		regexes[0] =
+			".*imaps?:([^: ]{1,32}):([^@]{0,32})@([^/: ]+)(/(\"[^\"]+\")|([^:@ ]+))?(:[0-9]+)?(  *(.*))?$";
+		regexes[1] =
+			".*imaps?:([^: ]{1,32}) ([^ ]{1,32}) ([^/: ]+)(/(\"[^\"]+\")|([^: ]+))?( [0-9]+)?(  *(.*))?$";
+	}
 
 
 	/* IMAP4 format: imap:user:password@server/mailbox[:port] */
@@ -360,6 +368,7 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 
 	/* defaults */
 	PCU.serverPort = (PCU.dossl != 0) ? 993 : 143;
+	PCU.authList[0] = '\0';
 
 	/* argh, str and pc->path are aliases, so we can't just write the default
 	   value into the string we're about to parse. */
@@ -374,15 +383,17 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 	/* failed to match either regex */
 	if (matchedchars <= 0) {
 		pc->label[0] = '\0';
-		IMAP_DM(pc, DEBUG_ERROR, "Couldn't parse line %s (%d)\n",
-				unaliased_str, matchedchars);
+		IMAP_DM(pc, DEBUG_ERROR, "Couldn't parse line %s (%d)\n"
+				"  If this used to work, run wmbiff with the -relax option, and\n"
+				"  send mail to wmbiff-devel@lists.sourceforge.net with the hostname\n"
+				"  of your mail server.\n", unaliased_str, matchedchars);
 		return -1;
 	}
 
 	if (PCU.password[0] == '\0')
 		PCU.interactive_password = 1;
 
-	grab_authList(unaliased_str + matchedchars, PCU.authList);
+	// grab_authList(unaliased_str + matchedchars, PCU.authList);
 
 	free(unaliased_str);
 

@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.49 2003/03/02 01:04:23 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.50 2003/03/02 02:17:15 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -76,6 +76,7 @@ int debug_default = DEBUG_ERROR;
 static const char *foreground = "#21B3AF";
 static const char *highlight = "yellow";
 int SkipCertificateCheck = 0;
+int Relax = 0;					/* be not paranoid */
 static int notWithdrawn = 0;
 
 static unsigned int num_mailboxes = 1;
@@ -1020,6 +1021,9 @@ static void usage(void)
 		   "    -skip-certificate-check   using TLS, don't validate the\n"
 		   "                              server's certificate\n"
 #endif
+		   "    -relax                    assume the configuration is \n"
+		   "                              correct, parse it without paranoia, \n"
+		   "                              and assume hostnames are okay.\n"
 		   "    -v                        print the version number\n"
 		   "    +w                        not withdrawn: run as a window\n"
 		   "\n", PACKAGE_VERSION, PACKAGE_BUGREPORT);
@@ -1112,6 +1116,15 @@ static void parse_cmd(int argc, const char **argv,	/*@out@ */
 			case 's':
 				if (strcmp(arg + 1, "skip-certificate-check") == 0) {
 					SkipCertificateCheck = 1;
+				} else {
+					usage();
+					exit(EXIT_SUCCESS);
+				}
+
+				break;
+			case 'r':
+				if (strcmp(arg + 1, "relax") == 0) {
+					Relax = 1;
 				} else {
 					usage();
 					exit(EXIT_SUCCESS);

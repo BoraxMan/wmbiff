@@ -1,4 +1,4 @@
-/* $Id: socket.c,v 1.7 2002/06/08 21:40:04 bluehal Exp $ */
+/* $Id: socket.c,v 1.8 2003/03/02 02:17:14 bluehal Exp $ */
 /* Copyright (C) 1998 Trent Piepho  <xyzzy@u.washington.edu>
  *           (C) 1999 Trent Piepho  <xyzzy@speakeasy.org>
  *
@@ -30,17 +30,27 @@
 #include <string.h>
 #include <netdb.h>
 #include <stdio.h>
+#include "regulo.h"
 
 #ifdef USE_DMALLOC
 #include <dmalloc.h>
 #endif
+
+/* be paranoid about leaking passwords as hostnames, enough
+   that we'll avoid attempting lookups on things that aren't
+   host names */
+extern int Relax;
+static int sanity_check_hostname(const char *hostname)
+{
+	return (Relax
+			|| regulo_match("^[A-Za-z][-_A-Za-z0-9.]+$", hostname, NULL));
+}
 
 /* nspring/blueHal, 10 Apr 2002; added some extra error
    printing, in line with the debug-messages-to-stdout
    philosophy of the rest of the wmbiff code */
 /* 1 June 2002; incorporated IPv6 support by 
    Jun-ichiro itojun Hagino <itojun@iijlab.net>, thanks! */
-
 
 int sock_connect(const char *hostname, int port)
 {
@@ -49,6 +59,14 @@ int sock_connect(const char *hostname, int port)
 	int fd;
 	char pbuf[NI_MAXSERV];
 	int error;
+
+	if (!sanity_check_hostname(hostname)) {
+		printf
+			("socket/connect to '%s' aborted: it does not appear to be a valid hostname\n",
+			 hostname);
+		printf("if you really want this, use wmbiff's -relax option.\n");
+		return -1;
+	}
 
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_socktype = SOCK_STREAM;
@@ -84,6 +102,14 @@ int sock_connect(const char *hostname, int port)
 	struct hostent *host;
 	struct sockaddr_in addr;
 	int fd, i;
+
+	if (!sanity_check_hostname(hostname)) {
+		printf
+			("socket/connect to '%s' aborted: it does not appear to be a valid hostname\n",
+			 hostname);
+		printf("if you really want this, use wmbiff's -relax option.\n");
+		return -1;
+	}
 
 	host = gethostbyname(hostname);
 	if (host == NULL) {

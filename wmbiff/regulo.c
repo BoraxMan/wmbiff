@@ -28,6 +28,14 @@ void regulo_strcpy(void *dest, const char *source)
 {
 	strcpy((char *) dest, source);
 }
+void regulo_strcpy_tolower(void *dest, const char *source)
+{
+	unsigned int i;
+	for (i = 0; i < strlen(source); i++) {
+		((char *) dest)[i] = tolower(source[i]);
+	}
+	((char *) dest)[i] = '\0';
+}
 void regulo_strcpy_skip1(void *dest, const char *source)
 {
 	strcpy((char *) dest, source + 1);
@@ -47,6 +55,8 @@ int regulo_match(const char *regex,
 	matchedchars = compile_and_match_regex(regex, string, &regs);
 	if (matchedchars <= 0)
 		return 0;
+	if (instructions == NULL)
+		return 1;
 	for (i = 0; instructions[i].match_handler != NULL; i++) {
 		char buf[255];
 		int j = instructions[i].match_index;
@@ -99,6 +109,8 @@ int regulo_match(const char *regex,
 	matchedchars = compile_and_match_regex_posix(regex, string, regs, 20);
 	if (matchedchars <= 0)
 		return 0;
+	if (instructions == NULL)
+		return 1;
 	for (i = 0; instructions[i].match_handler != NULL; i++) {
 		char buf[255];
 		int j = instructions[i].match_index;
