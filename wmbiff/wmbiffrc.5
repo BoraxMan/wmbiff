@@ -1,5 +1,5 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiffrc.5,v 1.10 2002/03/06 07:15:08 bluehal Exp $
+.\" $Id: wmbiffrc.5,v 1.11 2002/04/05 19:42:20 bluehal Exp $
 .\"
 .\" wmbiff.1 and wmbiffrc.5 are copyright 1999-2002 by 
 .\" Jordi Mallach <jordi@debian.org>
@@ -29,6 +29,15 @@ The supported configuration options are:
 \fBinterval\fP
 Global interval between mailbox checking. Value is the number of seconds, 5
 is the default.
+.TP 4
+\fBaskpass\fP
+Program run to ask for IMAP passwords, if left empty in the configuration file.
+The default is /usr/bin/ssh-askpass.  Can be specified on a per-mailbox basis.
+.TP 4
+\fBskinfile\fP
+XPM pixmap file to load for the background.  If not a full path, wmbiff will
+search /usr/share/wmbiff, /usr/local/share/wmbiff, and the current directory
+for the pixmap file.  
 .TP
 \fBlabel.n\fP
 Specifies the displayed label for a mailbox. It can be up to five characters
