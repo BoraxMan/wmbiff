@@ -40,8 +40,9 @@ distclean-local:
 	-rm -f wmbiff-master-contrast.xpm wmbiff-master.xpm
 
 # remove colors, then substitute old colors, then repalletize
+# for some reason $< doesn't always work. 
 wmbiff-master-contrast.xpm:  wmbiff-master-led.xpm Makefile
-	egrep -v '^"[:%][[:space:]]c #' < $< | \
+	egrep -v '^"[:%][[:space:]]c #' < wmbiff-master-led.xpm | \
 	sed -e 's/:/./g' -e 's/%/$$/g' -e 's/ 15 / 13 /' | \
 	sed -e 's/#\([0-9A-F]\{2\}\)[0-9A-F]\{2\}\([0-9A-F]\{2\}\)[0-9A-F]\{2\}\([0-9A-F]\{2\}\)[0-9A-F]\{2\}/#\1\2\3/'\
 	> $@ || rm $@
