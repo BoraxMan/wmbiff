@@ -16,7 +16,7 @@
 #include <dmalloc.h>
 #endif
 
-#define SH_DM(pc, lvl, args...) DM(pc, lvl, "shell: " ##args)
+#define SH_DM(pc, lvl, args...) DM(pc, lvl, "shell: " args)
 
 /* kind_pclose checks the return value from pclose and prints
    some nice error messages about it.  ordinarily, this would be 

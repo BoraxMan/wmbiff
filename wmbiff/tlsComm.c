@@ -29,7 +29,7 @@
 
 /* WARNING: implcitly uses scs to gain access to the mailbox
    that holds the per-mailbox debug flag. */
-#define TDM(lvl, args...) DM(scs->pc, lvl, "comm: " ##args)
+#define TDM(lvl, args...) DM(scs->pc, lvl, "comm: " args)
 
 /* this is the per-connection state that is maintained for
    each connection; BIG variables are for ssl (null if not

@@ -30,7 +30,7 @@
 void asprintf( /*@out@ */ char **out, char *fmt, ...);
 #endif
 
-#define IMAP_DM(pc, lvl, args...) DM(pc, lvl, "imap4: " ##args)
+#define IMAP_DM(pc, lvl, args...) DM(pc, lvl, "imap4: " args)
 
 /* this array maps server:port pairs to file descriptors, so
    that when more than one mailbox is queried from a server,

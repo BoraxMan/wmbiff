@@ -1,4 +1,4 @@
-/* $Id: Client.h,v 1.11 2002/03/06 07:15:08 bluehal Exp $ */
+/* $Id: Client.h,v 1.12 2002/03/12 23:53:15 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -110,7 +110,7 @@ extern int debug_default;
 #define DMA(msglevel, X...) \
 do { \
   if (debug_default >= msglevel) { \
-     printf("wmbiff: " ##X); \
+     printf("wmbiff: " X); \
 (void)fflush(NULL); \
   } \
 } while(0)

@@ -1,4 +1,4 @@
-/* $Id: Pop3Client.c,v 1.8 2002/03/02 06:41:55 bluehal Exp $ */
+/* $Id: Pop3Client.c,v 1.9 2002/03/12 23:53:15 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -19,7 +19,7 @@
 #endif
 
 #define	PCU	(pc->u).pop
-#define POP_DM(pc, lvl, args...) DM(pc, lvl, "pop3: " ##args)
+#define POP_DM(pc, lvl, args...) DM(pc, lvl, "pop3: " args)
 
 #ifdef WITH_GCRYPT
 static FILE *authenticate_md5(Pop3 pc, FILE * fp, char *unused);
