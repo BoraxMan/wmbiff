@@ -1,5 +1,5 @@
 SUBDIRS = wmgeneral wmbiff autoconf
-EXTRA_DIST = README.licq TODO
+EXTRA_DIST = README.licq TODO FAQ
 
 AUTOHEADER = @AUTOHEADER@ -l autoconf
 
