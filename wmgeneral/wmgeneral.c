@@ -362,11 +362,12 @@ void createXBMfromXPM(char *xbm, const char **xpm, int sx, int sy)
 |* copyXPMArea																   *|
 \*******************************************************************************/
 
-void copyXPMArea(int src_x, int src_y, int width, int height, int dest_x, int dest_y)
+void copyXPMArea(int src_x, int src_y, int width, int height, int dest_x,
+				 int dest_y)
 {
 
-	XCopyArea(display, wmgen.pixmap, wmgen.pixmap, NormalGC, src_x, src_y, 
-              width, height, dest_x, dest_y);
+	XCopyArea(display, wmgen.pixmap, wmgen.pixmap, NormalGC, src_x, src_y,
+			  width, height, dest_x, dest_y);
 
 }
 
@@ -374,30 +375,38 @@ void copyXPMArea(int src_x, int src_y, int width, int height, int dest_x, int de
 |* copyXBMArea																   *|
 \*******************************************************************************/
 
-void copyXBMArea(int src_x, int src_y, int width, int height, int dest_x, int dest_y)
+void copyXBMArea(int src_x, int src_y, int width, int height, int dest_x,
+				 int dest_y)
 {
 
-	XCopyArea(display, wmgen.mask, wmgen.pixmap, NormalGC, src_x, src_y, 
-              width, height, dest_x, dest_y);
+	XCopyArea(display, wmgen.mask, wmgen.pixmap, NormalGC, src_x, src_y,
+			  width, height, dest_x, dest_y);
 }
 
 
 /* added for wmbiff */
 XFontStruct *f;
-void loadFont(const char *fontname) {
-  if(display!=NULL){
-    f = XLoadQueryFont(display, fontname);
-    if(f) XSetFont(display, NormalGC, f->fid);
-    else printf("couldn't set font!\n");
-  }
+void loadFont(const char *fontname)
+{
+	if (display != NULL) {
+		f = XLoadQueryFont(display, fontname);
+		if (f)
+			XSetFont(display, NormalGC, f->fid);
+		else
+			printf("couldn't set font!\n");
+	}
 }
-void drawString(int dest_x, int dest_y, const char *string, const char *colorname, 
-                int right_justify) {
-  int len = strlen(string);
-  XSetForeground(display, NormalGC, GetColor(colorname));
-  if(right_justify) dest_x -= XTextWidth(f, string, len);
-  XDrawString(display, wmgen.pixmap, NormalGC, dest_x, dest_y, string, len);
+void drawString(int dest_x, int dest_y, const char *string,
+				const char *colorname, int right_justify)
+{
+	int len = strlen(string);
+	XSetForeground(display, NormalGC, GetColor(colorname));
+	if (right_justify)
+		dest_x -= XTextWidth(f, string, len);
+	XDrawString(display, wmgen.pixmap, NormalGC, dest_x, dest_y, string,
+				len);
 }
+
 /* end wmbiff additions */
 
 /*******************************************************************************\
