@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.19 2002/04/07 05:08:23 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.20 2002/04/09 07:44:28 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -56,9 +56,6 @@ const char *skin_filename = "wmbiff-master-led.xpm";
 /* /usr/local/share/wmbiff if compiled locally. */
 /* / is there in case a user wants to specify a complete path */
 /* . is there for development. */
-/* this should eventually be derived at compile (or
-   configure) time to use PREFIX from the makefile, but I (blueHal)
-   prefer to wait for autoconf integration. */
 const char *skin_search_path = DEFAULT_SKIN_PATH;
 
 int ReadLine(FILE *, char *, char *, int *);
@@ -80,10 +77,9 @@ void sigchld_handler(int sig);
 
 int debug_default = DEBUG_ERROR;
 
-void init_biff(char *uconfig_file)
+void init_biff(char *config_file)
 {
 	int i, j, loopinterval = DEFAULT_LOOP;
-	char config_file[256];
 	char *m;
 
 	for (i = 0; i < 5; i++) {
@@ -120,21 +116,11 @@ void init_biff(char *uconfig_file)
 	};
 #endif
 
-	/* Read config file */
-	if (uconfig_file[0] != 0) {
-		/* user-specified config file */
-		DMA(DEBUG_INFO, "Using user-specified config file '%s'.\n",
-			uconfig_file);
-		strcpy(config_file, uconfig_file);
-	} else
-		sprintf(config_file, "%s/.wmbiffrc", getenv("HOME"));
-
 	DMA(DEBUG_INFO, "config_file = %s.\n", config_file);
-
 	if (!Read_Config_File(config_file, &loopinterval)) {
 		if (m == NULL) {
 			DMA(DEBUG_ERROR, "Cannot open '%s' nor use the "
-				"MAIL environment var.\n", uconfig_file);
+				"MAIL environment var.\n", config_file);
 			exit(1);
 		}
 		/* we are using MAIL environment var. type mbox */
@@ -226,6 +212,42 @@ char *search_path(const char *path, const char *find_me)
 	}
 	free(buf);
 	return (NULL);
+}
+
+/* verifies that .wmbiffrc, is a file, is owned by the user,
+   is not world writeable, and is not world readable.  This
+   is just to help keep passwords secure */
+static int wmbiffrc_permissions_check(const char *wmbiffrc_fname)
+{
+	struct stat st;
+	if (stat(wmbiffrc_fname, &st)) {
+		DMA(DEBUG_ERROR, "Can't stat wmbiffrc: '%s'\n", wmbiffrc_fname);
+		return (1);				/* well, it's not a bad permission
+								   problem: if you can't find it,
+								   neither can the bad guys.. */
+	}
+	if (st.st_uid != getuid()) {
+		char *user = getenv("USER");
+		DMA(DEBUG_ERROR,
+			".wmbiffrc '%s' isn't owned by you.\n"
+			"Verify its contents, then 'chown %s %s'\n",
+			wmbiffrc_fname, ((user != NULL) ? user : "(your username)"),
+			wmbiffrc_fname);
+		return (0);
+	}
+	if (st.st_mode & S_IWOTH) {
+		DMA(DEBUG_ERROR, ".wmbiffrc '%s' is world writable.\n"
+			"Verify its contents, then 'chmod 0600 %s'\n",
+			wmbiffrc_fname, wmbiffrc_fname);
+		return (0);
+	}
+	if (st.st_mode & S_IROTH) {
+		DMA(DEBUG_ERROR, ".wmbiffrc '%s' is world readable.\n"
+			"Please run 'chmod 0600 %s' and consider changing your passwords.\n",
+			wmbiffrc_fname, wmbiffrc_fname);
+		return (0);
+	}
+	return (1);
 }
 
 
@@ -709,6 +731,20 @@ int main(int argc, char *argv[])
 	char uconfig_file[256];
 
 	parse_cmd(argc, argv, uconfig_file);
+
+	/* decide what the config file is */
+	if (uconfig_file[0] != 0) {	/* user-specified config file */
+		DMA(DEBUG_INFO, "Using user-specified config file '%s'.\n",
+			uconfig_file);
+	} else {
+		sprintf(uconfig_file, "%s/.wmbiffrc", getenv("HOME"));
+	}
+
+	if (wmbiffrc_permissions_check(uconfig_file) == 0) {
+		DMA(DEBUG_ERROR,
+			"WARNING: In future versions of WMBiff, .wmbiffrc MUST be\n"
+			"owned by the user, and not readable or writable by others.\n\n");
+	}
 	init_biff(uconfig_file);
 	signal(SIGCHLD, sigchld_handler);
 	do_biff(argc, argv);
