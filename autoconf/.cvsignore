@@ -1,2 +1,6 @@
 Makefile
 Makefile.in
+mkinstalldirs
+missing
+install-sh
+
