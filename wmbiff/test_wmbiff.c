@@ -220,6 +220,7 @@ int test_imap4creator(void) {
     }
     CKSTRING(m.u.pop_imap.authList, "cram-md5 plaintext");
 
+    /* doesn't really matter, as the # is gobbled by the parser as a comment. */
     if(imap4Create(&m, "imap:harry:has#pass@bar/\"mybox\":12 CRAm-md5 plainTEXt")) {
         return 1;
     }
