@@ -46,7 +46,7 @@ void AddMouseRegion(unsigned int rgn_index, int left, int top, int right,
 					int bottom);
 int CheckMouseRegion(int x, int y);
 
-void openXwindow(int argc, char *argv[], const char **,
+void openXwindow(int argc, const char *argv[], const char **,
 				 const char **, char *, int, int, int);
 void RedrawWindow(void);
 void RedrawWindowXY(int x, int y);
