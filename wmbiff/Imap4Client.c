@@ -447,7 +447,7 @@ void imap_cacheHeaders( /*@notnull@ */ Pop3 pc)
 				IMAP_DM(pc, DEBUG_ERROR, "error fetching: %s", hdrbuf);
 			}
 			if (!fetch_command_done) {
-				tlscomm_expect(scs, "a04 OK FETCH", hdrbuf, 127);
+				tlscomm_expect(scs, "a04 OK", hdrbuf, 127);
 			}
 		} while ((msgid = strtok(NULL, " \r\n")) != NULL
 				 && isdigit(msgid[0]));
