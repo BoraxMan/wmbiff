@@ -14,8 +14,10 @@ require 'net/http'
 # updated so that the number goes back to cyan (old) from
 # yellow (new) quickly on upgrade.
 
-# this doesn't mean we grab the whole file.  we get if-modified-since.
-Refetch_Interval_Sec = 6 * 60
+# this still doesn't mean we grab the whole file.  we get
+# if-modified-since.  it just means we don't connect to the
+# server more often than this.
+Refetch_Interval_Sec = 60 * 60
 
 # as an ordinary user, we store Packages in the home directory.
 Cachedir = ENV['HOME'] + '/.wmbiff-sdr'
