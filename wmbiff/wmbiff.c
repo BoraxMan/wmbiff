@@ -21,6 +21,7 @@
 #include "../wmgeneral/misc.h"
 
 #include "Client.h"
+#include "charutil.h"
 
 #include "wmbiff-master.xpm"
 char wmbiff_mask_bits[64 * 64];
@@ -325,16 +326,16 @@ int count_mail(int item)
 	}
 
 	if (mbox[item].checkMail(&(mbox[item])) < 0) {
-			/* we failed to obtain any numbers
-			 * therefore set them to -1's
-			 * ensuring the next pass (even if zero)
-			 * will be captured correctly
-			 */
-			mbox[item].TotalMsgs = -1;
-			mbox[item].UnreadMsgs = -1;
-			mbox[item].OldMsgs = -1;
-			mbox[item].OldUnreadMsgs = -1;
-			return -1;
+		/* we failed to obtain any numbers
+		 * therefore set them to -1's
+		 * ensuring the next pass (even if zero)
+		 * will be captured correctly
+		 */
+		mbox[item].TotalMsgs = -1;
+		mbox[item].UnreadMsgs = -1;
+		mbox[item].OldMsgs = -1;
+		mbox[item].OldUnreadMsgs = -1;
+		return -1;
 	}
 
 	if (mbox[item].UnreadMsgs > mbox[item].OldUnreadMsgs &&
@@ -431,8 +432,16 @@ int ReadLine(FILE * fp, char *setting, char *value, int *index)
 		return -1;
 	if (!(q = strtok(NULL, "\n")))
 		return -1;
-	for (; (*p == ' ' || *p == '\t') && *p; p++);	/* Skip leading spaces */
-	for (; (*q == ' ' || *q == '\t') && *q; q++);	/* Skip leading spaces */
+
+	/* Chg - Mark Hurley
+	 * Date: May 8, 2001
+	 * Removed for loop (which removed leading spaces)
+	 * Leading & Trailing spaces need to be removed
+	 * to Fix Debian bug #95849
+	 */
+	FullTrim(p);
+	FullTrim(q);
+
 	strcpy(setting, p);
 	strcpy(value, q);
 

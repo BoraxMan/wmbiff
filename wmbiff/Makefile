@@ -1,4 +1,4 @@
-WMBIFF_VERSION="0.2r"
+WMBIFF_VERSION="0.3.0"
 DESTDIR=
 prefix=/usr/local
 bindir=${prefix}/bin
@@ -18,7 +18,8 @@ OBJS =	wmbiff.o socket.o \
 	maildirClient.o \
 	../wmgeneral/wmgeneral.o \
 	../wmgeneral/misc.o \
-	../wmgeneral/list.o
+	../wmgeneral/list.o \
+	charutil.o
 
 INSTALL = /usr/bin/install
 INSTALL_DIR	= $(INSTALL) -p -d -o root -g root -m 755

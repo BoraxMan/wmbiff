@@ -49,8 +49,6 @@ FILE *imap4Login(Pop3 pc)
 int imap4CheckMail(Pop3 pc)
 {
 	FILE *f;
-	char str[128];
-	char buf[BUF_SIZE];
 
 	f = pc->open(pc);
 	if (f == NULL)
