@@ -75,7 +75,8 @@ Pixel back_pix, fore_pix;
 const char *Geometry = "";
 Window iconwin, win;
 GC NormalGC;
-XpmIcon wmgen;
+XpmIcon wmgen_bkg;
+XpmIcon wmgen_src;
 Pixmap pixmask;
 
   /*****************/
@@ -189,6 +190,8 @@ static void GetXPM(XpmIcon * wmgen_local, const char *pixmap_bytes[])
 
 	/* For the colormap */
 	XGetWindowAttributes(display, Root, &attributes);
+	/* despite the comment, I still don't understand... 
+	   attributes is subsequently unused in this function -ns 11/2002 */
 
 	wmgen_local->attributes.valuemask |=
 		(XpmReturnPixels | XpmReturnExtensions);
@@ -199,7 +202,9 @@ static void GetXPM(XpmIcon * wmgen_local, const char *pixmap_bytes[])
 								  &(wmgen_local->attributes));
 
 	if (err != XpmSuccess) {
-		fprintf(stderr, "Not enough free colorcells.\n");
+		fprintf(stderr,
+				"Not enough free colorcells to create pixmap from data (err=%d).\n",
+				err);
 		exit(1);
 	}
 }
@@ -249,11 +254,13 @@ void RedrawWindow(void)
 {
 
 	flush_expose(iconwin);
-	XCopyArea(display, wmgen.pixmap, iconwin, NormalGC,
-			  0, 0, wmgen.attributes.width, wmgen.attributes.height, 0, 0);
+	XCopyArea(display, wmgen_bkg.pixmap, iconwin, NormalGC,
+			  0, 0, wmgen_bkg.attributes.width,
+			  wmgen_bkg.attributes.height, 0, 0);
 	flush_expose(win);
-	XCopyArea(display, wmgen.pixmap, win, NormalGC,
-			  0, 0, wmgen.attributes.width, wmgen.attributes.height, 0, 0);
+	XCopyArea(display, wmgen_bkg.pixmap, win, NormalGC,
+			  0, 0, wmgen_bkg.attributes.width,
+			  wmgen_bkg.attributes.height, 0, 0);
 }
 
 /*******************************************************************************\
@@ -264,11 +271,13 @@ void RedrawWindowXY(int x, int y)
 {
 
 	flush_expose(iconwin);
-	XCopyArea(display, wmgen.pixmap, iconwin, NormalGC,
-			  x, y, wmgen.attributes.width, wmgen.attributes.height, 0, 0);
+	XCopyArea(display, wmgen_bkg.pixmap, iconwin, NormalGC,
+			  x, y, wmgen_bkg.attributes.width,
+			  wmgen_bkg.attributes.height, 0, 0);
 	flush_expose(win);
-	XCopyArea(display, wmgen.pixmap, win, NormalGC,
-			  x, y, wmgen.attributes.width, wmgen.attributes.height, 0, 0);
+	XCopyArea(display, wmgen_bkg.pixmap, win, NormalGC,
+			  x, y, wmgen_bkg.attributes.width,
+			  wmgen_bkg.attributes.height, 0, 0);
 }
 
 /*******************************************************************************\
@@ -367,8 +376,8 @@ void copyXPMArea(int src_x, int src_y, int width, int height, int dest_x,
 				 int dest_y)
 {
 
-	XCopyArea(display, wmgen.pixmap, wmgen.pixmap, NormalGC, src_x, src_y,
-			  width, height, dest_x, dest_y);
+	XCopyArea(display, wmgen_src.pixmap, wmgen_bkg.pixmap, NormalGC, src_x,
+			  src_y, width, height, dest_x, dest_y);
 
 }
 
@@ -380,8 +389,8 @@ void copyXBMArea(int src_x, int src_y, int width, int height, int dest_x,
 				 int dest_y)
 {
 
-	XCopyArea(display, wmgen.mask, wmgen.pixmap, NormalGC, src_x, src_y,
-			  width, height, dest_x, dest_y);
+	XCopyArea(display, wmgen_src.mask, wmgen_bkg.pixmap, NormalGC, src_x,
+			  src_y, width, height, dest_x, dest_y);
 }
 
 
@@ -409,14 +418,15 @@ void drawString(int dest_x, int dest_y, const char *string,
 	XSetForeground(display, NormalGC, GetColor(colorname));
 	if (right_justify)
 		dest_x -= XTextWidth(f, string, len);
-	XDrawImageString(display, wmgen.pixmap, NormalGC, dest_x, dest_y,
+	XDrawImageString(display, wmgen_bkg.pixmap, NormalGC, dest_x, dest_y,
 					 string, len);
 }
 
 void eraseRect(int x, int y, int x2, int y2)
 {
 	XSetForeground(display, NormalGC, GetColor("black"));
-	XFillRectangle(display, wmgen.pixmap, NormalGC, x, y, x2 - x, y2 - y);
+	XFillRectangle(display, wmgen_bkg.pixmap, NormalGC, x, y, x2 - x,
+				   y2 - y);
 }
 
 /* end wmbiff additions */
@@ -437,7 +447,8 @@ void setMaskXY(int x, int y)
 /*******************************************************************************\
 |* openXwindow																   *|
 \*******************************************************************************/
-void openXwindow(int argc, char *argv[], const char *pixmap_bytes[],
+void openXwindow(int argc, char *argv[], const char *pixmap_bytes_bkg[],
+				 const char *pixmap_bytes_src[],
 				 char *pixmask_bits, int pixmask_width, int pixmask_height)
 {
 
@@ -477,7 +488,8 @@ void openXwindow(int argc, char *argv[], const char *pixmap_bytes[],
 	x_fd = XConnectionNumber(display);
 
 	/* Convert XPM to XImage */
-	GetXPM(&wmgen, pixmap_bytes);
+	GetXPM(&wmgen_bkg, pixmap_bytes_bkg);
+	GetXPM(&wmgen_src, pixmap_bytes_src);
 
 	/* Create a window to hold the stuff */
 	mysizehints.flags = USSize | USPosition;
@@ -491,8 +503,8 @@ void openXwindow(int argc, char *argv[], const char *pixmap_bytes[],
 				&mysizehints.x, &mysizehints.y, &mysizehints.width,
 				&mysizehints.height, &dummy);
 
-	mysizehints.width = 64;
-	mysizehints.height = 64;
+	mysizehints.width = pixmask_width;	/* changed 11/2002 for wmbiff non 64x64-ness */
+	mysizehints.height = pixmask_height;	/* was statically 64. */
 
 	win = XCreateSimpleWindow(display, Root, mysizehints.x, mysizehints.y,
 							  mysizehints.width, mysizehints.height,

@@ -1,5 +1,5 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiffrc.5.in,v 1.8 2002/10/20 21:58:58 jordi Exp $
+.\" $Id: wmbiffrc.5.in,v 1.9 2002/11/12 08:27:47 bluehal Exp $
 .\"
 .\" @configure_input@
 .\"
@@ -8,7 +8,7 @@
 .\"
 .\" This is free documentation, see the latest version of the GNU
 .\" General Public License for copying conditions. There is NO warranty.
-.TH WMBIFFRC 5 "January 27, 2002" "wmbiff"
+.TH WMBIFFRC 5 "November 11, 2002" "wmbiff"
 
 .SH NAME
 wmbiffrc \- configuration file for
@@ -16,14 +16,15 @@ wmbiffrc \- configuration file for
 
 .SH DESCRIPTION
 \fBWMbiff\fP is a mail notification tool for the WindowMaker and AfterStep
-window managers. It can handle up to 5 mailboxes, and you can define actions
+window managers. It can handle up to 5 mailboxes, more when run using other
+window managers. You can define actions
 on mouse clicks for the different mailboxes. This manpage explains the
 different options which can be specified in a user's wmbiffrc.
 
 .SH OPTIONS
 Each option takes the form
 .IR option[.mbox] " = " value .
-Comment must be preceeded by pound signs (#).
+Comments must be preceeded by pound signs (#).
 
 The supported configuration options are:
 
@@ -200,6 +201,24 @@ Show debugging messages from this mailbox.  Currently
 supported values are "all" and "none".  The \-debug option
 to wmbiff overrides this setting.  Since IMAP uses a single
 connection per server, per-mailbox debugging may not
+
+.SH SIZING
+
+WMBiff will automatically size its window to the number of
+configured mailboxes.  While WindowMaker's Dock and
+AfterStep's Wharf expect square, 64x64 applets, other window
+managers, such as Blackbox or Openbox do not have this
+limitation.  This uncharacteristic "dockapp" behavior is
+intended to help those users who don't have exactly five
+mailboxes to watch.
+
+To preserve the old-style five-mailbox window even when you
+have only two, add
+.IR path.4=<space><space>
+to configure a blank 5th mailbox.
+
+To use the new-style sizing, just configure as many
+mailboxes as you want.
 
 .SH AUTHENTICATION
 

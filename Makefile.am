@@ -26,12 +26,12 @@ indent:
 	cd wmgeneral && make indent	
 
 # manually increment version in configure.ac, which should be enough.
-ChangeLog: Makefile configure.ac
-	@if test "x$(CVS2CL)" != "x"; then \
+ChangeLog: Makefile configure.ac 
+	@if test "x$(CVS2CL)" != "x" && test -e maint/changelog.sed; then \
 		echo "Running $(CVS2CL)..."; \
 		$(CVS2CL) --stdout --utc --day-of-week -I TODO | \
 		sed -f maint/changelog.sed > $@; \
 	else \
 		echo "Unable to build ChangeLog for distribution"; \
-		exit 1; \
+		exit 0; \
 	fi

@@ -1,5 +1,18 @@
 Release Notes
 ~~~~~~~~~~~~~
+Release 0.4.9 - 
+  * GNUTLS v0.5.9 or higher required
+  * Check TLS certificate hostname against the hostname we're
+    connecting to.  This raises the bar, but does not make 
+    wmbiff's TLS implementation secure.
+  * WMBiff scales to the number of mailboxes you're
+    using. For openbox, this means less wasted space in the
+    slit and the possibility of up to 40 mailboxes.  For
+    WindowMaker, this means more pretty chrome and less dark
+    LED if you have only a couple boxes.  If you prefer the empty
+    cells at the end, place "path.4=<space><space>" in your 
+    .wmbiffrc.
+    
 Release 0.4.8 - Sept 18, 2002
   * GNUTLS v0.5.1-0.5.6, gcrypt v1.1.8 required.
   * Allow spaces in IMAP mailbox paths.  The new syntax is:
@@ -356,4 +369,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.29 2002/09/18 23:43:49 bluehal Exp $
+$Id: NEWS,v 1.30 2002/11/12 08:27:44 bluehal Exp $

@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.33 2002/07/18 02:55:24 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.34 2002/11/12 08:27:45 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -38,7 +38,7 @@
 #include "wmbiff-master-led.xpm"
 char wmbiff_mask_bits[64 * 64];
 const int wmbiff_mask_width = 64;
-const int wmbiff_mask_height = 64;
+// const int wmbiff_mask_height = 64;
 
 #define CHAR_WIDTH  5
 #define CHAR_HEIGHT 7
@@ -48,7 +48,9 @@ const int wmbiff_mask_height = 64;
 #define BLINK_SLEEP_INTERVAL    200
 #define DEFAULT_LOOP 5
 
-mbox_t mbox[5];
+#define MAX_NUM_MAILBOXES 40
+mbox_t mbox[MAX_NUM_MAILBOXES];
+
 /* this is the normal pixmap. */
 const char *skin_filename = "wmbiff-master-led.xpm";
 /* path to search for pixmaps */
@@ -87,7 +89,7 @@ int debug_default = DEBUG_ERROR;
 const char *foreground = "#21B3AF";
 const char *highlight = "yellow";
 
-const int num_mailboxes = 5;
+int num_mailboxes = 1;
 const int x_origin = 5;
 const int y_origin = 5;
 int forever = 1;
@@ -343,6 +345,67 @@ static int periodic_mail_check(void)
 	return Sleep_Interval;
 }
 
+static int findTopOfMasterXPM(const char **skin_xpm)
+{
+	int i;
+	for (i = 0; skin_xpm[i] != NULL; i++) {
+		if (strstr(skin_xpm[i], "++++++++") != NULL)
+			return i;
+	}
+	DMA(DEBUG_ERROR,
+		"couldn't find the top of the xpm file using the simple method\n");
+	exit(EXIT_FAILURE);
+}
+
+static char **CreateBackingXPM(int width, int height,
+							   const char **skin_xpm)
+{
+	char **ret = malloc(sizeof(char *) * (height + 6));
+	const int colors = 5;
+	const int base = colors + 1;
+	const int margin = 4;
+	int i;
+	int top = findTopOfMasterXPM(skin_xpm);
+	ret[0] = malloc(30);
+	sprintf(ret[0], "%d %d %d %d", width, height, colors, 1);
+	ret[1] = (char *) " \tc #0000FF";	/* no color */
+	ret[2] = (char *) ".\tc #202020";	/* background gray */
+	ret[3] = (char *) "+\tc #000000";	/* shadowed */
+	ret[4] = (char *) "@\tc #C7C3C7";	/* highlight */
+	ret[5] = (char *) ":\tc #004941";	/* led off */
+	for (i = base; i < base + height; i++) {
+		ret[i] = malloc(width);
+	}
+	for (i = base; i < base + margin; i++) {
+		memset(ret[i], ' ', width);
+	}
+	for (i = base + margin; i < height + base - margin; i++) {
+		memset(ret[i], ' ', margin);
+
+		if (i == base + margin) {
+			memset(ret[i] + margin, '+', width - margin - margin);
+		} else if (i == base + height - margin - 1) {
+			memset(ret[i] + margin, '@', width - margin - margin);
+		} else {
+			// "    +..:::...:::...:::...:::...:::.......:::...:::...:::...@    "
+			// "    +.:...:.:...:.:...:.:...:.:...:..:..:...:.:...:.:...:..@    "                                                                                               ",
+			ret[i][margin] = '+';
+			memset(ret[i] + margin + 1, '.', width - margin - margin - 1);
+			ret[i][width - margin - 1] = '@';
+			memcpy(ret[i],
+				   skin_xpm[((i - (base + margin) - 1) % 11) + top + 1],
+				   width);
+		}
+
+		memset(ret[i] + width - margin, ' ', margin);
+	}
+	for (i = base + height - margin; i < height + base; i++) {
+		memset(ret[i], ' ', width);
+	}
+	ret[i] = NULL;				/* not sure if this is necessary, it just
+								   seemed like a good idea  */
+	return (ret);
+}
 
 void do_biff(int argc, char **argv)
 {
@@ -351,7 +414,12 @@ void do_biff(int argc, char **argv)
 	time_t curtime;
 	int Sleep_Interval = DEFAULT_SLEEP_INTERVAL;	/* in msec */
 	const char **skin_xpm = NULL;
+	const char **bkg_xpm = NULL;
 	char *skin_file_path = search_path(skin_search_path, skin_filename);
+	int wmbiff_mask_height = mbox_y(num_mailboxes) + 4;
+
+	DMA(DEBUG_INFO, "running %d mailboxes w %d h %d\n", num_mailboxes,
+		wmbiff_mask_width, wmbiff_mask_height);
 
 	if (skin_file_path != NULL) {
 		skin_xpm = (const char **) LoadXPM(skin_file_path);
@@ -363,10 +431,14 @@ void do_biff(int argc, char **argv)
 		skin_xpm = wmbiff_master_xpm;
 	}
 
-	createXBMfromXPM(wmbiff_mask_bits, skin_xpm,
+	bkg_xpm = (const char **) CreateBackingXPM(wmbiff_mask_width,
+											   wmbiff_mask_height,
+											   skin_xpm);
+
+	createXBMfromXPM(wmbiff_mask_bits, bkg_xpm,
 					 wmbiff_mask_width, wmbiff_mask_height);
 
-	openXwindow(argc, argv, skin_xpm, wmbiff_mask_bits,
+	openXwindow(argc, argv, bkg_xpm, skin_xpm, wmbiff_mask_bits,
 				wmbiff_mask_width, wmbiff_mask_height);
 
 	if (font != NULL) {
@@ -375,7 +447,8 @@ void do_biff(int argc, char **argv)
 			exit(EXIT_FAILURE);
 		}
 		/* make the whole background black */
-		eraseRect(x_origin, y_origin, 58, 58);
+		eraseRect(x_origin, y_origin,
+				  wmbiff_mask_width - 6, wmbiff_mask_height - 6);
 	}
 
 	/* First time setup of button regions and labels */
@@ -390,7 +463,7 @@ void do_biff(int argc, char **argv)
 	}
 
 	do {
-		/* while (forever) {            * forever is usually true, 
+		/* while (forever) {            * forever is usually true,
 		   but not when debugging with -exit */
 		/* waitpid(0, NULL, WNOHANG); */
 
@@ -607,10 +680,10 @@ void ClearDigits(int i)
 	}
 }
 
-/* 	Read a line from a file to obtain a pair setting=value 
+/* 	Read a line from a file to obtain a pair setting=value
 	skips # and leading spaces
 	NOTE: if setting finish with 0, 1, 2, 3 or 4 last char are deleted and
-	index takes its value... if not index will get -1 
+	index takes its value... if not index will get -1
 	Returns -1 if no setting=value
 */
 int ReadLine(FILE * fp, char *setting, char *value, int *mbox_index)
@@ -653,7 +726,7 @@ int ReadLine(FILE * fp, char *setting, char *value, int *mbox_index)
 	len = strlen(setting) - 1;
 	if (len > 0) {
 		aux = setting[len] - 48;
-		if (aux > -1 && aux < num_mailboxes) {
+		if (aux > -1 && aux < MAX_NUM_MAILBOXES) {
 			setting[len] = 0;
 			*mbox_index = aux;
 		}
@@ -748,10 +821,10 @@ int Read_Config_File(char *filename, int *loopinterval)
 		} else if (!strcmp(setting, "askpass")) {
 			const char *askpass = strdup(value);
 			if (mbox_index == -1) {
+				int i;
 				DMA(DEBUG_INFO, "setting all to askpass %s\n", askpass);
-				for (mbox_index = 0; mbox_index < num_mailboxes;
-					 mbox_index++)
-					mbox[mbox_index].askpass = askpass;
+				for (i = 0; i < MAX_NUM_MAILBOXES; i++)
+					mbox[i].askpass = askpass;
 			} else {
 				mbox[mbox_index].askpass = askpass;
 			}
@@ -761,6 +834,15 @@ int Read_Config_File(char *filename, int *loopinterval)
 			certificate_filename = strdup(value);
 		} else if (mbox_index == -1)
 			continue;			/* Didn't read any setting.[0-5] value */
+
+		if (mbox_index >= MAX_NUM_MAILBOXES) {
+			DMA(DEBUG_ERROR, "Don't have %d mailboxes.\n", mbox_index);
+			continue;
+		}
+		if (mbox_index + 1 > num_mailboxes
+			&& mbox_index + 1 <= MAX_NUM_MAILBOXES) {
+			num_mailboxes = mbox_index + 1;
+		}
 		/* now only local settings */
 		if (!strcmp(setting, "label.")) {
 			strcpy(mbox[mbox_index].label, value);
