@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.47 2003/02/08 03:45:44 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.48 2003/02/08 07:06:08 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -858,6 +858,22 @@ static void XSleep(int millisec)
 #endif
 }
 
+const char **restart_args;
+
+static void restart_wmbiff(int sig
+#ifdef HAVE___ATTRIBUTE__
+							__attribute__ ((unused))
+#endif
+	)
+{
+	DMA(DEBUG_ERROR, "exec()'ing %s\n", restart_args[0]);
+	sleep(1);
+	execvp(restart_args[0], (char *const *) restart_args);
+	DMA(DEBUG_ERROR, "exec of %s failed: %s\n",
+		restart_args[0], strerror(errno));
+	exit(EXIT_FAILURE);
+}
+
 
 static void do_biff(int argc, const char **argv)
 {
@@ -943,7 +959,11 @@ static void do_biff(int argc, const char **argv)
 					&& but_pressed_region >= 0) {
 					switch (Event.xbutton.button) {
 					case 1:	/* Left mouse-click */
-						if (mbox[i].action[0] != '\0') {
+                        /* C-S-left will restart wmbiff. */
+                        if ((Event.xbutton.state & ControlMask) && 
+                            (Event.xbutton.state & ShiftMask)) {
+                            restart_wmbiff(0);
+                        } else if (mbox[i].action[0] != '\0') {
 							(void) execCommand(mbox[i].action);
 						}
 						break;
@@ -978,22 +998,6 @@ static void sigchld_handler(int sig
 {
 	while (waitpid(0, NULL, WNOHANG) > 0);
 	signal(SIGCHLD, sigchld_handler);
-}
-
-const char **restart_args;
-
-static void sigusr1_handler(int sig
-#ifdef HAVE___ATTRIBUTE__
-							__attribute__ ((unused))
-#endif
-	)
-{
-	DMA(DEBUG_ERROR, "exec()'ing %s\n", restart_args[0]);
-	sleep(1);
-	execvp(restart_args[0], (char *const *) restart_args);
-	DMA(DEBUG_ERROR, "exec of %s failed: %s\n",
-		restart_args[0], strerror(errno));
-	exit(EXIT_FAILURE);
 }
 
 static void usage(void)
@@ -1178,7 +1182,7 @@ int main(int argc, const char *argv[])
 	}
 	init_biff(uconfig_file);
 	signal(SIGCHLD, sigchld_handler);
-	signal(SIGUSR1, sigusr1_handler);
+	signal(SIGUSR1, restart_wmbiff);
 	signal(SIGPIPE, SIG_IGN);	/* write() may fail */
 	do_biff(argc, argv);
 	return 0;
