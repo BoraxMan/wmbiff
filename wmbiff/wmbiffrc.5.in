@@ -1,5 +1,5 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiffrc.5.in,v 1.16 2003/10/26 08:31:59 bluehal Exp $
+.\" $Id: wmbiffrc.5.in,v 1.17 2004/03/12 21:35:25 bluehal Exp $
 .\"
 .\" @configure_input@
 .\"
@@ -124,7 +124,9 @@ empty: see askpass above for information on password
 prompting.  If your password includes a @, use the 
 space delimited form.  If it contains a space or #, use the
 askpass option instead.  The mailbox field may be quoted, 
-e.g., server/"Mail/Eggs and Spam"
+e.g., server/"Mail/Eggs and Spam".  Mailboxes in subfolders 
+may be described as /INBOX.subfolder by some servers and 
+/Mail/subfolder by others.
 .RS
 imap:user:passwd@server[/mailbox][:port] [auth]
 .RE
