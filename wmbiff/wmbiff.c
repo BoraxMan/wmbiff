@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.38 2002/12/29 00:14:41 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.39 2002/12/29 00:37:26 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -1100,10 +1100,10 @@ void parse_cmd(int argc, char **argv, /*@out@ */ char *config_file)
 
 void usage(void)
 {
-	printf("\nwmBiff v" VERSION
+	printf("\nwmBiff v%s"
 		   " - incoming mail checker\n"
 		   "Gennady Belyakov and others (see the README file)\n"
-		   "Please report bugs to wmbiff-devel@lists.sourceforge.net\n"
+		   "Please report bugs to %s\n"
 		   "\n"
 		   "usage:\n"
 		   "    -c <filename>             use specified config file\n"
@@ -1120,12 +1120,12 @@ void usage(void)
 #endif
 		   "    -v                        print the version number\n"
 		   "    +w                        not withdrawn: run as a window\n"
-		   "\n");
+		   "\n", PACKAGE_VERSION, PACKAGE_BUGREPORT);
 }
 
 void printversion(void)
 {
-	printf("wmbiff v%s\n", VERSION);
+	printf("wmbiff v%s\n", PACKAGE_VERSION);
 }
 
 
