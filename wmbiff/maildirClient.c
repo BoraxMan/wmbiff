@@ -1,11 +1,11 @@
-/* $Id: maildirClient.c,v 1.10 2002/09/18 23:43:49 bluehal Exp $ */
+/* $Id: maildirClient.c,v 1.11 2002/09/18 23:45:57 bluehal Exp $ */
 /* Author : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
    Modified : Dwayne C. Litzenberger ( dlitz@dlitz.net )
  * 
  * Maildir checker.
  *
- * Last Updated : $Date: 2002/09/18 23:43:49 $
+ * Last Updated : $Date: 2002/09/18 23:45:57 $
  *
  */
 
@@ -18,6 +18,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <utime.h>
+#include <unistd.h>
 #ifdef USE_DMALLOC
 #include <dmalloc.h>
 #endif
@@ -70,7 +71,7 @@ int maildirCheckHistory(Pop3 pc)
 
 	if (pc->u.maildir.dircache_flush) {
 		/* hack to clear directory cache for network-mounted maildirs */
-		if (fn = mktemp(path_newtmp)) {
+		if ((fn = mktemp(path_newtmp)) != NULL) {
 			unlink(fn);
 		} else {
 			DM(pc, DEBUG_ERROR,
