@@ -3,6 +3,8 @@ Release Notes
 Release 0.4.0 - unreleased
 
   * This release is by Neil Spring <nspring@cs.washington.edu>.
+  * GNUTLS version 0.3.5 is expected; earlier and later versions
+    may be incompatible.
   * askpass: Passwords can be left empty for IMAP: ssh-askpass
     will be used to prompt the user.  See sample.wmbiffrc 
     and wmbiffrc(5).
@@ -305,4 +307,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.19 2002/04/20 08:53:20 bluehal Exp $
+$Id: NEWS,v 1.20 2002/04/25 21:35:25 bluehal Exp $
