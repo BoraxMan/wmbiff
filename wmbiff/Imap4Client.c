@@ -16,6 +16,7 @@
 #include "tlsComm.h"
 #include "passwordMgr.h"
 #include "regulo.h"
+#include "MessageList.h"
 
 #include <sys/types.h>
 #include <stdio.h>
@@ -23,6 +24,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <time.h>
+#include <ctype.h>
 
 #ifdef USE_DMALLOC
 #include <dmalloc.h>
@@ -281,6 +283,7 @@ int imap_checkmail( /*@notnull@ */ Pop3 pc)
 	/* recover connection state from the cache */
 	struct connection_state *scs = state_for_pcu(pc);
 	char buf[BUF_SIZE];
+    static int command_id;
 
 	/* if it's not in the cache, try to open */
 	if (scs == NULL) {
@@ -299,7 +302,8 @@ int imap_checkmail( /*@notnull@ */ Pop3 pc)
 	}
 
 	/* if we've got it by now, try the status query */
-	tlscomm_printf(scs, "a003 STATUS %s (MESSAGES UNSEEN)\r\n", pc->path);
+    command_id ++;
+	tlscomm_printf(scs, "a%03d STATUS %s (MESSAGES UNSEEN)\r\n", command_id % 1000, pc->path);
 	if (tlscomm_expect(scs, "* STATUS", buf, 127) != 0) {
 		/* a valid response? */
 		// doesn't support spaces: (void) sscanf(buf, "* STATUS %*s (MESSAGES %d UNSEEN %d)",
@@ -314,6 +318,75 @@ int imap_checkmail( /*@notnull@ */ Pop3 pc)
 		return -1;
 	}
 	return 0;
+}
+
+struct msglst *imap_getHeaders( /*@notnull@ */ Pop3 pc)
+{
+	struct connection_state *scs = state_for_pcu(pc);
+    struct msglst *message_list;
+    char *msgid;
+	char buf[BUF_SIZE];
+
+	if (scs == NULL) {
+		(void) imap_open(pc);
+		scs = state_for_pcu(pc);
+	}
+	if (scs == NULL) { return NULL; }
+	if (tlscomm_is_blacklisted(scs) != 0) { return NULL; }
+
+    IMAP_DM(pc, DEBUG_INFO, "working headers\n");
+
+	tlscomm_printf(scs, "a004 EXAMINE %s\r\n", pc->path);
+	if (tlscomm_expect(scs, "a004 OK", buf, 127) == 0) {
+		tlscomm_close(unbind(scs));
+		return NULL;
+	}
+    IMAP_DM(pc, DEBUG_INFO, "examine ok\n");
+
+	/* if we've got it by now, try the status query */
+	tlscomm_printf(scs, "a005 SEARCH UNSEEN\r\n");
+	if (tlscomm_expect(scs, "* SEARCH", buf, 127) == 0) {
+		tlscomm_close(unbind(scs));
+		return NULL;
+	}
+    IMAP_DM(pc, DEBUG_INFO, "search: %s", buf);
+    if(strlen(buf) < 9) return NULL; /* search turned up nothing */
+    msgid = strtok(buf+9, " \r\n");
+    message_list = NULL;
+    /* the isdigit cruft is to deal with EOL */
+    if(msgid != NULL && isdigit(msgid[0])) do {
+        struct msglst *m = malloc(sizeof(struct msglst));
+        char hdrbuf[128];
+        tlscomm_printf(scs, "a04 FETCH %s (FLAGS " 
+                       "BODY[HEADER.FIELDS (FROM SUBJECT)])\r\n", msgid);
+        if (tlscomm_expect(scs, "* ", hdrbuf, 127)) {
+            m->subj[0] = '\0'; 
+            m->from[0] = '\0';
+            while(m->subj[0] == '\0' || m->from[0] == '\0') {
+                if (tlscomm_expect(scs, "", hdrbuf, 127)) {
+                    if (strncmp(hdrbuf, "Subject:", 8) == 0) {
+                        strncpy(m->subj, hdrbuf+9, SUBJ_LEN-1);
+                        m->subj[SUBJ_LEN-1] = '\0';
+                    } else if (strncmp(hdrbuf, "From: ", 5) == 0) {
+                        strncpy(m->from, hdrbuf+6, FROM_LEN-1);
+                        m->from[FROM_LEN-1] = '\0';
+                    }
+                } else {
+                    IMAP_DM(pc, DEBUG_ERROR, "timedout looking for headers.: %s", hdrbuf);
+                }
+            }
+            IMAP_DM(pc, DEBUG_INFO, "From: '%s' Subj: '%s'\n", m->from, m->subj);
+            m->next = message_list;
+            message_list = m;
+        } else {
+            IMAP_DM(pc, DEBUG_ERROR, "error fetching: %s", hdrbuf);
+        }
+    } while((msgid = strtok(NULL, " \r\n")) != NULL && isdigit(msgid[0]));
+
+    tlscomm_printf(scs, "a06 CLOSE\r\n" ); /* return to polling state */
+    /*  may be unneeded tlscomm_expect(scs, "a06 OK CLOSE\r\n" );  see if it worked? */
+    IMAP_DM(pc, DEBUG_INFO, "worked headers\n");
+	return message_list;
 }
 
 
@@ -418,6 +491,7 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 	IMAP_DM(pc, DEBUG_INFO, "authList= '%s'\n", PCU.authList);
 
 	pc->checkMail = imap_checkmail;
+	pc->getHeaders = imap_getHeaders;
 	pc->TotalMsgs = 0;
 	pc->UnreadMsgs = 0;
 	pc->OldMsgs = -1;
