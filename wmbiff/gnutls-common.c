@@ -465,6 +465,8 @@ void print_cert_info(gnutls_session session, const char* hostname)
 		print_openpgp_info(session, hostname);
 		break;
 #endif
+    default:
+      break;
 	}
 
 }
