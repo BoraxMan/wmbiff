@@ -1,7 +1,7 @@
 Release Notes
 ~~~~~~~~~~~~~
 
-Release 0.3.3 - [UNRELEASED]
+Release 0.3.3 - Mon, 29 Oct 2001 14:55:00 +0100
 
   * Sanity check to IMAP code: exit if wmbiff tries to connect to more
     than 5 servers.
