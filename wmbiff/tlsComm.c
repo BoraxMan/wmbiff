@@ -66,8 +66,13 @@ void tlscomm_close(struct connection_state *scs)
 	/* not ok to call this more than once */
 	if (scs->state) {
 #ifdef WITH_TLS
+#if GNUTLS_VER >= 3
+		gnutls_bye(scs->state, GNUTLS_SHUT_RDWR);
+		gnutls_x509pki_free_sc(scs->xcred);
+#else
 		gnutls_bye(scs->sd, scs->state, GNUTLS_SHUT_RDWR);
 		gnutls_free_x509_client_sc(scs->xcred);
+#endif
 		gnutls_deinit(scs->state);
 		scs->xcred = NULL;
 #endif
@@ -147,8 +152,12 @@ int tlscomm_expect(struct connection_state *scs,
 #ifdef WITH_TLS
 		if (scs->state) {
 			readbytes =
+#if GNUTLS_VER >= 3
+				gnutls_read(scs->state, scs->unprocessed, BUF_SIZE);
+#else
 				gnutls_read(scs->sd, scs->state, scs->unprocessed,
 							BUF_SIZE);
+#endif
 			if (readbytes < 0) {
 				handle_gnutls_read_error(readbytes, scs);
 				return 0;
@@ -210,7 +219,11 @@ void tlscomm_printf(struct connection_state *scs, const char *format, ...)
 	if (scs->sd != -1) {
 #ifdef WITH_TLS
 		if (scs->state) {
+#if GNUTLS_VER>=3
+			int written = gnutls_write(scs->state, buf, bytes);
+#else
 			int written = gnutls_write(scs->sd, scs->state, buf, bytes);
+#endif
 			if (written < bytes) {
 				fprintf(stderr, "Error %s prevented writing: %*s\n",
 						gnutls_strerror(written), bytes, buf);
@@ -232,7 +245,7 @@ void tlscomm_printf(struct connection_state *scs, const char *format, ...)
 
 #ifdef DEBUG_COMM
 /* taken from the GNUTLS documentation, version 0.2.10; this
-   may need to be updated from cli.c if the gnutls interface
+   may need to be updated from gnutls's cli.c if the gnutls interface
    changes, but that is only necessary if you want
    debug_comm. */
 #define PRINTX(x,y) if (y[0]!=0) printf(" -   %s %s\n", x, y)
@@ -329,11 +342,36 @@ struct connection_state *initialize_gnutls(int sd, char *name)
 	assert(sd >= 0);
 
 	if (gnutls_initialized == 0) {
-		gnutls_global_init();
+		assert(gnutls_global_init() == 0);
 		gnutls_initialized = 1;
 	}
 
 	assert(gnutls_init(&ret->state, GNUTLS_CLIENT) == 0);
+#if GNUTLS_VER>=3
+	{
+		const int protocols[] = { GNUTLS_TLS1, GNUTLS_SSL3, 0 };
+		const int ciphers[] =
+			{ GNUTLS_CIPHER_3DES_CBC, GNUTLS_CIPHER_ARCFOUR, 0 };
+		const int compress[] = { GNUTLS_COMP_ZLIB, GNUTLS_COMP_NULL, 0 };
+		const int key_exch[] = { GNUTLS_KX_X509PKI_RSA, 0 };
+		const int mac[] = { GNUTLS_MAC_SHA, GNUTLS_MAC_MD5, 0 };
+		assert(gnutls_protocol_set_priority(ret->state, protocols) == 0);
+		assert(gnutls_cipher_set_priority(ret->state, ciphers) == 0);
+		assert(gnutls_compression_set_priority(ret->state, compress) == 0);
+		assert(gnutls_kx_set_priority(ret->state, key_exch) == 0);
+		assert(gnutls_mac_set_priority(ret->state, mac) == 0);
+		/* no client private key */
+		if (gnutls_x509pki_allocate_sc(&ret->xcred, 0) < 0) {
+			fprintf(stderr, "gnutls memory error\n");
+			exit(1);
+		}
+		gnutls_cred_set(ret->state, GNUTLS_X509PKI, ret->xcred);
+		gnutls_transport_set_ptr(ret->state, sd);
+		do {
+			zok = gnutls_handshake(ret->state);
+		} while (zok == GNUTLS_E_INTERRUPTED || zok == GNUTLS_E_AGAIN);
+	}
+#else
 	assert(gnutls_set_protocol_priority(ret->state, GNUTLS_TLS1,
 										GNUTLS_SSL3, 0) == 0);
 	assert(gnutls_set_cipher_priority(ret->state, GNUTLS_3DES_CBC,
@@ -344,12 +382,14 @@ struct connection_state *initialize_gnutls(int sd, char *name)
 	assert(gnutls_set_kx_priority(ret->state, GNUTLS_KX_RSA, 0) == 0);
 	assert(gnutls_set_mac_priority(ret->state, GNUTLS_MAC_SHA,
 								   GNUTLS_MAC_MD5, 0) == 0);
-
 	/* no client private key */
 	if (gnutls_allocate_x509_client_sc(&ret->xcred, 0) < 0) {
 		fprintf(stderr, "gnutls memory error\n");
 		exit(1);
 	}
+	gnutls_set_cred(ret->state, GNUTLS_X509PKI, ret->xcred);
+	zok = gnutls_handshake(sd, ret->state);
+#endif
 
 	/* TODO: 
 	   zok =
@@ -360,9 +400,6 @@ struct connection_state *initialize_gnutls(int sd, char *name)
 	   }
 	 */
 
-	gnutls_set_cred(ret->state, GNUTLS_X509PKI, ret->xcred);
-
-	zok = gnutls_handshake(sd, ret->state);
 	if (zok < 0) {
 		fprintf(stderr, "%s: Handshake failed\n", name);
 		fprintf(stderr, "%s: This may be a problem in gnutls, "
@@ -399,7 +436,11 @@ void handle_gnutls_read_error(int readbytes, struct connection_state *scs)
 		if (readbytes == GNUTLS_E_WARNING_ALERT_RECEIVED
 			|| readbytes == GNUTLS_E_FATAL_ALERT_RECEIVED)
 			fprintf(stderr, "* Received alert [%d]\n",
+#if GNUTLS_VER>=3
+					gnutls_alert_get_last(scs->state));
+#else
 					gnutls_get_last_alert(scs->state));
+#endif
 		if (readbytes == GNUTLS_E_REHANDSHAKE)
 			fprintf(stderr, "* Received HelloRequest message\n");
 	}

@@ -1,4 +1,4 @@
-/* $Id: charutil.c,v 1.6 2001/11/16 07:11:04 bluehal Exp $ */
+/* $Id: charutil.c,v 1.7 2002/01/12 05:30:09 bluehal Exp $ */
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -181,8 +181,7 @@ void grab_authList(const char *source, char *destination)
 }
 
 
-int compile_and_match_regex(const char *regex,
-							const char *str, /*@out@ */
+int compile_and_match_regex(const char *regex, const char *str,	/*@out@ */
 							struct re_registers *regs)
 {
 
@@ -194,7 +193,7 @@ int compile_and_match_regex(const char *regex,
 	memset(&rpbuf, 0, sizeof(struct re_pattern_buffer));
 
 	/* posix egrep interprets intervals (eg. {1,32}) nicely */
-	re_syntax_options = RE_SYNTAX_POSIX_EGREP; 
+	re_syntax_options = RE_SYNTAX_POSIX_EGREP;
 	errstr = re_compile_pattern(regex, strlen(regex), &rpbuf);
 	if (errstr != NULL) {
 		fprintf(stderr, "error in compiling regular expression: %s\n",
