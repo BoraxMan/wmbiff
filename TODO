@@ -1,13 +1,37 @@
-- Store and verify server certificates.
-- Runtime back-tick expansion
-- \ line continuations in configuration file.
-- Remove (*open)() from mbox_t
-- Add more shell "recipes" besides gicu.
-- Support on/off status LED's, for, for example,
-   grep eth0 /proc/net/dev | wc -l
-- Add a failure-expect case in tlsComm. For example,
-   an IMAP status query has a good response (* STATUS) 
-   and a bad response (a003 NO STATUS).  As soon as 
-   one of them is received, we're done.
+* Store and verify server certificates. 
+  I don't know whether gnutls supports this.  A pointer to
+  documentation that describes what to do, or a way to leech
+  stored certificates or CA's from mutt would be great.
+* Runtime back-tick expansion
+  Because interesting mailboxes can be defined by date.
+* \ line continuations in configuration file.
+  Because shell commands can be quite long.
+* Remove (*open)() from mbox_t
+  Because it's rarely used, and can be easily integrated
+  with the command check.
+* Generic constructors for mboxes.  
+  There's a lot of common code across different Clients;
+  this is one piece that could use refactoring.
+* Add more shell "recipes" besides gicu.
+  Just added 'finger'.  I'm hoping to add something to
+  integrate 'remind' just as soon as I can figure it out.
+* Support on/off status LED's, for, for example,
+  grep eth0 /proc/net/dev | wc -l
+  The colored LED's are already in WMBiff's pixmap.
+* Use a helper program to blink keyboard led's.
+  Requires killing the 'notify' program when new mail no
+  longer exists.  Keyboard blinking is done via a helper
+  program because it requires root.  ledcontrol seems ok,
+  but extra complicated, and has a useless default install
+  that requires root.  xbuffy's led program seems quite
+  good, but depending on another biff program seems odd.
+* Add a failure-expect case in tlsComm. 
+  For example, an IMAP status query has a good response (*
+  STATUS) and a bad response (a003 NO STATUS).  As soon as
+  one of them is received, we're done.
 
-$Id: TODO,v 1.6 2002/04/15 08:15:18 bluehal Exp $
+$Id: TODO,v 1.7 2002/04/15 22:58:05 bluehal Exp $
+
+;;; Local Variables: ***
+;;; mode: outline ***
+;;; End: ***
