@@ -294,8 +294,12 @@ int imap_checkmail(Pop3 pc)
 int imap4Create(Pop3 pc, const char *const str)
 {
 	struct re_registers regs;
-	const char *regex =
-		".*imaps?:([^:]{1,32}):([^@]{1,32})@([^/: ]+)(/[^: ]+)?(:[0-9]+)? *";
+	int i, matchedchars;
+	const char *regexes[] = {
+		".*imaps?:([^: ]{1,32}):([^@]{1,32})@([^/: ]+)(/[^: ]+)?(:[0-9]+)? (.+)? *",
+		".*imaps?:([^: ]{1,32}) ([^ ]{1,32}) ([^/: ]+)(/[^: ]+)?( [0-9]+)? (.+)? *",
+		NULL
+	};
 
 	/* IMAP4 format: imap:user:password@server/mailbox[:port] */
 	/* If 'str' line is badly formatted, wmbiff won't display the mailbox. */
@@ -320,9 +324,18 @@ int imap4Create(Pop3 pc, const char *const str)
 	} else
 		PCU.dossl = 0;
 
-	if (compile_and_match_regex(regex, str, &regs) <= 0) {
+	for (matchedchars = 0, i = 0;
+		 regexes[i] != NULL && matchedchars <= 0; i++)
+	{
+		matchedchars = compile_and_match_regex(regexes[i], str, &regs);
+	}
+
+	/* failed to match either regex */
+	if (matchedchars <= 0)
+	{
 		pc->label[0] = '\0';
-		fprintf(stderr, "Couldn't parse line %s\n", str);
+		fprintf(stderr, "Couldn't parse line %s (%d)\n", str,
+				matchedchars);
 		return -1;
 	}
 

@@ -1,6 +1,6 @@
-# $Id: Makefile,v 1.18 2002/01/14 01:50:16 jordi Exp $
+# $Id: Makefile,v 1.19 2002/01/27 12:46:38 jordi Exp $
 
-WMBIFF_VERSION = "0.3.5"
+WMBIFF_VERSION = "0.3.5-cvs"
 
 DESTDIR=
 prefix=/usr/local

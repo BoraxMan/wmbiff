@@ -1,12 +1,12 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiffrc.5,v 1.7 2001/11/16 00:39:13 bluehal Exp $
+.\" $Id: wmbiffrc.5,v 1.8 2002/01/27 12:46:38 jordi Exp $
 .\"
-.\" wmbiff.1 and wmbiffrc.5 are copyright 1999-2001 by 
+.\" wmbiff.1 and wmbiffrc.5 are copyright 1999-2002 by 
 .\" Jordi Mallach <jordi@debian.org>
 .\"
 .\" This is free documentation, see the latest version of the GNU
 .\" General Public License for copying conditions. There is NO warranty.
-.TH WMBIFFRC 5 "October 4, 2001" "wmbiff"
+.TH WMBIFFRC 5 "January 27, 2002" "wmbiff"
 
 .SH NAME
 wmbiffrc \- configuration file for
@@ -80,6 +80,9 @@ See Authentication below for a description of the auth field.
 .RS
 imap:user:passwd@server[/mailbox][:port] [auth]
 .RE
+.RS
+imap:user passwd server[/mailbox][ port] [auth]
+.RE
 .TP
 .I imaps
 These are IMAP4 boxes wrapped in a TLS (SSL) connection, only available if 
@@ -91,6 +94,9 @@ and may be insecure.  TLS support is only for encryption: since certificates
 are not yet checked, it is vulnerable to man-in-the-middle attack.
 .RS
 imaps:user:passwd@server[/mailbox][:port] [auth]
+.RE
+.RS
+imaps:user passwd server[/mailbox][ port] [auth]
 .RE
 .TP
 .I licq
