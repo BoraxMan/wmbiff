@@ -3,9 +3,10 @@ noinst_PROGRAMS = test_wmbiff
 bin_PROGRAMS = wmbiff
 wmbiff_SOURCES = wmbiff.c socket.c Pop3Client.c LicqClient.c mboxClient.c \
 	maildirClient.c Imap4Client.c tlsComm.c tlsComm.h ShellClient.c  \
-	passwordMgr.c passwordMgr.h charutil.c charutil.h Client.h
-wmbiff_LDADD = -L../wmgeneral -lwmgeneral
-wmbiff_DEPENDENCIES = ../wmgeneral/libwmgeneral.a
+	passwordMgr.c passwordMgr.h charutil.c charutil.h Client.h \
+	gnutls-common.c gnutls-common.h
+wmbiff_LDADD = -L../wmgeneral -lwmgeneral @LIBGCRYPT_LIBS@ @GTK_LIBS@
+wmbiff_DEPENDENCIES = ../wmgeneral/libwmgeneral.a Makefile
 test_wmbiff_SOURCES = ShellClient.c charutil.c charutil.h Client.h \
 	test_wmbiff.c passwordMgr.c
 man_MANS = wmbiff.1 wmbiffrc.5
