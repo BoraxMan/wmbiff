@@ -26,7 +26,7 @@
    a checking program fails. */
 
 #ifdef __LCLINT__
-void (*old_signal_handler)(int);
+void (*old_signal_handler) (int);
 #else
 sig_t old_signal_handler;
 #endif
@@ -42,7 +42,7 @@ FILE *kind_popen(const char *command, const char *type)
 	if (ret == NULL) {
 		DMA(DEBUG_ERROR, "popen: error while reading '%s': %s\n",
 			command, strerror(errno));
-		(void)signal(SIGCHLD, old_signal_handler);
+		(void) signal(SIGCHLD, old_signal_handler);
 		old_signal_handler = NULL;
 	}
 	return (ret);
@@ -55,13 +55,14 @@ FILE *kind_popen(const char *command, const char *type)
    so no error checking can be done here until that's disabled */
 
 /* returns as a mailcheck function does: -1 on fail, 0 on success */
-static int kind_pclose(/*@only@*/ FILE * F, 
-                       const char *command, 
-                       /*@null@*/ Pop3 pc) {
+static int kind_pclose( /*@only@ */ FILE * F,
+					   const char *command,
+					   /*@null@ */ Pop3 pc)
+{
 	int exit_status = pclose(F);
 
 	if (old_signal_handler != NULL) {
-		(void)signal(SIGCHLD, old_signal_handler);
+		(void) signal(SIGCHLD, old_signal_handler);
 		old_signal_handler = NULL;
 	}
 
@@ -80,7 +81,8 @@ static int kind_pclose(/*@only@*/ FILE * F,
 	return (exit_status);
 }
 
-int grabCommandOutput(Pop3 pc, const char *command, /*@out@*/ char **output)
+int grabCommandOutput(Pop3 pc, const char *command, /*@out@ */
+					  char **output)
 {
 	FILE *F;
 	char linebuf[512];
@@ -101,7 +103,7 @@ int grabCommandOutput(Pop3 pc, const char *command, /*@out@*/ char **output)
 }
 
 /* returns null on failure */
-/*@null@*/ 
+/*@null@*/
 char *backtickExpand(Pop3 pc, const char *path)
 {
 	char bigbuffer[1024];
@@ -179,7 +181,7 @@ int shellCmdCheck(Pop3 pc)
 		}
 		/* see if we should print as new or not */
 		pc->UnreadMsgs = (strstr(commandOutput, "new")) ? 1 : 0;
-		pc->TotalMsgs = -1; /* we might alternat numeric /string */
+		pc->TotalMsgs = -1;		/* we might alternat numeric /string */
 	} else {
 		SH_DM(pc, DEBUG_ERROR,
 			  "'%s' returned something other than an integer message count"
