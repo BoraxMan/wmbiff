@@ -26,7 +26,7 @@ ChangeLog: stamp-h Makefile configure.in
 		cat maint/changelog-header > $@; \
 		echo >> $@; \
 		echo "running $(CVS2CL)..."; \
-		$(CVS2CL) --stdout --utc --day-of-week | sed -f maint/changelog.sed >> $@; \
+		$(CVS2CL) --stdout --utc --day-of-week -I TODO | sed -f maint/changelog.sed >> $@; \
 	  else \
 		echo "Unable to build ChangeLog for distribution"; \
 		exit 1; \
