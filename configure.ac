@@ -1,13 +1,12 @@
 dnl Autoconf is here to detect:
 dnl  gnutls, libgcrypt
-dnl  gnu regex (-lgnuregex / DEXT_GNU_REGEX_LIB)
 dnl  default ssh-askpass
 dnl and the basics X11, Xext, Xpm
 dnl and configure:
 dnl  installation prefix
 dnl  version
 
-AC_INIT(WMBiff, 0.4.13, wmbiff-devel@lists.sourceforge.net, wmbiff)
+AC_INIT(WMBiff, 0.4.14, wmbiff-devel@lists.sourceforge.net, wmbiff)
 AC_CONFIG_AUX_DIR(autoconf)
 AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
