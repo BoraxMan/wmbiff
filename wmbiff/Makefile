@@ -4,6 +4,8 @@ prefix=/usr/local
 bindir=${prefix}/bin
 mandir=${prefix}/share/man
 CONF=/etc
+
+CC     = gcc
 LIBDIR = -L/usr/X11R6/lib
 LIBS   = -lXpm -lXext -lX11
 CFLAGS = -O2 -Wall
@@ -28,7 +30,7 @@ INSTALL_FILE 	= $(INSTALL) -p -o root -g root -m 644
 
 
 .c.o:
-	gcc $(CFLAGS) $(EXTRAFLAGS) -c $< -o $*.o
+	$(CC) $(CFLAGS) $(EXTRAFLAGS) -c $< -o $*.o
 
 all: wmbiff-master.xpm wmbiff
 
@@ -36,7 +38,7 @@ wmbiff-master.xpm:
 	ln -s wmbiff-master-led.xpm wmbiff-master.xpm
 
 wmbiff:	$(OBJS)
-	gcc $(CFLAGS) $(EXTRAFLAGS) -o wmbiff -lX11 -lnsl $^ $(LIBDIR) $(LIBS)
+	$(CC) $(CFLAGS) $(EXTRAFLAGS) -o wmbiff -lX11 -lnsl $^ $(LIBDIR) $(LIBS)
 
 clean:
 	for i in $(OBJS) ; do \

@@ -1,8 +1,15 @@
-wmBiff (0.3.1)
+Sat, 16 Jun 2001 02:55:51 +0100  Jordi Mallach <jordi@sindominio.net>
+
+  * wmbiff/Makefile: replaced hardcoded `gcc' calls with $(CC).
+  * wmbiff/sample.wmbiffrc, wmbiff/wmbiff.c: replace /var/spool/mail 
+    with /var/mail, which is what the FHS mandates. All decent
+    systems should have either the directory or a symlink pointing
+    somewhere else.
+
+Wed, 16 May 2001 20:45:49 -0400  Mark Hurley <debian4tux@telocity.com>
+
   * wmbiff/charutil.c: fixed gcc-3.0 implicit warning, but including string.h
     also cleaned up other includes in same file
- 
- -- Mark Hurley <debian4tux@telocity.com>  Wed, 16 May 2001 20:45:49 -0400
  
 wmBiff (0.3.0)
   * wmbiff/Makefile:

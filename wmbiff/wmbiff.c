@@ -76,7 +76,7 @@ void init_biff(char *uconfig_file)
 	if ((m = getenv("MAIL")) != NULL) {
 		strcpy(mbox[0].path, m);
 	} else if ((m = getenv("USER")) != NULL) {
-		strcpy(mbox[0].path, "/var/spool/mail/");
+		strcpy(mbox[0].path, "/var/mail/");
 		strcat(mbox[0].path, m);
 	}
 
