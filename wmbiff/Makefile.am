@@ -6,7 +6,7 @@ wmbiff_SOURCES = wmbiff.c socket.c Pop3Client.c LicqClient.c mboxClient.c \
 	passwordMgr.c passwordMgr.h charutil.c charutil.h Client.h 
 EXTRA_wmbiff_SOURCES = gnutls-common.c gnutls-common.h	
 wmbiff_LDADD = -L../wmgeneral -lwmgeneral @LIBGCRYPT_LIBS@ @GNUTLS_COMMON_O@
-wmbiff_DEPENDENCIES = ../wmgeneral/libwmgeneral.a Makefile
+wmbiff_DEPENDENCIES = ../wmgeneral/libwmgeneral.a Makefile @GNUTLS_COMMON_O@
 test_wmbiff_SOURCES = ShellClient.c charutil.c charutil.h Client.h \
 	test_wmbiff.c passwordMgr.c
 man_MANS = wmbiff.1 wmbiffrc.5
