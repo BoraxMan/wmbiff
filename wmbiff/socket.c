@@ -1,4 +1,4 @@
-/* $Id: socket.c,v 1.3 2001/10/04 09:50:59 jordi Exp $ */
+/* $Id: socket.c,v 1.4 2002/04/12 05:54:36 bluehal Exp $ */
 /* Copyright (C) 1998 Trent Piepho  <xyzzy@u.washington.edu>
  *           (C) 1999 Trent Piepho  <xyzzy@speakeasy.org>
  *
@@ -21,12 +21,19 @@
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
+#include <errno.h>
+#include <string.h>
 #include <netdb.h>
 #include <stdio.h>
 
 #ifdef USE_DMALLOC
 #include <dmalloc.h>
 #endif
+
+/* nspring/blueHal, 10 Apr 2002; added some extra error
+   printing, in line with the debug-messages-to-stdout
+   philosophy of the rest of the wmbiff code */
 
 int sock_connect(const char *hostname, int port)
 {
@@ -37,12 +44,14 @@ int sock_connect(const char *hostname, int port)
 	host = gethostbyname(hostname);
 	if (host == NULL) {
 		herror("gethostbyname");
+		printf("gethostbyname(%s) failed.\n", hostname);
 		return (-1);
 	};
 
 	fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (fd == -1) {
 		perror("Error opening socket");
+		printf("socket() failed.\n");
 		return (-1);
 	};
 
@@ -52,6 +61,8 @@ int sock_connect(const char *hostname, int port)
 	i = connect(fd, (struct sockaddr *) &addr, sizeof(struct sockaddr));
 	if (i == -1) {
 		perror("Error connecting");
+		printf("connect(%s:%d) failed: %s\n", inet_ntoa(addr.sin_addr),
+			   port, strerror(errno));
 		close(fd);
 		return (-1);
 	};
