@@ -30,6 +30,9 @@
 
 #include "Client.h"				/* debugging messages */
 
+/* if non-null, set to a file for certificate verification */
+extern const char *certificate_filename;
+
 /* WARNING: implcitly uses scs to gain access to the mailbox
    that holds the per-mailbox debug flag. */
 #define TDM(lvl, args...) DM(scs->pc, lvl, "comm: " args)
@@ -346,6 +349,51 @@ static int print_info(GNUTLS_STATE state)
 	return 0;
 }
 
+/* a start of a hack at verifying certificates.  does not
+   provide any security at all.  I'm waiting for either
+   gnutls to make this as easy as it should be, or someone
+   to port Andrew McDonald's gnutls-for-mutt patch.
+*/
+int tls_check_certificate(struct connection_state *scs)
+{
+	CertificateStatus certstat;
+	const gnutls_datum *cert_list;
+	int cert_list_size = 0;
+
+	if (gnutls_auth_get_type(scs->state) != GNUTLS_X509PKI) {
+		TDM(DEBUG_ERROR, "Unable to get certificate from peer.\n");
+		exit(1);
+	}
+	certstat =
+		gnutls_x509pki_client_get_peer_certificate_status(scs->state);
+	switch (certstat) {
+	case GNUTLS_CERT_TRUSTED:
+		TDM(DEBUG_INFO, "certificate is trusted.\n");
+		return 0;
+	case GNUTLS_CERT_NOT_TRUSTED:
+		/* note, here is one place where we provide no security */
+		TDM(DEBUG_INFO, "certificate is not trusted (but valid).\n");
+		return 0;
+	case GNUTLS_CERT_INVALID:
+		TDM(DEBUG_ERROR, "certificate is invalid.\n");
+		exit(1);
+	case GNUTLS_CERT_EXPIRED:
+		TDM(DEBUG_ERROR, "certificate has expired.\n");
+		exit(1);
+	case GNUTLS_CERT_NONE:
+		TDM(DEBUG_ERROR, "server has no certificate.\n");
+		exit(1);
+	}
+	/* not checking for not-yet-valid certs... this would make sense
+	   if we weren't just comparing to stored ones */
+	cert_list =
+		gnutls_x509pki_client_get_peer_certificate_list(scs->state,
+														&cert_list_size);
+
+	TDM(DEBUG_INFO, "certificate check ok.\n");
+	return (0);
+}
+
 struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc)
 {
 	static int gnutls_initialized;
@@ -375,15 +423,38 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc)
 		assert(gnutls_kx_set_priority(scs->state, key_exch) == 0);
 		assert(gnutls_mac_set_priority(scs->state, mac) == 0);
 		/* no client private key */
-		if (gnutls_x509pki_allocate_sc(&scs->xcred, 0) < 0) {
+		if (gnutls_x509pki_allocate_sc(&scs->xcred, 1) < 0) {
 			DMA(DEBUG_ERROR, "gnutls memory error\n");
 			exit(1);
 		}
+
+		/* certfile really isn't supported; this is just a start. */
+		if (certificate_filename != NULL) {
+			if (!exists(certificate_filename)) {
+				DMA(DEBUG_ERROR,
+					"Certificate file (certfile=) %s not found.\n",
+					certificate_filename);
+				exit(1);
+			}
+			zok = gnutls_x509pki_set_client_trust_file(scs->xcred,
+													   certificate_filename,
+													   "");
+			if (zok != 0) {
+				DMA(DEBUG_ERROR,
+					"GNUTLS did not like your certificate file %s.\n",
+					certificate_filename);
+				gnutls_perror(zok);
+				exit(1);
+			}
+		}
+
 		gnutls_cred_set(scs->state, GNUTLS_X509PKI, scs->xcred);
 		gnutls_transport_set_ptr(scs->state, sd);
 		do {
 			zok = gnutls_handshake(scs->state);
 		} while (zok == GNUTLS_E_INTERRUPTED || zok == GNUTLS_E_AGAIN);
+
+		tls_check_certificate(scs);
 	}
 
 	if (zok < 0) {
@@ -479,3 +550,12 @@ int tlscomm_is_blacklisted(const struct connection_state *scs)
 {
 	return (scs != NULL && scs->sd == -1);
 }
+
+/* vim:set ts=4: */
+/*
+ * Local Variables:
+ * tab-width: 4
+ * c-indent-level: 4
+ * c-basic-offset: 4
+ * End:
+ */
