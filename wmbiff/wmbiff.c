@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.60 2004/01/01 07:47:50 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.61 2004/03/28 00:28:58 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -92,7 +92,8 @@ extern Window iconwin;
 
 Cursor busy_cursor, ready_cursor;
 
-static __inline /*@out@ */ void *malloc_ordie(size_t len)
+static __inline /*@out@ */ void *
+malloc_ordie(size_t len)
 {
 	void *ret = malloc(len);
 	if (ret == NULL) {
@@ -303,69 +304,87 @@ static int Read_Config_File(char *filename, int *loopinterval)
 
 		/* now only local settings */
 		if (!strcmp(setting, "label.")) {
-			if (strlen(value)+1 > BUF_SMALL) {
-				DMA(DEBUG_ERROR, "Mailbox %i label string '%s' is too long.\n", mbox_index, value);
-            continue;
+			if (strlen(value) + 1 > BUF_SMALL) {
+				DMA(DEBUG_ERROR,
+					"Mailbox %i label string '%s' is too long.\n",
+					mbox_index, value);
+				continue;
 			} else {
-				strncpy(mbox[mbox_index].label, value, BUF_SMALL-1);
+				strncpy(mbox[mbox_index].label, value, BUF_SMALL - 1);
 			}
 		} else if (!strcmp(setting, "path.")) {
-			if (strlen(value)+1 > BUF_BIG) {
-				DMA(DEBUG_ERROR, "Mailbox %i path string '%s' is too long.\n", mbox_index, value);
-            continue;
+			if (strlen(value) + 1 > BUF_BIG) {
+				DMA(DEBUG_ERROR,
+					"Mailbox %i path string '%s' is too long.\n",
+					mbox_index, value);
+				continue;
 			} else {
-				strncpy(mbox[mbox_index].path, value, BUF_BIG-1);
+				strncpy(mbox[mbox_index].path, value, BUF_BIG - 1);
 			}
 		} else if (!strcmp(setting, "notify.")) {
-			if (strlen(value)+1 > BUF_BIG) {
-				DMA(DEBUG_ERROR, "Mailbox %i notify string '%s' is too long.\n", mbox_index, value);
-            continue;
+			if (strlen(value) + 1 > BUF_BIG) {
+				DMA(DEBUG_ERROR,
+					"Mailbox %i notify string '%s' is too long.\n",
+					mbox_index, value);
+				continue;
 			} else {
-				strncpy(mbox[mbox_index].notify, value, BUF_BIG-1);
+				strncpy(mbox[mbox_index].notify, value, BUF_BIG - 1);
 			}
 		} else if (!strcmp(setting, "action.")) {
-			if (strlen(value)+1 > BUF_BIG) {
-				DMA(DEBUG_ERROR, "Mailbox %i action string '%s' is too long.\n", mbox_index, value);
-            continue;
+			if (strlen(value) + 1 > BUF_BIG) {
+				DMA(DEBUG_ERROR,
+					"Mailbox %i action string '%s' is too long.\n",
+					mbox_index, value);
+				continue;
 			} else {
-				strncpy(mbox[mbox_index].action, value, BUF_BIG-1);
+				strncpy(mbox[mbox_index].action, value, BUF_BIG - 1);
 			}
 		} else if (!strcmp(setting, "action_disconnected.")) {
-			if (strlen(value)+1 > BUF_BIG) {
-				DMA(DEBUG_ERROR, "Mailbox %i action_disconnected string '%s' is too long.\n", mbox_index, value);
-            continue;
+			if (strlen(value) + 1 > BUF_BIG) {
+				DMA(DEBUG_ERROR,
+					"Mailbox %i action_disconnected string '%s' is too long.\n",
+					mbox_index, value);
+				continue;
 			} else {
-				strncpy(mbox[mbox_index].actiondc, value, BUF_BIG-1);
+				strncpy(mbox[mbox_index].actiondc, value, BUF_BIG - 1);
 			}
 		} else if (!strcmp(setting, "action_new_mail.")) {
-			if (strlen(value)+1 > BUF_BIG) {
-				DMA(DEBUG_ERROR, "Mailbox %i action_new_mail string '%s' is too long.\n", mbox_index, value);
-            continue;
+			if (strlen(value) + 1 > BUF_BIG) {
+				DMA(DEBUG_ERROR,
+					"Mailbox %i action_new_mail string '%s' is too long.\n",
+					mbox_index, value);
+				continue;
 			} else {
-				strncpy(mbox[mbox_index].actionnew, value, BUF_BIG-1);
+				strncpy(mbox[mbox_index].actionnew, value, BUF_BIG - 1);
 			}
 		} else if (!strcmp(setting, "action_no_new_mail.")) {
-			if (strlen(value)+1 > BUF_BIG) {
-				DMA(DEBUG_ERROR, "Mailbox %i action_no_new_mail string '%s' is too long.\n", mbox_index, value);
-            continue;
+			if (strlen(value) + 1 > BUF_BIG) {
+				DMA(DEBUG_ERROR,
+					"Mailbox %i action_no_new_mail string '%s' is too long.\n",
+					mbox_index, value);
+				continue;
 			} else {
-				strncpy(mbox[mbox_index].actionnonew, value, BUF_BIG-1);
+				strncpy(mbox[mbox_index].actionnonew, value, BUF_BIG - 1);
 			}
 		} else if (!strcmp(setting, "interval.")) {
 			mbox[mbox_index].loopinterval = atoi(value);
 		} else if (!strcmp(setting, "buttontwo.")) {
-			if (strlen(value)+1 > BUF_BIG) {
-				DMA(DEBUG_ERROR, "Mailbox %i buttontwo string '%s' is too long.\n", mbox_index, value);
-            continue;
+			if (strlen(value) + 1 > BUF_BIG) {
+				DMA(DEBUG_ERROR,
+					"Mailbox %i buttontwo string '%s' is too long.\n",
+					mbox_index, value);
+				continue;
 			} else {
-				strncpy(mbox[mbox_index].button2, value, BUF_BIG-1);
+				strncpy(mbox[mbox_index].button2, value, BUF_BIG - 1);
 			}
 		} else if (!strcmp(setting, "fetchcmd.")) {
-			if (strlen(value)+1 > BUF_BIG) {
-				DMA(DEBUG_ERROR, "Mailbox %i fetchcmd string '%s' is too long.\n", mbox_index, value);
-            continue;
+			if (strlen(value) + 1 > BUF_BIG) {
+				DMA(DEBUG_ERROR,
+					"Mailbox %i fetchcmd string '%s' is too long.\n",
+					mbox_index, value);
+				continue;
 			} else {
-				strncpy(mbox[mbox_index].fetchcmd, value, BUF_BIG-1);
+				strncpy(mbox[mbox_index].fetchcmd, value, BUF_BIG - 1);
 			}
 		} else if (!strcmp(setting, "fetchinterval.")) {
 			mbox[mbox_index].fetchinterval = atoi(value);
@@ -436,20 +455,22 @@ static void init_biff(char *config_file)
 		/* setup defaults if there's no config */
 		if ((m = getenv("MAIL")) != NULL) {
 			/* we are using MAIL environment var. type mbox */
-			if (strlen(m)+1 > BUF_BIG) {
-				DMA(DEBUG_ERROR, "MAIL environment var '%s' is too long.\n", m);
+			if (strlen(m) + 1 > BUF_BIG) {
+				DMA(DEBUG_ERROR,
+					"MAIL environment var '%s' is too long.\n", m);
 			} else {
-			DMA(DEBUG_INFO, "Using MAIL environment var '%s'.\n", m);
-				strncpy(mbox[0].path, m, BUF_BIG-1);
+				DMA(DEBUG_INFO, "Using MAIL environment var '%s'.\n", m);
+				strncpy(mbox[0].path, m, BUF_BIG - 1);
 			}
 		} else if ((m = getenv("USER")) != NULL) {
 			/* we are using MAIL environment var. type mbox */
-			if (strlen(m)+10+1 > BUF_BIG) {
-				DMA(DEBUG_ERROR, "USER environment var '%s' is too long.\n", m);
+			if (strlen(m) + 10 + 1 > BUF_BIG) {
+				DMA(DEBUG_ERROR,
+					"USER environment var '%s' is too long.\n", m);
 			} else {
-			DMA(DEBUG_INFO, "Using /var/mail/%s.\n", m);
-			strcpy(mbox[0].path, "/var/mail/");
-				strncat(mbox[0].path, m, BUF_BIG-1-10);
+				DMA(DEBUG_INFO, "Using /var/mail/%s.\n", m);
+				strcpy(mbox[0].path, "/var/mail/");
+				strncat(mbox[0].path, m, BUF_BIG - 1 - 10);
 			}
 		} else {
 			DMA(DEBUG_ERROR, "Cannot open config file '%s' nor use the "
@@ -1103,11 +1124,15 @@ static void do_biff(int argc, const char **argv)
 						}
 						/* do we need to run an extra action? */
 						if (mbox[but_released_region].UnreadMsgs == -1) {
-							extra_click_action = mbox[but_released_region].actiondc;
-						} else if (mbox[but_released_region].UnreadMsgs > 0) {
-							extra_click_action = mbox[but_released_region].actionnew;
+							extra_click_action =
+								mbox[but_released_region].actiondc;
+						} else if (mbox[but_released_region].
+								   UnreadMsgs > 0) {
+							extra_click_action =
+								mbox[but_released_region].actionnew;
 						} else {
-							extra_click_action = mbox[but_released_region].actionnonew;
+							extra_click_action =
+								mbox[but_released_region].actionnonew;
 						}
 						click_action = mbox[but_released_region].action;
 						break;
@@ -1121,12 +1146,15 @@ static void do_biff(int argc, const char **argv)
 						click_action = NULL;
 						break;
 					}
-					if (extra_click_action != NULL && extra_click_action[0] != 0 &&
-						strcmp(extra_click_action, "msglst")) {
-						DM(&mbox[but_released_region], DEBUG_INFO, "runing: %s", extra_click_action);
+					if (extra_click_action != NULL
+						&& extra_click_action[0] != 0
+						&& strcmp(extra_click_action, "msglst")) {
+						DM(&mbox[but_released_region], DEBUG_INFO,
+						   "runing: %s", extra_click_action);
 						(void) execCommand(extra_click_action);
 					}
-					if (click_action != NULL && click_action[0] != '\0'
+					if (click_action != NULL
+						&& click_action[0] != '\0'
 						&& strcmp(click_action, "msglst")) {
 						DM(&mbox[but_released_region], DEBUG_INFO,
 						   "running: %s", click_action);
@@ -1143,7 +1171,8 @@ static void do_biff(int argc, const char **argv)
 			}
 		}
 		XSleep(Sleep_Interval);
-	} while (forever);			/* forever is usually true,
+	}
+	while (forever);			/* forever is usually true,
 								   but not when debugging with -exit */
 	if (skin_xpm != NULL && skin_xpm != wmbiff_master_xpm) {
 		free(skin_xpm);			// added 3 jul 02, appeasing valgrind

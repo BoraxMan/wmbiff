@@ -1,11 +1,11 @@
-/* $Id: Client.h,v 1.38 2004/01/01 07:47:50 bluehal Exp $ */
+/* $Id: Client.h,v 1.39 2004/03/28 00:28:58 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
  *
  * Email Checker Pop3/Imap4/Licq/Gicu/mbox/maildir/finger
  *
- * Last Updated : $Date: 2004/01/01 07:47:50 $
+ * Last Updated : $Date: 2004/03/28 00:28:58 $
  *
  */
 
@@ -39,9 +39,9 @@ typedef struct _mbox_t {
 	char path[BUF_BIG];			/* Path to mailbox */
 	char notify[BUF_BIG];		/* Program to notify mail arrivation */
 	char action[BUF_BIG];		/* Action to execute on mouse click, reduces to
-										 *	what happens on button1. this is executed after
-										 *	either actionnew or actionnonew (if they are
-										 *	defined in the config file) */
+								 *  what happens on button1. this is executed after
+								 *  either actionnew or actionnonew (if they are
+								 *  defined in the config file) */
 	char actionnew[BUF_BIG];	/* Action to execute on mouse click when new mail */
 	char actionnonew[BUF_BIG];	/* Action to execute on mouse click when no new mail */
 	char actiondc[BUF_BIG];		/* Action to execute when icq is disconnected */
@@ -84,6 +84,9 @@ typedef struct _mbox_t {
 			unsigned int dossl:1;	/* use tls. */
 			/* prompt the user if we can't login / password is empty */
 			unsigned int interactive_password:1;
+			/* using the msglst feature, fetch the headers
+			   to have them on hand */
+			unsigned int wantCacheHeaders:1;
 			unsigned char password_len;	/* memfrob may shorten passwords */
 		} pop_imap;
 	} u;

@@ -1,4 +1,4 @@
-/* $Id: charutil.c,v 1.16 2003/11/08 22:58:54 bluehal Exp $ */
+/* $Id: charutil.c,v 1.17 2004/03/28 00:28:58 bluehal Exp $ */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -157,8 +157,9 @@ void Decode_Base64(char *src, char *dst)
 }
 
 /* helper function for the configuration line parser */
-void copy_substring(char *destination,
-					int startidx, int endidx, const char *source)
+void
+copy_substring(char *destination,
+			   int startidx, int endidx, const char *source)
 {
 	if (startidx > -1) {
 		strncpy(destination, source + startidx, endidx - startidx);

@@ -1,4 +1,4 @@
-/* $Id: Pop3Client.c,v 1.19 2003/10/29 18:17:08 bluehal Exp $ */
+/* $Id: Pop3Client.c,v 1.20 2004/03/28 00:28:58 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -254,9 +254,8 @@ int pop3Create(Pop3 pc, const char *str)
 
 
 #ifdef HAVE_GCRYPT_H
-static FILE *authenticate_md5(Pop3 pc,
-							  FILE * fp,
-							  char *apop_str __attribute__ ((unused)))
+static FILE *authenticate_md5(Pop3 pc, FILE * fp, char *apop_str
+							  __attribute__ ((unused)))
 {
 	char buf[BUF_SIZE];
 	char buf2[BUF_SIZE];

@@ -70,8 +70,8 @@ struct connection_state {
 };
 
 /* gotta do our own line buffering, sigh */
-int
-getline_from_buffer(char *readbuffer, char *linebuffer, int linebuflen);
+int getline_from_buffer(char *readbuffer, char *linebuffer,
+						int linebuflen);
 void handle_gnutls_read_error(int readbytes, struct connection_state *scs);
 
 void tlscomm_close(struct connection_state *scs)
@@ -110,7 +110,8 @@ static int wait_for_it(int sd, int timeoutseconds)
 	FD_SET(sd, &readfds);
 	do {
 		ready_descriptors = select(sd + 1, &readfds, NULL, NULL, &tv);
-	} while (ready_descriptors == -1 && errno == EINTR);
+	}
+	while (ready_descriptors == -1 && errno == EINTR);
 	if (ready_descriptors == 0) {
 		DMA(DEBUG_INFO,
 			"select timed out after %d seconds on socket: %d\n",
@@ -176,8 +177,9 @@ getline_from_buffer(char *readbuffer, char *linebuffer, int linebuflen)
 /* the correct response to a return value of 0 is almost
    certainly tlscomm_close(scs): don't _expect() anything
    unless anything else would represent failure */
-int tlscomm_expect(struct connection_state *scs,
-				   const char *prefix, char *linebuf, int buflen)
+int
+tlscomm_expect(struct connection_state *scs,
+			   const char *prefix, char *linebuf, int buflen)
 {
 	int prefixlen = (int) strlen(prefix);
 	int readbytes = 0;
@@ -208,8 +210,8 @@ int tlscomm_expect(struct connection_state *scs,
 					read(scs->sd, &scs->unprocessed[readbytes],
 						 BUF_SIZE - 1 - readbytes);
 				if (thisreadbytes < 0) {
-					TDM(DEBUG_ERROR, "%s: error reading: %s\n", scs->name,
-						strerror(errno));
+					TDM(DEBUG_ERROR, "%s: error reading: %s\n",
+						scs->name, strerror(errno));
 					return 0;
 				}
 			}
@@ -312,8 +314,9 @@ bad_certificate(const struct connection_state *scs, const char *msg)
    gnutls to make this as easy as it should be, or someone
    to port Andrew McDonald's gnutls-for-mutt patch.
 */
-int tls_check_certificate(struct connection_state *scs,
-						  const char *remote_hostname)
+int
+tls_check_certificate(struct connection_state *scs,
+					  const char *remote_hostname)
 {
 	GNUTLS_CertificateStatus certstat;
 	const gnutls_datum *cert_list;
@@ -448,7 +451,8 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc,
 								 (gnutls_transport_ptr) sd);
 		do {
 			zok = gnutls_handshake(scs->tls_state);
-		} while (zok == GNUTLS_E_INTERRUPTED || zok == GNUTLS_E_AGAIN);
+		}
+		while (zok == GNUTLS_E_INTERRUPTED || zok == GNUTLS_E_AGAIN);
 
 		tls_check_certificate(scs, remote_hostname);
 	}

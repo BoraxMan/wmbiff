@@ -50,7 +50,7 @@ typedef struct password_binding_struct {
 	struct password_binding_struct *next;
 	char user[BUF_SMALL];
 	char server[BUF_BIG];
-	char password[BUF_SMALL];			/* may be frobnicated */
+	char password[BUF_SMALL];	/* may be frobnicated */
 	unsigned char password_len;	/* frobnicated *'s are nulls */
 } *password_binding;
 
@@ -73,7 +73,10 @@ int permissions_ok(Pop3 pc, const char *askpass_fname)
 	if (stat(askpass_fname, &st)) {
 		DM(pc, DEBUG_ERROR, "Can't stat askpass program: '%s'\n",
 		   askpass_fname);
-		DM(pc, DEBUG_ERROR, "For your own good, use a full pathname.\n");
+		if (askpass_fname[0] != '/') {
+			DM(pc, DEBUG_ERROR,
+			   "For your own good, use a full pathname.\n");
+		}
 		return (0);
 	}
 	if (st.st_uid != 0 && st.st_uid != getuid()) {
@@ -106,11 +109,12 @@ int permissions_ok(Pop3 pc, const char *askpass_fname)
 #include<CoreServices/CoreServices.h>
 #include<Security/Security.h>
 
-static void get_password_from_keychain(Pop3 pc, const char *username,
-									   const char *servername,
-									   /*@out@ */ char *password,
-									   /*@out@ */
-									   unsigned char *password_len)
+static void
+get_password_from_keychain(Pop3 pc, const char *username,
+						   const char *servername,
+						   /*@out@ */ char *password,
+						   /*@out@ */
+						   unsigned char *password_len)
 {
 	SecKeychainRef kc;
 	OSStatus rc;
@@ -150,11 +154,12 @@ static void get_password_from_keychain(Pop3 pc, const char *username,
 #endif							/* apple keychain */
 
 
-static void get_password_from_command(Pop3 pc, const char *username,
-									  const char *servername,
-									  /*@out@ */ char *password,
-									  /*@out@ */
-									  unsigned char *password_len)
+static void
+get_password_from_command(Pop3 pc, const char *username,
+						  const char *servername,
+						  /*@out@ */ char *password,
+						  /*@out@ */
+						  unsigned char *password_len)
 {
 	password[*password_len - 1] = '\0';
 	password[0] = '\0';
@@ -197,8 +202,10 @@ static void get_password_from_command(Pop3 pc, const char *username,
 		password[*password_len - 1] = '\0';
 		*password_len = strlen(password);
 	} else {
+		/* consider this error to be particularly troublesome */
 		DM(pc, DEBUG_ERROR,
 		   "passmgr: permissions check of '%s' failed.", pc->askpass);
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -260,17 +267,17 @@ char *passwordFor(const char *username,
 		}
 #endif
 		retval = strdup(p->password);
-		if (strlen(username)+1 > BUF_SMALL) {
+		if (strlen(username) + 1 > BUF_SMALL) {
 			DM(pc, DEBUG_ERROR, "username is too long.\n");
 			memset(p->user, 0, BUF_SMALL);
 		} else {
-			strncpy(p->user, username, BUF_SMALL-1);
+			strncpy(p->user, username, BUF_SMALL - 1);
 		}
-		if (strlen(servername)+1 > BUF_BIG) {
+		if (strlen(servername) + 1 > BUF_BIG) {
 			DM(pc, DEBUG_ERROR, "servername is too long.\n");
 			memset(p->server, 0, BUF_BIG);
 		} else {
-			strncpy(p->server, servername, BUF_BIG-1);
+			strncpy(p->server, servername, BUF_BIG - 1);
 		}
 		ENFROB(p->password);
 		p->next = pass_list;

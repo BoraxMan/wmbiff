@@ -1,4 +1,4 @@
-/* $Id: mboxClient.c,v 1.16 2004/01/01 07:47:50 bluehal Exp $ */
+/* $Id: mboxClient.c,v 1.17 2004/03/28 00:28:58 bluehal Exp $ */
 /* Author:		Yong-iL Joh <tolkien@mizi.com>
    Modified:	Jorge García <Jorge.Garcia@uv.es>
    			 	Rob Funk <rfunk@funknet.net>
@@ -6,7 +6,7 @@
  * 
  * MBOX checker.
  *
- * Last Updated : $Date: 2004/01/01 07:47:50 $
+ * Last Updated : $Date: 2004/03/28 00:28:58 $
  *
  */
 
@@ -87,8 +87,9 @@ static void countMessages(Pop3 pc, const char *mbox_filename)
 
 /* check file status; hold on to file information used 
    to restore access time */
-int fileHasChanged(const char *mbox_filename, time_t * atime,
-				   time_t * mtime, off_t * size)
+int
+fileHasChanged(const char *mbox_filename, time_t * atime,
+			   time_t * mtime, off_t * size)
 {
 	struct stat st;
 
@@ -144,11 +145,11 @@ int mboxCreate(Pop3 pc, const char *str)
 
 	/* default boxes are mbox... cut mbox: if it exists */
 	if (!strncasecmp(pc->path, "mbox:", 5)) {
-		if (strlen(str+5)+1 > BUF_BIG) {
-			DM(pc, DEBUG_ERROR, "mbox '%s' is too long.\n", str+5);
+		if (strlen(str + 5) + 1 > BUF_BIG) {
+			DM(pc, DEBUG_ERROR, "mbox '%s' is too long.\n", str + 5);
 			memset(pc->path, 0, BUF_BIG);
 		} else {
-			strncpy(pc->path, str + 5, BUF_BIG-1);	/* cut off ``mbox:'' */
+			strncpy(pc->path, str + 5, BUF_BIG - 1);	/* cut off ``mbox:'' */
 		}
 	}
 

@@ -328,7 +328,9 @@ int imap_checkmail( /*@notnull@ */ Pop3 pc)
 		   has occurred; not necessarily complete. */
 		if (pc->UnreadMsgs != pc->OldUnreadMsgs ||
 			pc->TotalMsgs != pc->OldMsgs) {
-			imap_cacheHeaders(pc);
+			if (PCU.wantCacheHeaders) {
+				imap_cacheHeaders(pc);
+			}
 		}
 	} else {
 		/* something went wrong. bail. */
@@ -338,8 +340,8 @@ int imap_checkmail( /*@notnull@ */ Pop3 pc)
 	return 0;
 }
 
-void imap_releaseHeaders(Pop3 pc
-						 __attribute__ ((unused)), struct msglst *h)
+void
+imap_releaseHeaders(Pop3 pc __attribute__ ((unused)), struct msglst *h)
 {
 	assert(h != NULL);
 	/* allow the list to be released next time around */
@@ -418,8 +420,8 @@ void imap_cacheHeaders( /*@notnull@ */ Pop3 pc)
 						} else if (strncasecmp(hdrbuf, "From: ", 5) == 0) {
 							strncpy(m->from, hdrbuf + 6, FROM_LEN - 1);
 							m->from[FROM_LEN - 1] = '\0';
-						} else if (strncasecmp(hdrbuf, "a04 OK FETCH", 5)
-								   == 0) {
+						} else if (strncasecmp
+								   (hdrbuf, "a04 OK FETCH", 5) == 0) {
 							/* server says we're done getting this header, which
 							   may occur if the message has no subject */
 							if (m->from[0] == '\0') {
@@ -438,8 +440,8 @@ void imap_cacheHeaders( /*@notnull@ */ Pop3 pc)
 						strcpy(m->subj, "failure");
 					}
 				}
-				IMAP_DM(pc, DEBUG_INFO, "From: '%s' Subj: '%s'\n", m->from,
-						m->subj);
+				IMAP_DM(pc, DEBUG_INFO, "From: '%s' Subj: '%s'\n",
+						m->from, m->subj);
 				m->next = pc->headerCache;
 				pc->headerCache = m;
 				pc->headerCache->in_use = 0;	/* initialize that it isn't locked */
@@ -449,8 +451,9 @@ void imap_cacheHeaders( /*@notnull@ */ Pop3 pc)
 			if (!fetch_command_done) {
 				tlscomm_expect(scs, "a04 OK", hdrbuf, 127);
 			}
-		} while ((msgid = strtok(NULL, " \r\n")) != NULL
-				 && isdigit(msgid[0]));
+		}
+		while ((msgid = strtok(NULL, " \r\n")) != NULL
+			   && isdigit(msgid[0]));
 
 	tlscomm_printf(scs, "a06 CLOSE\r\n");	/* return to polling state */
 	/*  may be unneeded tlscomm_expect(scs, "a06 OK CLOSE\r\n" );  see if it worked? */
@@ -567,6 +570,13 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 	IMAP_DM(pc, DEBUG_INFO, "serverPort= '%d'\n", PCU.serverPort);
 	IMAP_DM(pc, DEBUG_INFO, "authList= '%s'\n", PCU.authList);
 
+	if (strcmp(pc->action, "msglst") == 0 ||
+		strcmp(pc->notify, "msglst") == 0 ||
+		strcmp(pc->button2, "msglst") == 0) {
+		PCU.wantCacheHeaders = 1;
+	} else {
+		PCU.wantCacheHeaders = 0;
+	}
 	pc->checkMail = imap_checkmail;
 	pc->getHeaders = imap_getHeaders;
 	pc->releaseHeaders = imap_releaseHeaders;
@@ -617,16 +627,17 @@ static int authenticate_plaintext( /*@notnull@ */ Pop3 pc,
 		} else {
 			return (1);
 		}
-	} while (1);
+	}
+	while (1);
 
   plaintext_failed:
 	return (0);
 }
 
 #ifdef HAVE_GCRYPT_H
-static int authenticate_md5(Pop3 pc,
-							struct connection_state *scs,
-							const char *capabilities)
+static int
+authenticate_md5(Pop3 pc,
+				 struct connection_state *scs, const char *capabilities)
 {
 	char buf[BUF_SIZE];
 	char buf2[BUF_SIZE];
@@ -696,11 +707,11 @@ static void ask_user_for_password( /*@notnull@ */ Pop3 pc, int bFlushCache)
 			password =
 				passwordFor(PCU.userName, PCU.serverName, pc, bFlushCache);
 			if (password != NULL) {
-				if (strlen(password)+1 > BUF_SMALL) {
+				if (strlen(password) + 1 > BUF_SMALL) {
 					DMA(DEBUG_ERROR, "Password is too long.\n");
-					memset(PCU.password, 0, BUF_SMALL-1);
+					memset(PCU.password, 0, BUF_SMALL - 1);
 				} else {
-					strncpy(PCU.password, password, BUF_SMALL-1);
+					strncpy(PCU.password, password, BUF_SMALL - 1);
 					PCU.password_len = strlen(PCU.password);
 				}
 				free(password);

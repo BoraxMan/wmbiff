@@ -12,6 +12,7 @@ int exists(const char *filename __attribute__ ((unused)))
 {
 	return (0);
 }
+
 int print_info(void *state __attribute__ ((unused)))
 {
 	return (0);
@@ -44,10 +45,11 @@ ssize_t read(int s, void *buf, size_t buflen)
 	}
 }
 
-int select(int nfds, fd_set * r,
-		   fd_set * w __attribute__ ((unused)),
-		   fd_set * x __attribute__ ((unused)),
-		   struct timeval *tv __attribute__ ((unused)))
+int
+select(int nfds, fd_set * r,
+	   fd_set * w __attribute__ ((unused)),
+	   fd_set * x __attribute__ ((unused)),
+	   struct timeval *tv __attribute__ ((unused)))
 {
 	int i;
 	int ready = 0;
@@ -75,8 +77,9 @@ struct connection_state {
 	void *pc;					/* mailbox handle for debugging messages */
 };
 
-int main(int argc __attribute__ ((unused)),
-		 char **argv __attribute__ ((unused)))
+int
+main(int argc __attribute__ ((unused)), char **argv
+	 __attribute__ ((unused)))
 {
 	char buf[255];
 	struct connection_state scs;

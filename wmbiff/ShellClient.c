@@ -245,8 +245,9 @@ struct msglst *shell_getHeaders( /*@notnull@ */ Pop3 pc)
 	}
 	return message_list;
 }
-void shell_releaseHeaders(Pop3 pc
-						  __attribute__ ((unused)), struct msglst *h)
+
+void
+shell_releaseHeaders(Pop3 pc __attribute__ ((unused)), struct msglst *h)
 {
 	for (; h != NULL;) {
 		struct msglst *n = h->next;
@@ -289,11 +290,12 @@ int shellCreate( /*@notnull@ */ Pop3 pc, const char *str)
 	SH_DM(pc, DEBUG_INFO, "path= '%s'\n", commandline);
 	{
 		char *tmp = strdup(commandline);
-		if (strlen(tmp)+1 > BUF_BIG) {
-			SH_DM(pc, DEBUG_ERROR, "commandline '%s' is too long.\n", commandline);
+		if (strlen(tmp) + 1 > BUF_BIG) {
+			SH_DM(pc, DEBUG_ERROR, "commandline '%s' is too long.\n",
+				  commandline);
 			memset(pc->path, 0, BUF_BIG);
 		} else {
-		strcpy(pc->path, tmp);
+			strcpy(pc->path, tmp);
 		}
 		free(tmp);
 	}
