@@ -1,3 +1,254 @@
+wmbiff (0.4.26-1) unstable; urgency=low
+
+  * New upstream release. 
+    + security.debian.rb initializes properly (closes: #256505)
+
+ -- Neil Spring <nspring@cs.washington.edu>  Sun, 10 Oct 2004 17:36:10 -0700
+
+wmbiff (0.4.25-3) unstable; urgency=low
+
+  * Update dependencies to libgcrypt11 and libgnutls11. (closes: #263663)
+
+ -- Neil Spring <nspring@cs.washington.edu>  Wed, 28 Jul 2004 23:04:10 -0700
+
+wmbiff (0.4.25-2) unstable; urgency=low
+
+  * Fix menu entry: quote unquoted strings 
+
+ -- Neil Spring <nspring@cs.washington.edu>  Sat, 26 Jun 2004 11:31:38 -0700
+
+wmbiff (0.4.25-1) unstable; urgency=low
+
+  * New upstream release
+    + Should fix a build error on s390.
+
+ -- Neil Spring <nspring@cs.washington.edu>  Wed, 23 Jun 2004 15:02:38 -0700
+
+wmbiff (0.4.24-1) unstable; urgency=low
+
+  * New upstream release
+    + Uses newer gnutls: now depends on libgnutls10
+
+ -- Neil Spring <nspring@cs.washington.edu>  Tue, 22 Jun 2004 20:24:24 -0700
+
+wmbiff (0.4.23-1) unstable; urgency=low
+
+  * New upstream release
+    + Support IP addresses in IMAP paths. (closes: #242458)
+
+ -- Neil Spring <nspring@cs.washington.edu>  Tue, 27 Apr 2004 17:32:36 -0700
+
+wmbiff (0.4.22-1) unstable; urgency=low
+
+  * New upstream release
+    + Only runs imap examine/search when msglst option requested, to 
+      address bad flag handling on read-only mailboxes.
+    + Exits if configured ssh-askpass is not found (closes: #239628)
+
+ -- Neil Spring <nspring@cs.washington.edu>  Sat, 27 Mar 2004 16:50:01 -0800
+
+wmbiff (0.4.21-1) unstable; urgency=low
+
+  * New upstream release
+    + Prevent a hang with certain IMAP servers (closes: #234011)
+
+ -- Neil Spring <nspring@cs.washington.edu>  Sat, 21 Feb 2004 10:10:16 -0800
+
+wmbiff (0.4.20-1) unstable; urgency=low
+
+  * New upstream release
+    + Allows different mouse-click actions when a box has new mail.
+  * New maintainer (thanks, Jordi).
+
+ -- Neil Spring <nspring@cs.washington.edu>  Thu,  1 Jan 2004 15:53:48 -0800
+
+wmbiff (0.4.19-1) unstable; urgency=low
+
+  * New upstream release 
+    + fixes an FTBFS problem in a regression test (closes: #219787)
+
+ -- Neil Spring <nspring@cs.washington.edu>  Sat,  8 Nov 2003 19:17:55 -0800
+
+wmbiff (0.4.18-1) unstable; urgency=low
+
+  * New upstream release.
+    + fixes another (unreported to the BTS) infinite loop in the IMAP/TLS code.
+    + update security.debian.rb for ruby1.8 (closes: #215122) 
+
+ -- Neil Spring <nspring@cs.washington.edu>  Sat,  8 Nov 2003 14:25:29 -0800
+
+wmbiff (0.4.17-1) unstable; urgency=low
+
+  * New upstream release.
+    + fixes an (unreported to the BTS) infinite loop in the TLS code.
+  * debian/control: bump Standards-Version to 3.6.1.0.
+  * debian/copyright: add Neil to list of authors. Whoops.
+  * debian/changelog: recode to UTF-8 per new policy.
+
+ -- Jordi Mallach <jordi@debian.org>  Mon,  1 Sep 2003 02:46:01 +0200
+
+wmbiff (0.4.16-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/control:
+    + bump gnutls build-dependency to libgnutls7-dev.
+    + bump debhelper build-dependency to 4.1.0 and add cdbs.
+    + bump Standards-Version to 3.5.10.0 (no changes required).
+    + add Neil Spring (upstream developer) to Uploaders, as he will probably
+      take over this package soon.
+  * debian/rules: repackage with cdbs.
+
+ -- Jordi Mallach <jordi@debian.org>  Wed,  9 Jul 2003 17:27:26 +0200
+
+wmbiff (0.4.15-1) unstable; urgency=low
+
+  * New upstream release.
+    + tries to detect missconfiguration, to avoid doing bad stuff with
+      passwords (closes: #182875). This can't be fixed entirely without a
+      configuration file format redesign, though.
+    + fixes issues with -debug output (closes: #183529).
+  * debian/control: Standards-Version: 3.5.9.0 (no changes).
+  * debian/rules: pass DEB_BUILD_GNU_TYPE and DEB_HOST_GNU_TYPE to configure.
+
+ -- Jordi Mallach <jordi@debian.org>  Mon, 31 Mar 2003 15:09:10 +0200
+
+wmbiff (0.4.14-1) unstable; urgency=low
+
+  * New upstream release.
+    + adds a method to easily restart wmbiff, to recover stale remote
+      mailboxes.
+
+ -- Jordi Mallach <jordi@debian.org>  Fri, 14 Feb 2003 18:03:56 +0100
+
+wmbiff (0.4.13-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Jordi Mallach <jordi@debian.org>  Tue, 28 Jan 2003 17:45:16 +0100
+
+wmbiff (0.4.12-1) unstable; urgency=low
+
+  * New upstream release.
+    + fixes parsing of -geometry option (closes: #175220).
+
+ -- Jordi Mallach <jordi@debian.org>  Sat,  4 Jan 2003 16:45:56 +0100
+
+wmbiff (0.4.11-1) unstable; urgency=low
+
+  * New upstream release.
+    + adds a checker for Debian security updates. See the NEWS file for more
+      information.
+  * debian/control:
+    + Suggests: ruby.
+    + Standards-Version: 3.5.8.0 (no changes).
+
+ -- Jordi Mallach <jordi@debian.org>  Sun, 29 Dec 2002 13:28:44 +0100
+
+wmbiff (0.4.10-1) unstable; urgency=low
+
+  * New upstream release.
+    + adds an override for the certificate check introduced in 0.4.9, so
+      connecting to server with wrong certificates is still possible
+      (closes: #172767).
+    + new "globalnotify" option.
+  * debian/compat: define debhelper's compatibility mode here.
+  * debian/rules: remove DH_COMPAT definition.
+
+ -- Jordi Mallach <jordi@debian.org>  Fri, 13 Dec 2002 17:16:14 +0100
+
+wmbiff (0.4.9-1) unstable; urgency=low
+
+  * New upstream release.
+    + Adds OpenBox "slit" support, or what is the same, support for
+      more than 5 mailboxes for capable window managers.
+  * debian/control: bump gnutls minimal version to 0.5.9 in Build-Depends.
+
+ -- Jordi Mallach <jordi@debian.org>  Mon,  9 Dec 2002 02:35:06 +0100
+
+wmbiff (0.4.8-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/control:
+    + Standards-Version: 3.5.7.0.
+    + change gnutls build-dep to libgnutls5-dev | libgnutls-dev.
+
+ -- Jordi Mallach <jordi@debian.org>  Thu, 19 Sep 2002 12:05:03 +0200
+
+wmbiff (0.4.7-1) unstable; urgency=low
+
+  * New upstream release. 
+
+ -- Jordi Mallach <jordi@debian.org>  Sun, 18 Aug 2002 23:07:23 +0200
+
+wmbiff (0.4.6-2) unstable; urgency=low
+
+  * Recompile against libgnutls5.
+  * debian/control:
+    + Build-Depend on libgnutls-dev (>= 0.5.1-4).
+    + bump debhelper build-dep to (>= 4.0.0).
+  * wmbiff/{gnutls-common.{c,h},tlsComm.c,Imap4Client.c}: fix includes and
+    defines for gnutls 0.5. Gross hack till 0.4.7.
+  * configure, config.h.in: fix for gnutls 0.5.
+
+ -- Jordi Mallach <jordi@debian.org>  Thu, 15 Aug 2002 18:10:51 +0200
+
+wmbiff (0.4.6-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/rules: switch to DH_COMPAT=4.
+
+ -- Jordi Mallach <jordi@debian.org>  Fri, 19 Jul 2002 22:04:37 +0200
+
+wmbiff (0.4.5-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/control: Build-Depend on libgnutls-dev, libgcrypt-dev (>= 1.1.7).
+
+ -- Jordi Mallach <jordi@debian.org>  Thu, 27 Jun 2002 12:21:44 +0200
+
+wmbiff (0.4.3-2) unstable; urgency=medium
+
+  * Recompiled with libgcrypt 1.1.7 (closes: #150068).
+
+ -- Jordi Mallach <jordi@debian.org>  Sat, 15 Jun 2002 15:50:13 +0200
+
+wmbiff (0.4.3-1) unstable; urgency=low
+
+  * New upstream release.
+    + IPv6 support! (really!)
+    + partial custom font support.
+
+ -- Jordi Mallach <jordi@debian.org>  Sun,  9 Jun 2002 03:32:05 +0200
+
+wmbiff (0.4.2-1) unstable; urgency=low
+
+  * New upstream release.
+    + disables buggy, unfinished font feature which broke the display
+      quite a bit.
+
+ -- Jordi Mallach <jordi@debian.org>  Sat,  1 Jun 2002 21:26:18 +0200
+
+wmbiff (0.4.1-1) unstable; urgency=low
+
+  * New upstream release.
+    + IPv6 support!
+
+ -- Jordi Mallach <jordi@debian.org>  Sat,  1 Jun 2002 11:58:55 +0200
+
+wmbiff (0.4.0-2) unstable; urgency=low
+
+  * debian/control: Suggests: ssh-askpass 
+
+ -- Jordi Mallach <jordi@debian.org>  Wed,  8 May 2002 12:47:08 +0200
+
+wmbiff (0.4.0-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/rules: build changes, upstream is now using autoconf.
+  * debian/docs: added new docs AUTHORS and FAQ.
+
+ -- Jordi Mallach <jordi@debian.org>  Fri,  3 May 2002 14:06:13 +0200
+
 wmbiff (0.3.8-3) unstable; urgency=low
 
   * Apply patch from Neil Spring to change the semantics of the
@@ -145,7 +396,7 @@ wmbiff (0.2q-2) unstable; urgency=low
 
   * The `duh, I did it again' release.
   * wmbiff/Client.h: yeah, we want to undefine all the debugging stuff now.
-  * wmbiff/wmbiff.c: we have 5 mailboxes, not 4 (thanks to Jorge García).
+  * wmbiff/wmbiff.c: we have 5 mailboxes, not 4 (thanks to Jorge GarcÃ­a).
 
  -- Jordi Mallach <jordi@debian.org>  Wed, 11 Apr 2001 23:25:23 +0200
 
@@ -177,8 +428,8 @@ wmbiff (0.2n-2) unstable; urgency=low
 
   * The `if you want to test, install the appropriate package' release.
   * Fixed a major upstream bug that renders this new wmbiff unusable.
-    Thanks to Guillaume Morin, Jérôme Marant and Mark Hurley for their
-    help identifying the bug, and Jorge García <Jorge.Garcia@uv.es> for
+    Thanks to Guillaume Morin, JÃ©rÃ´me Marant and Mark Hurley for their
+    help identifying the bug, and Jorge GarcÃ­a <Jorge.Garcia@uv.es> for
     writing a patch. Basically, the new upstream broke backwards
     compatibility of wmbiffrc with Gennady's wmbiff, fixed that.
     This patch also fixes wmbiff not using $MAIL or defaulting to
@@ -266,17 +517,17 @@ wmbiff (0.2-1) unstable; urgency=low
   * New upstream release.
   * (Auto)Mail fetch support added.
 
- -- Jordi Mallach Pérez <jordi@sindominio.net>  Sat, 27 Nov 1999 01:31:22 +0100
+ -- Jordi Mallach PÃ©rez <jordi@sindominio.net>  Sat, 27 Nov 1999 01:31:22 +0100
 
 wmbiff (0.1a-1) unstable; urgency=low
 
   * New upstream release.
   * This version fixes unwanted beeps on new mail arrival.
 
- -- Jordi Mallach Pérez <jordi@sindominio.net>  Sat, 20 Nov 1999 03:10:58 +0100
+ -- Jordi Mallach PÃ©rez <jordi@sindominio.net>  Sat, 20 Nov 1999 03:10:58 +0100
 
 wmbiff (0.1-1) unstable; urgency=low
 
   * Initial Release.
 
- -- Jordi Mallach Pérez <jordi@sindominio.net>  Thu, 18 Nov 1999 02:53:59 +0100
+ -- Jordi Mallach PÃ©rez <jordi@sindominio.net>  Thu, 18 Nov 1999 02:53:59 +0100

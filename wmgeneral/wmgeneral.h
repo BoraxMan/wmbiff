@@ -14,38 +14,40 @@
 typedef struct _rckeys rckeys;
 
 struct _rckeys {
-	const char	*label;
-	char		**var;
+	const char *label;
+	char **var;
 };
 
 typedef struct _rckeys2 rckeys2;
 
 struct _rckeys2 {
-	const char	*family;
-	const char	*label;
-	char		**var;
+	const char *family;
+	const char *label;
+	char **var;
 };
 
 typedef struct {
-	Pixmap			pixmap;
-	Pixmap			mask;
-	XpmAttributes	attributes;
+	Pixmap pixmap;
+	Pixmap mask;
+	XpmAttributes attributes;
 } XpmIcon;
 
   /*******************/
  /* Global variable */
 /*******************/
 
-Display		*display;
+Display *display;
 
   /***********************/
  /* Function Prototypes */
 /***********************/
 
-void AddMouseRegion(int rgn_index, int left, int top, int right, int bottom);
+void AddMouseRegion(unsigned int rgn_index, int left, int top, int right,
+					int bottom);
 int CheckMouseRegion(int x, int y);
 
-void openXwindow(int argc, char *argv[], const char **, char *, int, int);
+void openXwindow(int argc, const char *argv[], const char **,
+				 const char **, char *, int, int, int);
 void RedrawWindow(void);
 void RedrawWindowXY(int x, int y);
 
@@ -55,5 +57,13 @@ void copyXBMArea(int, int, int, int, int, int);
 void setMaskXY(int, int);
 
 void parse_rcfile(const char *, rckeys *);
+
+/* for wmbiff */
+int loadFont(const char *fontname);	/* -1 on fail, 0 success. */
+void drawString(int dest_x, int dest_y, const char *string,
+				const char *colorname, const char *bgcolorname,
+				int right_justify);
+void eraseRect(int x, int y, int x2, int y2, const char *bgcolorname);
+/* end wmbiff */
 
 #endif

@@ -1,2 +1,2 @@
-?package(wmbiff):needs=X11 section=Apps/Net \
+?package(wmbiff):needs="X11" section="Apps/Net" \
   title="WMbiff" command="/usr/bin/wmbiff"

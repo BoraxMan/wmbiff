@@ -1,20 +1,32 @@
 Source: wmbiff
 Section: x11
 Priority: optional
-Maintainer: Jordi Mallach <jordi@debian.org>
-Build-Depends: xlibs-dev, gnutls-dev (>> 0.3.5-3), libgcrypt-dev (>= 1.1.5-3), debhelper (>= 3.0.0)
-Standards-Version: 3.5.6.2
+Maintainer: Neil Spring <nspring@cs.washington.edu>
+Uploaders: Jordi Mallach <jordi@debian.org>
+Build-Depends: debhelper (>= 4.1.0), cdbs, xlibs-dev, libgnutls11-dev | libgnutls-dev, libgcrypt11-dev
+Standards-Version: 3.6.1.0
 
 Package: wmbiff
 Architecture: any
 Depends: ${shlibs:Depends}
+Suggests: ssh-askpass, ruby
 Description: A dockable app that displays information about mailboxes
- WMBiff is an WindowMaker docking utility, that displays the number of read
- and unread messages in up to five mailboxes.
- You can also define actions to execute on new mail arrival (for example,
- play a sound file), [auto]fetchmail from a remote server or to execute your
- mail reader with a mouse click. WMBiff also supports notification of
- incoming Licq messages, so you can put Licq in the background.
+ WMBiff is an WindowMaker docking utility, that displays the
+ number of read and unread messages in (usually) five
+ mailboxes. You can also define actions to execute on new
+ mail arrival (for example, play a sound file),
+ [auto]fetchmail from a remote server, execute your mail
+ reader with a mouse click, or list subject lines from unread
+ messages. WMBiff also supports notification of incoming Licq
+ messages, so you can put Licq in the background.
  .
  At this moment, wmbiff supports unix-style, maildir, pop3, APOP, IMAP
  and IMAPS mailboxes, as well as Licq and GnomeICU history files.
+ .
+ It also includes scripts to perform miscellaneous tasks. At
+ the moment, these include a checker for Debian security updates.
+ .
+ wmbiff is similar to the wmmaiload package, but features an
+ LED-style appearance, IMAPS support, and other minor differences.
+
+
