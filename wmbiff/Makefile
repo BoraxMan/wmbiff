@@ -1,6 +1,6 @@
 # Makefile for wmbiff
 #
-# $Id: Makefile,v 1.24 2002/03/01 11:28:05 jordi Exp $
+# $Id: Makefile,v 1.25 2002/03/02 06:31:38 bluehal Exp $
 
 # Disable gnutls crypto?
 #WITHOUT_CRYPTO=	1
@@ -33,8 +33,9 @@ INSTALL_GROUP=	root
 
 # Debugging
 ifdef DEBUG
-CFLAGS=		-g -Wall -Wpointer-arith -Wwrite-strings -pedantic
-#-W -Wmissing-noreturn -Wtraditional
+CFLAGS=		-g -Wall -Wpointer-arith -Wwrite-strings \
+-W -Wtraditional
+#-pedantic  -Wmissing-noreturn
 endif
 
 # FreeBSD overrides
