@@ -32,14 +32,21 @@ dnl Parameter is minimum version
 dnl TODO: fix so that GCRYPT is tested only if GNUTLS fails; the dependence
 dnl between them makes this turn redundant
 
+GNUTLS_MAN_STATUS="This copy of WMBiff was not compiled with GNUTLS."
 if test "$gnutls" == "ok"; then
  AM_PATH_LIBGNUTLS(0.3.3, [LIBS="$LIBS $LIBGNUTLS_LIBS"
-                         CFLAGS="$CFLAGS $LIBGNUTLS_CFLAGS"])
+                         CFLAGS="$CFLAGS $LIBGNUTLS_CFLAGS"
+                         GNUTLS_MAN_STATUS="This copy of WMBiff was compiled with GNUTLS." ])
  AC_CHECK_HEADERS(gnutls.h) 
 fi
+GCRYPT_MAN_STATUS="This copy of WMBiff was not compiled with gcrypt."
 AM_PATH_LIBGCRYPT(1.1.5, [LIBS="$LIBS $LIBGCRYPT_LIBS"
-                         CFLAGS="$CFLAGS $LIBGCRYPT_CFLAGS"])
+                         CFLAGS="$CFLAGS $LIBGCRYPT_CFLAGS"
+                         GCRYPT_MAN_STATUS="This copy of WMBiff was compiled with gcrypt."])
 AC_CHECK_HEADERS(gcrypt.h) 
+
+AC_SUBST(GNUTLS_MAN_STATUS)
+AC_SUBST(GCRYPT_MAN_STATUS)
 
 dnl regex stuff.
 AC_CHECK_HEADERS(regex.h gnuregex.h) dnl linux has regex.h, BSD gnuregex
@@ -58,9 +65,9 @@ AC_CHECK_LIB(Xpm, XpmCreateImageFromXpmImage)
 AC_CHECK_HEADERS(X11/xpm.h, , AC_CHECK_HEADERS(xpm.h, , AC_MSG_ERROR([xpm.h is needed])))
 
 dnl Password prompting stuff.
-AC_PATH_PROGS(ASKPASS, ssh-askpass x11-ssh-askpass ssh-askpass-gnome, /usr/bin/ssh-askpass)
+AC_PATH_PROGS(DEFAULT_ASKPASS, ssh-askpass x11-ssh-askpass ssh-askpass-gnome, /usr/bin/ssh-askpass)
 AC_PATH_PROG(CVS2CL, cvs2cl)
-AC_DEFINE_UNQUOTED(DEFAULT_ASKPASS, "$ASKPASS")
+AC_DEFINE_UNQUOTED(DEFAULT_ASKPASS, "$DEFAULT_ASKPASS")
 
 dnl Skin files; note - this is duplicated in wmbiff/Makefile.am
 dnl haven't thought of a way around it.
@@ -76,4 +83,4 @@ AC_DEFINE_UNQUOTED(DEFAULT_SKIN_PATH,
                    "$SKINDIR:/usr/share/wmbiff/skins:/usr/local/share/wmbiff/skins:.")
 
 dnl We're done.
-AC_OUTPUT(Makefile wmbiff/Makefile wmgeneral/Makefile)
+AC_OUTPUT(Makefile wmbiff/Makefile wmgeneral/Makefile wmbiff/wmbiffrc.5)

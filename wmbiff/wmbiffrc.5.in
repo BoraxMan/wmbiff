@@ -1,5 +1,5 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiffrc.5,v 1.11 2002/04/05 19:42:20 bluehal Exp $
+.\" $Id: wmbiffrc.5.in,v 1.1 2002/04/08 09:35:19 bluehal Exp $
 .\"
 .\" wmbiff.1 and wmbiffrc.5 are copyright 1999-2002 by 
 .\" Jordi Mallach <jordi@debian.org>
@@ -25,19 +25,20 @@ Comment must be preceeded by pound signs (#).
 
 The supported configuration options are:
 
-.TP 4
+.TP 3
 \fBinterval\fP
 Global interval between mailbox checking. Value is the number of seconds, 5
 is the default.
-.TP 4
+.TP 
 \fBaskpass\fP
 Program run to ask for IMAP passwords, if left empty in the configuration file.
-The default is /usr/bin/ssh-askpass.  Can be specified on a per-mailbox basis.
-.TP 4
+The default is @DEFAULT_ASKPASS@.  Can be specified on a per-mailbox basis.
+.TP 
 \fBskinfile\fP
-XPM pixmap file to load for the background.  If not a full path, wmbiff will
-search /usr/share/wmbiff, /usr/local/share/wmbiff, and the current directory
-for the pixmap file.  
+XPM pixmap file to load for the background.  If not a full
+path, wmbiff will search @SKINDIR@, /usr/share/wmbiff,
+/usr/local/share/wmbiff, and the current directory for the
+pixmap file.
 .TP
 \fBlabel.n\fP
 Specifies the displayed label for a mailbox. It can be up to five characters
@@ -61,18 +62,16 @@ mbox:/path/to/mail/debian-devel
 .RE
 .TP
 .I maildir
-\fBMaildir mailboxes are now supported!\fP
-This works just like \fImbox\fP above.  After the prefix, you need to put
-the path to the maildir wmbiff will read.
+This works just like \fImbox\fP above.  
 .RS
 maildir:/path/to/mail/bugtraq/
 .RE
 .TP
 .I pop3
-Using this type, wmbiff will fetch mail from a pop3 server, using the
+Using this type, WMBiff will check for mail on a pop3 server using the
 specified username, password, host and an optional port number (defaulting
-to 110). If your password contained special character, eg. '@' or ':',
-use another path format.  See Authentication below for a description of 
+to 110). If your password contains a special character, eg. '@' or ':',
+use the second path format.  See Authentication below for a description of 
 the auth field. 
 .RS
 pop3:user:passwd@server[:port] [auth]
@@ -82,27 +81,39 @@ pop3:user passwd server[ port] [auth]
 .RE
 .TP
 .I imap
-These are IMAP4 boxes. As with pop3, wmbiff will read a imap4 mbox using
-the given values and will display info about the remote mail. This type
-accepts user, password, host and optional path to mailbox and port number.
-See Authentication below for a description of the auth field.
+These are IMAP4 boxes. As with pop3, WMBiff will report the
+status of an IMAP4 mbox using the given values. This type
+accepts user, optional password, host and optional path to
+mailbox and port number.  See Authentication below for a
+description of the auth field.  The password may be left
+empty: see askpass above for information on password
+prompting.
 .RS
 imap:user:passwd@server[/mailbox][:port] [auth]
+.RE
+.RS
+imap:user:@server[/mailbox][:port] [auth]
 .RE
 .RS
 imap:user passwd server[/mailbox][ port] [auth]
 .RE
 .TP
 .I imaps
-These are IMAP4 boxes wrapped in a TLS (SSL) connection, only available if 
-wmbiff was compiled with TLS support.  Parameters are the same as those for 
-ordinary IMAP4 boxes.  Port defaults to 993. If 143 is specified, 
-wmbiff will attempt to connect unencrypted but negotiate TLS using
-IMAP's STARTTLS command.  TLS support uses gnutls, which is under development
-and may be insecure.  TLS support is only for encryption: since certificates
-are not yet checked, it is vulnerable to man-in-the-middle attack.
+These are IMAP4 boxes wrapped in a TLS (SSL)
+connection. @GNUTLS_MAN_STATUS@ Parameters are the same as
+those for ordinary IMAP4 boxes.  Port defaults to 993. If
+143 is specified, WMBiff will attempt to connect unencrypted
+but negotiate TLS using IMAP's STARTTLS command.  TLS
+support uses GNUTLS, which is under development and may be
+insecure.  TLS support is only for encryption: since
+certificates are not yet checked, it is vulnerable to
+man-in-the-middle attack.  Like IMAP, WMBiff will prompt
+the user if the password is left blank.
 .RS
 imaps:user:passwd@server[/mailbox][:port] [auth]
+.RE
+.RS
+imaps:user:@server[/mailbox][:port] [auth]
 .RE
 .RS
 imaps:user passwd server[/mailbox][ port] [auth]
@@ -166,6 +177,7 @@ connection per server, per-mailbox debugging may not
 Authentication methods include "cram-md5", "apop" (for
 Pop3), and "plaintext".  "cram-md5" and "apop" are only
 available when wmbiff is compiled with libgcrypt.
+@GCRYPT_MAN_STATUS@
 Authentication methods are tried in the following order:
 cram-md5, apop, plaintext.
 
