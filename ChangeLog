@@ -6,13 +6,49 @@ The latest changelog entry is in a different format, because it's inserted by
 CVS on commit.
 
   $Log: ChangeLog,v $
-  Revision 1.28  2002/04/20 08:53:20  bluehal
-  update meta-information for prerelease 5
+  Revision 1.29  2002/04/25 17:31:36  bluehal
+  add m4 macros for libgcrypt and libgnutls to the repository, so that FromCVS can be run to regenerate configure.in, even on systems without gnutls.
 
   Revision 1.1  2002/04/07 05:08:23  bluehal
   use automake / autoconf; after checkout run ./FromCVS.sh
 
 
+
+2002-04-20 Saturday 18:15 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* TODO: mention MH patch / shell workaround
+
+2002-04-20 Saturday 10:15 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/.cvsignore: add ignorance of test binary
+
+2002-04-20 Saturday 09:55 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Makefile.am: correct a problem uncovered by sourceforge's
+	compile farm
+
+2002-04-20 Saturday 09:27 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/ShellClient.c: BSD fix (no strndup, no sighandler_t)
+
+2002-04-20 Saturday 09:12 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: LicqClient.c, mboxClient.c: move msgs=-1 assignment on
+	failure to the common openMailbox()
+
+2002-04-20 Saturday 08:53 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* ChangeLog, NEWS, TODO, configure.in, wmbiff/Client.h: update
+	meta-information for prerelease 5
+
+2002-04-20 Saturday 08:51 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Makefile.am: correct syntax for making a test program
+
+2002-04-20 Saturday 08:41 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* autoconf/.cvsignore, wmbiff/.cvsignore, wmgeneral/.cvsignore,
+	.cvsignore: ignorance
 
 2002-04-20 Saturday 08:13 UTC -- Neil Spring <nspring@cs.washington.edu>
 
