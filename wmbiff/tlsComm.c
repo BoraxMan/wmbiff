@@ -84,7 +84,10 @@ void tlscomm_close(struct connection_state *scs)
 	/* not ok to call this more than once */
 	if (scs->tls_state) {
 #ifdef USE_GNUTLS
-		// gnutls_bye(scs->tls_state, GNUTLS_SHUT_RDWR);
+		/* this next line seems capable of hanging... */
+		/* gnutls_bye(scs->tls_state, GNUTLS_SHUT_RDWR); */
+		/* so we'll try just _bye'ing the WR direction, which
+		   should send the alert but not wait for a response. */
 		gnutls_bye(scs->tls_state, GNUTLS_SHUT_WR);
 		gnutls_certificate_free_credentials(scs->xcred);
 		gnutls_deinit(scs->tls_state);
