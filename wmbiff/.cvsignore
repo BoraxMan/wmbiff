@@ -5,7 +5,7 @@ Makefile.in
 wmbiff
 wmbiffrc.5
 wmbiff-master.xpm
-wmbiff-master-constrast.xpm
+wmbiff-master-contrast.xpm
 .deps
 .elog
 test_wmbiff
