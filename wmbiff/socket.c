@@ -1,4 +1,4 @@
-/* $Id: socket.c,v 1.8 2003/03/02 02:17:14 bluehal Exp $ */
+/* $Id: socket.c,v 1.9 2003/07/03 05:34:22 bluehal Exp $ */
 /* Copyright (C) 1998 Trent Piepho  <xyzzy@u.washington.edu>
  *           (C) 1999 Trent Piepho  <xyzzy@speakeasy.org>
  *
@@ -73,7 +73,13 @@ int sock_connect(const char *hostname, int port)
 	snprintf(pbuf, sizeof(pbuf), "%d", port);
 	error = getaddrinfo(hostname, pbuf, &hints, &res0);
 	if (error) {
-		printf("%s: %s\n", hostname, gai_strerror(error));
+		static int last_error;
+		if (last_error != error) {
+			/* only report a problem if it's new.  this is an 
+			   approximation that minimizes kept state. */
+			printf("%s: %s\n", hostname, gai_strerror(error));
+			last_error = error;
+		}
 		return -1;
 	}
 
