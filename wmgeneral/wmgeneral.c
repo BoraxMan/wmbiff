@@ -62,7 +62,7 @@ int			d_depth;
 XSizeHints	mysizehints;
 XWMHints	mywmhints;
 Pixel		back_pix, fore_pix;
-char		*Geometry = "";
+const char		*Geometry = "";
 Window		iconwin, win;
 GC			NormalGC;
 XpmIcon		wmgen;
@@ -86,8 +86,8 @@ MOUSE_REGION	mouse_region[MAX_MOUSE_REGION];
  /* Function Prototypes */
 /***********************/
 
-static void GetXPM(XpmIcon *, char **);
-static Pixel GetColor(char *);
+static void GetXPM(XpmIcon *, const char **);
+static Pixel GetColor(const char *);
 void RedrawWindow(void);
 void AddMouseRegion(int, int, int, int, int);
 int CheckMouseRegion(int, int);
@@ -100,7 +100,7 @@ void parse_rcfile(const char *filename, rckeys *keys) {
 
 	char	*p,*q;
 	char	temp[128];
-	char	*tokens = " :\t\n";
+	const char	*tokens = " :\t\n";
 	FILE	*fp;
 	int		i,key;
 
@@ -135,7 +135,7 @@ void parse_rcfile2(const char *filename, rckeys2 *keys) {
 
 	char	*p;
 	char	temp[128];
-	char	*tokens = " :\t\n";
+	const char	*tokens = " :\t\n";
 	FILE	*fp;
 	int		i,key;
 	char	*family = NULL;
@@ -165,7 +165,7 @@ void parse_rcfile2(const char *filename, rckeys2 *keys) {
 |* GetXPM																	   *|
 \*******************************************************************************/
 
-static void GetXPM(XpmIcon *wmgen, char *pixmap_bytes[]) {
+static void GetXPM(XpmIcon *wmgen, const char *pixmap_bytes[]) {
 
 	XWindowAttributes	attributes;
 	int					err;
@@ -175,7 +175,7 @@ static void GetXPM(XpmIcon *wmgen, char *pixmap_bytes[]) {
 
 	wmgen->attributes.valuemask |= (XpmReturnPixels | XpmReturnExtensions);
 
-	err = XpmCreatePixmapFromData(display, Root, pixmap_bytes, &(wmgen->pixmap),
+	err = XpmCreatePixmapFromData(display, Root, (char **)pixmap_bytes, &(wmgen->pixmap),
 					&(wmgen->mask), &(wmgen->attributes));
 	
 	if (err != XpmSuccess) {
@@ -188,7 +188,7 @@ static void GetXPM(XpmIcon *wmgen, char *pixmap_bytes[]) {
 |* GetColor																	   *|
 \*******************************************************************************/
 
-static Pixel GetColor(char *name) {
+static Pixel GetColor(const char *name) {
 
 	XColor				color;
 	XWindowAttributes	attributes;
@@ -288,7 +288,7 @@ int CheckMouseRegion(int x, int y) {
 /*******************************************************************************\
 |* createXBMfromXPM															   *|
 \*******************************************************************************/
-void createXBMfromXPM(char *xbm, char **xpm, int sx, int sy) {
+void createXBMfromXPM(char *xbm, const char **xpm, int sx, int sy) {
 
 	int		i,j,k;
 	int		width, height, numcol, depth;
@@ -366,7 +366,7 @@ void setMaskXY(int x, int y) {
 /*******************************************************************************\
 |* openXwindow																   *|
 \*******************************************************************************/
-void openXwindow(int argc, char *argv[], char *pixmap_bytes[], char *pixmask_bits, int pixmask_width, int pixmask_height) {
+void openXwindow(int argc, char *argv[], const char *pixmap_bytes[], char *pixmask_bits, int pixmask_width, int pixmask_height) {
 
 	unsigned int	borderwidth = 1;
 	XClassHint		classHint;
