@@ -1,4 +1,4 @@
-/* $Id: Pop3Client.c,v 1.11 2002/04/07 05:08:23 bluehal Exp $ */
+/* $Id: Pop3Client.c,v 1.12 2002/04/11 07:24:15 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -79,6 +79,7 @@ FILE *pop3Login(Pop3 pc)
 			break;
 		}
 	}
+
 
 	/* try each authentication method in turn. */
 	for (a = auth_methods; a->name != NULL; a++) {
@@ -279,6 +280,8 @@ static FILE *authenticate_apop(Pop3 pc, FILE * fp, char *apop_str)
 		/* server doesn't support apop. */
 		return (NULL);
 	}
+	POP_DM(pc, DEBUG_INFO, "APOP challenge: %s\n", apop_str);
+	strcat(apop_str, PCU.password);
 
 	gmh = gcry_md_open(GCRY_MD_MD5, 0);
 	gcry_md_write(gmh, (unsigned char *) apop_str, strlen(apop_str));
