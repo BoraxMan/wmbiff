@@ -25,6 +25,18 @@
 
 #include "tlsComm.h"
 
+/* emulates what 'variadic macros' are great for */
+#ifdef DEBUG_COMM
+#define DM printf
+#else
+#define DM nullie
+/*@unused@*/
+static void nullie( /*@unused@ */ const char *format, ...)
+{
+	return;
+}
+#endif
+
 /* this is the per-connection state that is maintained for
    each connection; BIG variables are for ssl (null if not
    used). */
@@ -49,10 +61,7 @@ void handle_gnutls_read_error(int readbytes, struct connection_state *scs);
 
 void tlscomm_close(struct connection_state *scs)
 {
-#ifdef DEBUG_COMM
-	fprintf(stderr, "%s: closing.\n",
-			(scs->name != NULL) ? scs->name : "null");
-#endif
+	DM("%s: closing.\n", (scs->name != NULL) ? scs->name : "null");
 
 	/* not ok to call this more than once */
 	if (scs->state) {
@@ -83,11 +92,8 @@ static int wait_for_it(int sd, int timeoutseconds)
 	FD_ZERO(&readfds);
 	FD_SET(sd, &readfds);
 	if (select(sd + 1, &readfds, NULL, NULL, &tv) == 0) {
-#ifdef DEBUG_COMM
-		fprintf(stderr,
-				"select timed out after %d seconds on socket: %d\n",
-				timeoutseconds, sd);
-#endif
+		DM("select timed out after %d seconds on socket: %d\n",
+		   timeoutseconds, sd);
 		return (0);
 	}
 	return (FD_ISSET(sd, &readfds));
@@ -96,11 +102,12 @@ static int wait_for_it(int sd, int timeoutseconds)
 static int
 getline_from_buffer(char *readbuffer, char *linebuffer, int linebuflen)
 {
-	/* TODO: respect linebuflen */
 	char *p, *q;
 	int i;
-	/* find end of line */
-	for (p = readbuffer, i = 0; *p != '\n' && *p != '\0'; p++, i++);
+	/* find end of line (stopping if linebuflen is too small. */
+	for (p = readbuffer, i = 0;
+		 *p != '\n' && *p != '\0' && i < linebuflen - 1; p++, i++);
+
 	if (i != 0) {
 		/* grab the end of line too! */
 		i++;
@@ -134,9 +141,7 @@ int tlscomm_expect(struct connection_state *scs,
 {
 	int prefixlen = (int) strlen(prefix);
 	memset(buf, 0, buflen);
-#ifdef DEBUG_COMM
-	fprintf(stderr, "%s: expecting: %s\n", scs->name, prefix);
-#endif
+	DM("%s: expecting: %s\n", scs->name, prefix);
 	while (wait_for_it(scs->sd, 10)) {
 		int readbytes;
 #ifdef WITH_TLS
@@ -170,20 +175,15 @@ int tlscomm_expect(struct connection_state *scs,
 				} else {
 					readbytes -= linebytes;
 					if (strncmp(buf, prefix, prefixlen) == 0) {
-#ifdef DEBUG_COMM
-						fprintf(stderr, "%s: got: %*s", scs->name,
-								readbytes, buf);
-#endif
+						DM("%s: got: %*s", scs->name, readbytes, buf);
 						return 1;	/* got it! */
 					}
-#ifdef DEBUG_COMM
-					fprintf(stderr, "%s: dumped(%d/%d): %.*s", scs->name,
-							linebytes, readbytes, linebytes, buf);
-#endif
+					DM("%s: dumped(%d/%d): %.*s", scs->name,
+					   linebytes, readbytes, linebytes, buf);
 				}
 			}
 	}
-	fprintf(stderr, "%s: expecting: '%s', saw '%s'\n", scs->name, prefix,
+	fprintf(stderr, "%s: expecting: '%s', saw: %s", scs->name, prefix,
 			buf);
 	return 0;					/* wait_for_it failed */
 }
@@ -224,71 +224,79 @@ void tlscomm_printf(struct connection_state *scs, const char *format, ...)
 				"warning: tlscomm_printf called with an invalid socket descriptor\n");
 		return;
 	}
-#ifdef DEBUG_COMM
-	fprintf(stderr, "wrote %*s", bytes, buf);
-#endif
+	DM("wrote %*s", bytes, buf);
 }
 
 /* most of this file only makes sense if using TLS. */
 #ifdef WITH_TLS
 
 #ifdef DEBUG_COMM
-/* taken from the GNUTLS documentation; edited to work
-   on more recent versions of gnutls */
+/* taken from the GNUTLS documentation, version 0.2.10; this
+   may need to be updated from cli.c if the gnutls interface
+   changes, but that is only necessary if you want
+   debug_comm. */
 #define PRINTX(x,y) if (y[0]!=0) printf(" -   %s %s\n", x, y)
 #define PRINT_DN(X) PRINTX( "CN:", X->common_name); \
 	PRINTX( "OU:", X->organizational_unit_name); \
 	PRINTX( "O:", X->organization); \
 	PRINTX( "L:", X->locality_name); \
 	PRINTX( "S:", X->state_or_province_name); \
-	PRINTX( "C:", X->country);
+	PRINTX( "C:", X->country); \
+	PRINTX( "E:", X->email); \
+	PRINTX( "SAN:", gnutls_x509pki_client_get_subject_dns_name(state))
 
 static int print_info(GNUTLS_STATE state)
 {
 	const char *tmp;
-	X509PKI_CLIENT_AUTH_INFO x509_info;
+	CredType cred;
 	const gnutls_DN *dn;
+	CertificateStatus status;
 
-	/* print the key exchange's algorithm name
-	 */
+
 	tmp = gnutls_kx_get_name(gnutls_get_current_kx(state));
 	printf("- Key Exchange: %s\n", tmp);
 
-	/* in case of X509 PKI
-	 */
-	if (gnutls_get_auth_info_type(state) == GNUTLS_X509PKI) {
-		x509_info = gnutls_get_auth_info(state);
-		if (x509_info != NULL) {
-			switch (gnutls_x509pki_client_get_peer_certificate_status
-					(x509_info)) {
-			case GNUTLS_CERT_NOT_TRUSTED:
-				printf("- Peer's X509 Certificate was NOT verified\n");
-				break;
-			case GNUTLS_CERT_EXPIRED:
-				printf
-					("- Peer's X509 Certificate was verified but is expired\n");
-				break;
-			case GNUTLS_CERT_TRUSTED:
-				printf("- Peer's X509 Certificate was verified\n");
-				break;
-			case GNUTLS_CERT_INVALID:
-			default:
-				printf("- Peer's X509 Certificate was invalid\n");
-				break;
+	cred = gnutls_get_auth_type(state);
+	switch (cred) {
+	case GNUTLS_ANON:
+		printf("- Anonymous DH using prime of %d bits\n",
+			   gnutls_anon_client_get_dh_bits(state));
 
-			}
+	case GNUTLS_X509PKI:
+		status = gnutls_x509pki_client_get_peer_certificate_status(state);
+		switch (status) {
+		case GNUTLS_CERT_NOT_TRUSTED:
+			printf("- Peer's X509 Certificate was NOT verified\n");
+			break;
+		case GNUTLS_CERT_EXPIRED:
+			printf
+				("- Peer's X509 Certificate was verified but is expired\n");
+			break;
+		case GNUTLS_CERT_TRUSTED:
+			printf("- Peer's X509 Certificate was verified\n");
+			break;
+		case GNUTLS_CERT_NONE:
+			printf("- Peer did not send any X509 Certificate.\n");
+			break;
+		case GNUTLS_CERT_INVALID:
+			printf("- Peer's X509 Certificate was invalid\n");
+			break;
+		}
+
+		if (status != GNUTLS_CERT_NONE && status != GNUTLS_CERT_INVALID) {
 			printf(" - Certificate info:\n");
 			printf(" - Certificate version: #%d\n",
 				   gnutls_x509pki_client_get_peer_certificate_version
-				   (x509_info));
+				   (state));
 
-			dn = gnutls_x509pki_client_get_peer_dn(x509_info);
+			dn = gnutls_x509pki_client_get_peer_dn(state);
 			PRINT_DN(dn);
 
+			dn = gnutls_x509pki_client_get_issuer_dn(state);
 			printf(" - Certificate Issuer's info:\n");
-			dn = gnutls_x509pki_client_get_issuer_dn(x509_info);
 			PRINT_DN(dn);
 		}
+	default:
 	}
 
 	tmp = gnutls_version_get_name(gnutls_get_current_version(state));
@@ -307,6 +315,7 @@ static int print_info(GNUTLS_STATE state)
 
 	return 0;
 }
+
 #endif
 
 
@@ -316,6 +325,8 @@ struct connection_state *initialize_gnutls(int sd, char *name)
 	static int gnutls_initialized;
 	int zok;
 	struct connection_state *ret = malloc(sizeof(struct connection_state));
+
+	assert(sd >= 0);
 
 	if (gnutls_initialized == 0) {
 		gnutls_global_init();
@@ -366,8 +377,8 @@ struct connection_state *initialize_gnutls(int sd, char *name)
 		free(ret);
 		return (NULL);
 	} else {
+		DM("%s: Handshake was completed\n", name);
 #ifdef DEBUG_COMM
-		printf("%s: Handshake was completed\n", name);
 		print_info(ret->state);
 #endif
 		ret->sd = sd;
@@ -387,10 +398,10 @@ void handle_gnutls_read_error(int readbytes, struct connection_state *scs)
 	} else {
 		if (readbytes == GNUTLS_E_WARNING_ALERT_RECEIVED
 			|| readbytes == GNUTLS_E_FATAL_ALERT_RECEIVED)
-			printf("* Received alert [%d]\n",
-				   gnutls_get_last_alert(scs->state));
+			fprintf(stderr, "* Received alert [%d]\n",
+					gnutls_get_last_alert(scs->state));
 		if (readbytes == GNUTLS_E_REHANDSHAKE)
-			printf("* Received HelloRequest message\n");
+			fprintf(stderr, "* Received HelloRequest message\n");
 	}
 	fprintf(stderr, "%s: error reading: %s\n",
 			scs->name, gnutls_strerror(readbytes));
@@ -412,10 +423,30 @@ struct connection_state *initialize_unencrypted(int sd,
 												/*@only@ */ char *name)
 {
 	struct connection_state *ret = malloc(sizeof(struct connection_state));
+	assert(sd >= 0);
 	assert(ret != NULL);
 	ret->sd = sd;
 	ret->name = name;
 	ret->state = NULL;
 	ret->xcred = NULL;
 	return (ret);
+}
+
+/* bad seed connections that can't be setup */
+/*@only@*/
+struct connection_state *initialize_blacklist( /*@only@ */ char *name)
+{
+	struct connection_state *ret = malloc(sizeof(struct connection_state));
+	assert(ret != NULL);
+	ret->sd = -1;
+	ret->name = name;
+	ret->state = NULL;
+	ret->xcred = NULL;
+	return (ret);
+}
+
+
+int tlscomm_is_blacklisted(const struct connection_state *scs)
+{
+	return (scs != NULL && scs->sd == -1);
 }

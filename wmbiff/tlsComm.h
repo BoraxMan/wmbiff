@@ -25,6 +25,15 @@ struct connection_state *initialize_gnutls(int sd, /*@only@ */ char *name);
 struct connection_state *initialize_unencrypted(int sd,	/*@only@ */
 												char *name);
 
+/* store a binding when connect() times out. these should be 
+   skipped when trying to check mail so that other mailboxes
+   are checked responsively.  I believe linux defaults to 
+   around 90 seconds for a failed connect() attempt */
+/* TODO: engineer an eventual retry scheme */
+/*@only@*/
+struct connection_state *initialize_blacklist( /*@only@ */ char *name);
+int tlscomm_is_blacklisted(const struct connection_state *scs);
+
 /* just like fprintf, only takes a connection state structure */
 void tlscomm_printf(struct connection_state *scs, const char *format, ...);
 
