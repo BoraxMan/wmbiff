@@ -1,3 +1,16 @@
+wmBiff (0.2r)
+  * wmbiff/Makefile: little cosmetic changes.
+  * wmbiff/wmbiff.c: if a pop3 or imap mailbox read fails and the following
+    reads are successful but no mail was in the server, the given mailbox
+    would remain reading "XX". Now it updates the counter no matter what the
+    read was (Mark Hurley).
+  * wmbiff/mboxClient.c: wmbiff would only count as new mails those with "N"
+    flags, ignoring those marked "ON" (Rob Funk).
+  * wmbiff/Imap4Client.c: fixed reading of quoted imap folders, which some
+    IMAPd's do (Rob Funk).
+
+ -- Jordi Mallach <jordi@sindominio.net>  Fri,  4 May 2001 13:01:14 +0200
+
 wmBiff (0.2q1)
   * wmbiff/Client.h: move DEBUG_* macros to wmbiff/Makefile
   * wmbiff/Pop3Client.c:

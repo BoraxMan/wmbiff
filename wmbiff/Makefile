@@ -1,4 +1,4 @@
-WMBIFF_VERSION="0.2q1"
+WMBIFF_VERSION="0.2r"
 DESTDIR=
 prefix=/usr/local
 bindir=${prefix}/bin
