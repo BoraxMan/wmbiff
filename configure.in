@@ -42,7 +42,7 @@ if test "$gnutls" = "ok"; then
                          GNUTLS_MAN_STATUS="This copy of WMBiff was compiled with GNUTLS." ])
  AC_CHECK_HEADERS(gnutls.h) 
 else
- AC_MSG_RESULT(GNUTLS support requires libz.a and libgdbm.a)
+ AC_MSG_RESULT(GNUTLS support requires libz.a and libgdbm.a, so will be disabled)
 fi
 GCRYPT_MAN_STATUS="This copy of WMBiff was not compiled with gcrypt."
 AM_PATH_LIBGCRYPT(1.1.5, [LIBS="$LIBS $LIBGCRYPT_LIBS"
