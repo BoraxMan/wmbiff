@@ -362,11 +362,11 @@ void createXBMfromXPM(char *xbm, const char **xpm, int sx, int sy)
 |* copyXPMArea																   *|
 \*******************************************************************************/
 
-void copyXPMArea(int x, int y, int sx, int sy, int dx, int dy)
+void copyXPMArea(int src_x, int src_y, int width, int height, int dest_x, int dest_y)
 {
 
-	XCopyArea(display, wmgen.pixmap, wmgen.pixmap, NormalGC, x, y, sx, sy,
-			  dx, dy);
+	XCopyArea(display, wmgen.pixmap, wmgen.pixmap, NormalGC, src_x, src_y, 
+              width, height, dest_x, dest_y);
 
 }
 
@@ -374,13 +374,31 @@ void copyXPMArea(int x, int y, int sx, int sy, int dx, int dy)
 |* copyXBMArea																   *|
 \*******************************************************************************/
 
-void copyXBMArea(int x, int y, int sx, int sy, int dx, int dy)
+void copyXBMArea(int src_x, int src_y, int width, int height, int dest_x, int dest_y)
 {
 
-	XCopyArea(display, wmgen.mask, wmgen.pixmap, NormalGC, x, y, sx, sy,
-			  dx, dy);
+	XCopyArea(display, wmgen.mask, wmgen.pixmap, NormalGC, src_x, src_y, 
+              width, height, dest_x, dest_y);
 }
 
+
+/* added for wmbiff */
+XFontStruct *f;
+void loadFont(const char *fontname) {
+  if(display!=NULL){
+    f = XLoadQueryFont(display, fontname);
+    if(f) XSetFont(display, NormalGC, f->fid);
+    else printf("couldn't set font!\n");
+  }
+}
+void drawString(int dest_x, int dest_y, const char *string, const char *colorname, 
+                int right_justify) {
+  int len = strlen(string);
+  XSetForeground(display, NormalGC, GetColor(colorname));
+  if(right_justify) dest_x -= XTextWidth(f, string, len);
+  XDrawString(display, wmgen.pixmap, NormalGC, dest_x, dest_y, string, len);
+}
+/* end wmbiff additions */
 
 /*******************************************************************************\
 |* setMaskXY																   *|
@@ -445,8 +463,8 @@ void openXwindow(int argc, char *argv[], const char *pixmap_bytes[],
 	mysizehints.x = 0;
 	mysizehints.y = 0;
 
-	back_pix = GetColor("white");
-	fore_pix = GetColor("black");
+	back_pix = GetColor("black");
+	fore_pix = GetColor("cyan");
 
 	XWMGeometry(display, screen, Geometry, NULL, borderwidth, &mysizehints,
 				&mysizehints.x, &mysizehints.y, &mysizehints.width,
