@@ -53,9 +53,18 @@ if [ ! -e autoconf/libgcrypt.m4 ] ; then
     echo "WARNING: autoconf/libgcrypt.m4 does not exist.  autogen is unlikely to work."
 fi
 
+if [ -h autoconf/config.guess ] && [ ! -e autoconf/config.guess ] ; then
+    echo "autoconf/config.guess is a dangling symlink, removing."
+    rm autoconf/config.guess
+fi
+if [ -h autoconf/config.sub ] && [ ! -e autoconf/config.sub ] ; then
+    echo "autoconf/config.sub is a dangling symlink, removing."
+    rm autoconf/config.sub
+fi
+
 ACLOCAL=${ACLOCAL} AUTOHEADER=${AUTOHEADER} \
 AUTOCONF=${AUTOCONF} AUTOMAKE=${AUTOMAKE}  \
-${AUTORECONF} --install && \
+${AUTORECONF} --install --symlink && \
  ./configure && \
  make
 
