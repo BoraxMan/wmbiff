@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.37 2002/12/13 05:38:39 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.38 2002/12/29 00:14:41 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -320,9 +320,9 @@ static int periodic_mail_check(void)
 								   BLINK_SLEEP_INTERVAL */
 	int NewMail = 0;			/* flag for global notify */
 	int i;
+	time_t curtime = time(0);
 	for (i = 0; i < num_mailboxes; i++) {
 		if (mbox[i].label[0] != 0) {
-			time_t curtime = time(0);
 			if (curtime >= mbox[i].prevtime + mbox[i].loopinterval) {
 				int mailstat = 0;
 				NeedRedraw = 1;
@@ -341,6 +341,9 @@ static int periodic_mail_check(void)
 				}
 				displayMsgCounters(i, mailstat, &Sleep_Interval,
 								   &Blink_Mode);
+				/* update our idea of current time, as it
+				   may have changed as we check. */
+				curtime = time(0);
 			}
 			if (mbox[i].blink_stat > 0) {
 				if (--mbox[i].blink_stat <= 0) {
@@ -397,7 +400,8 @@ static int findTopOfMasterXPM(const char **skin_xpm)
 static char **CreateBackingXPM(int width, int height,
 							   const char **skin_xpm)
 {
-	char **ret = malloc(sizeof(char *) * (height + 6));
+	char **ret = malloc(sizeof(char *) * (height + 6)
+						+ sizeof(void *) /* trailing null space */ );
 	const int colors = 5;
 	const int base = colors + 1;
 	const int margin = 4;
@@ -500,8 +504,6 @@ void do_biff(int argc, char **argv)
 	}
 
 	do {
-		/* while (forever) {            * forever is usually true,
-		   but not when debugging with -exit */
 		/* waitpid(0, NULL, WNOHANG); */
 
 		Sleep_Interval = periodic_mail_check();
@@ -546,7 +548,8 @@ void do_biff(int argc, char **argv)
 			}
 		}
 		XSleep(Sleep_Interval);
-	} while (forever);
+	} while (forever);			/* forever is usually true,
+								   but not when debugging with -exit */
 	if (skin_xpm != NULL) {
 		free(skin_xpm);			// added 3 jul 02, appeasing valgrind
 	}
@@ -724,8 +727,8 @@ int ReadLine(FILE * fp, char *setting, char *value, int *mbox_index)
 	char *p, *q;
 	int len, aux;
 
-	*setting = 0;
-	*value = 0;
+	*setting = '\0';
+	*value = '\0';
 	*mbox_index = -1;
 
 	if (!fp || feof(fp) || !fgets(buf, BUF_SIZE - 1, fp))
@@ -752,18 +755,20 @@ int ReadLine(FILE * fp, char *setting, char *value, int *mbox_index)
 	FullTrim(p);
 	FullTrim(q);
 
-	strcpy(setting, p);
+	/* strcpy(setting, p); nspring replaced with sscanf dec 2002 */
 	strcpy(value, q);
 
-	len = strlen(setting) - 1;
-	if (len > 0) {
-		aux = setting[len] - 48;
-		if (aux > -1 && aux < MAX_NUM_MAILBOXES) {
-			setting[len] = 0;
-			*mbox_index = aux;
+	if (sscanf(p, "%[a-z.]%d", setting, mbox_index) == 2) {
+		if (*mbox_index < 0 || *mbox_index >= MAX_NUM_MAILBOXES) {
+			DMA(DEBUG_ERROR, "invalid mailbox number %d\n", *mbox_index);
+			exit(EXIT_FAILURE);
 		}
-	} else
+	} else if (sscanf(p, "%[a-z]", setting) == 1) {
 		*mbox_index = -1;
+	} else {
+		DMA(DEBUG_INFO, "unparsed setting %s\n", p);
+		return -1;
+	}
 
 	DMA(DEBUG_INFO, "@%s.%d=%s@\n", setting, *mbox_index, value);
 	return 1;
@@ -836,7 +841,7 @@ void parse_mbox_path(int item)
 int Read_Config_File(char *filename, int *loopinterval)
 {
 	FILE *fp;
-	char setting[17], value[250];
+	char setting[17], value[BUF_SIZE];
 	int mbox_index;
 
 	if (!(fp = fopen(filename, "r"))) {
@@ -847,9 +852,11 @@ int Read_Config_File(char *filename, int *loopinterval)
 	while (!feof(fp)) {
 		if (ReadLine(fp, setting, value, &mbox_index) == -1)
 			continue;
+
 		/* settings that can be global go here. */
 		if (!strcmp(setting, "interval")) {
 			*loopinterval = atoi(value);
+			continue;
 		} else if (!strcmp(setting, "askpass")) {
 			const char *askpass = strdup(value);
 			if (mbox_index == -1) {
@@ -860,14 +867,20 @@ int Read_Config_File(char *filename, int *loopinterval)
 			} else {
 				mbox[mbox_index].askpass = askpass;
 			}
+			continue;
 		} else if (!strcmp(setting, "skinfile")) {
 			skin_filename = strdup(value);
+			continue;
 		} else if (!strcmp(setting, "certfile")) {	/* not yet supported */
 			certificate_filename = strdup(value);
+			continue;
 		} else if (!strcmp(setting, "globalnotify")) {
 			globalnotify = strdup(value);
-		} else if (mbox_index == -1)
+			continue;
+		} else if (mbox_index == -1) {
+			DMA(DEBUG_INFO, "Unknown global setting '%s'\n", setting);
 			continue;			/* Didn't read any setting.[0-5] value */
+		}
 
 		if (mbox_index >= MAX_NUM_MAILBOXES) {
 			DMA(DEBUG_ERROR, "Don't have %d mailboxes.\n", mbox_index);
@@ -901,6 +914,8 @@ int Read_Config_File(char *filename, int *loopinterval)
 			   line argument to provide all information
 			   possible. */
 			mbox[mbox_index].debug = debug_value;
+		} else {
+			DMA(DEBUG_INFO, "Unknown setting '%s'\n", setting);
 		}
 	}
 	fclose(fp);
