@@ -1,5 +1,5 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiffrc.5.in,v 1.11 2003/02/08 21:04:49 bluehal Exp $
+.\" $Id: wmbiffrc.5.in,v 1.12 2003/03/28 08:16:07 bluehal Exp $
 .\"
 .\" @configure_input@
 .\"
@@ -90,7 +90,7 @@ unwanted delays (eg. SFS-mounted maildirs).
 .I pop3
 Using this type, WMBiff will check for mail on a pop3 server using the
 specified username, password, host and an optional port number (defaulting
-to 110). If your password contains a special character, eg. '@' or ':',
+to 110).  If your password contains a special character, eg. '@' or ':',
 use the second path format.  See Authentication below for a description of 
 the auth field. 
 .RS
@@ -107,7 +107,10 @@ accepts user, optional password, host and optional path to
 mailbox and port number.  See Authentication below for a
 description of the auth field.  The password may be left
 empty: see askpass above for information on password
-prompting.  The mailbox field may be quoted, e.g., server/"Mail/Eggs and Spam"
+prompting.  If your password includes a @, use the 
+space delimited form.  If it contains a space, use the
+askpass option instead.  The mailbox field may be quoted, 
+e.g., server/"Mail/Eggs and Spam"
 .RS
 imap:user:passwd@server[/mailbox][:port] [auth]
 .RE
@@ -130,8 +133,8 @@ but negotiate TLS using IMAP's STARTTLS command.  TLS
 support uses GNUTLS, which is under development and may be
 insecure.  TLS support is only for encryption: since
 certificates are not yet checked, it is vulnerable to
-man-in-the-middle attack.  Like IMAP, WMBiff will prompt
-the user if the password is left blank.
+man-in-the-middle attack.  See the imap format above
+for additional detail about specifying your password.
 .RS
 imaps:user:passwd@server[/mailbox][:port] [auth]
 .RE
