@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.35 2002/11/13 06:44:08 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.36 2002/12/09 21:45:29 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -53,6 +53,8 @@ mbox_t mbox[MAX_NUM_MAILBOXES];
 
 /* this is the normal pixmap. */
 const char *skin_filename = "wmbiff-master-led.xpm";
+/* global notify action taken (if globalnotify option is set) */
+const char *globalnotify = NULL;
 /* path to search for pixmaps */
 /* /usr/share/wmbiff should have the default pixmap. */
 /* /usr/local/share/wmbiff if compiled locally. */
@@ -288,18 +290,40 @@ static int wmbiffrc_permissions_check(const char *wmbiffrc_fname)
 	return (1);
 }
 
+/*
+ * void execnotify(1) : runs notify command (if given)
+ */
+void execnotify(const char *notifycmd)
+{
+	if (notifycmd != 0) {		/* need to call notify() ? */
+		if (!strcasecmp(notifycmd, "beep")) {	/* Internal keyword ? */
+			/* Yes, bell */
+			XBell(display, 100);
+		} else if (!strcasecmp(notifycmd, "true")) {
+			/* Yes, nothing */
+		} else {
+			/* Else call external notifyer */
+			execCommand((char *) notifycmd);
+		}
+	}
+}
+
+
 static int periodic_mail_check(void)
 {
 	int NeedRedraw = 0;
 	static int Blink_Mode = 0;	/* Bit mask, digits are in blinking 
 								   mode or not. Each bit for separate 
 								   mailbox */
-	int Sleep_Interval;			/* is either DEFAULT_SLEEP_INTERVAL or BLINK_SLEEP_INTERVAL */
+	int Sleep_Interval;			/* either DEFAULT_SLEEP_INTERVAL or
+								   BLINK_SLEEP_INTERVAL */
+	int NewMail = 0;			/* flag for global notify */
 	int i;
 	for (i = 0; i < num_mailboxes; i++) {
 		if (mbox[i].label[0] != 0) {
 			time_t curtime = time(0);
 			if (curtime >= mbox[i].prevtime + mbox[i].loopinterval) {
+				int mailstat = 0;
 				NeedRedraw = 1;
 				DM(&mbox[i], DEBUG_INFO,
 				   "working on [%d].label=>%s< [%d].path=>%s<\n", i,
@@ -309,7 +333,12 @@ static int periodic_mail_check(void)
 				   (int) curtime, (int) mbox[i].prevtime,
 				   mbox[i].loopinterval);
 				mbox[i].prevtime = curtime;
-				displayMsgCounters(i, count_mail(i), &Sleep_Interval,
+				mailstat = count_mail(i);
+				if ((mailstat == 2) && (mbox[i].notify[0] == 0)) {
+					/* for global notify */
+					NewMail = 1;
+				}
+				displayMsgCounters(i, mailstat, &Sleep_Interval,
 								   &Blink_Mode);
 			}
 			if (mbox[i].blink_stat > 0) {
@@ -328,6 +357,12 @@ static int periodic_mail_check(void)
 			}
 		}
 	}
+
+	/* exec globalnotify if there was any new mail */
+	if (NewMail == 1) {
+		execnotify(globalnotify);
+	}
+
 
 	if (Blink_Mode == 0) {
 		for (i = 0; i < num_mailboxes; i++) {
@@ -533,8 +568,9 @@ static void blitMsgCounters(int i)
 	}
 }
 
-void displayMsgCounters(int i, int mail_stat, int *Sleep_Interval,
-						int *Blink_Mode)
+void
+displayMsgCounters(int i, int mail_stat, int *Sleep_Interval,
+				   int *Blink_Mode)
 {
 	switch (mail_stat) {
 	case 2:					/* New mail has arrived */
@@ -543,13 +579,7 @@ void displayMsgCounters(int i, int mail_stat, int *Sleep_Interval,
 		*Sleep_Interval = BLINK_SLEEP_INTERVAL;
 		*Blink_Mode |= (1 << i);	/* Global blink flag set for this mailbox */
 		blitMsgCounters(i);
-		if (mbox[i].notify[0] != 0) {	/* need to call notify() ? */
-			if (!strcasecmp(mbox[i].notify, "beep")) {	/* Internal keyword ? */
-				XBell(display, 100);	/* Yes, bell */
-			} else {
-				execCommand(mbox[i].notify);	/* Else call external notifyer */
-			}
-		}
+		execnotify(mbox[i].notify);
 
 		/* Autofetch on new mail arrival? */
 		if (mbox[i].fetchinterval == -1 && mbox[i].fetchcmd[0] != 0) {
@@ -833,6 +863,8 @@ int Read_Config_File(char *filename, int *loopinterval)
 			skin_filename = strdup(value);
 		} else if (!strcmp(setting, "certfile")) {	/* not yet supported */
 			certificate_filename = strdup(value);
+		} else if (!strcmp(setting, "globalnotify")) {
+			globalnotify = strdup(value);
 		} else if (mbox_index == -1)
 			continue;			/* Didn't read any setting.[0-5] value */
 
@@ -1066,6 +1098,7 @@ void printversion(void)
 {
 	printf("wmbiff v%s\n", VERSION);
 }
+
 
 /* vim:set ts=4: */
 /*

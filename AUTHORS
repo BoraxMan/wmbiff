@@ -14,6 +14,9 @@
    
    POP3 checking code was taken from wmpop3 by
    Scott Holden (scotth@thezone.net)
+
+   Additional code was taken from xlassie, written by
+   Trent Piepho <xyzzy@speakeasy.net>
    
    Many thanks for:
    Angus Mackay (amackay@gusnet.cx)
@@ -33,4 +36,5 @@
    Benoît Rouits (brouits@free.fr)
    Andelko Horvat (comel@srk.fer.hr)
    Jun-ichiro itojun Hagino (itojun@iijlab.net)
+   Peter McAlpine (pmcalpin@uoguelph.ca)
 

@@ -1,5 +1,5 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiffrc.5.in,v 1.9 2002/11/12 08:27:47 bluehal Exp $
+.\" $Id: wmbiffrc.5.in,v 1.10 2002/12/09 21:45:29 bluehal Exp $
 .\"
 .\" @configure_input@
 .\"
@@ -42,6 +42,10 @@ XPM pixmap file to load for the background.  If not a full
 path, wmbiff will search @SKINDIR@, /usr/share/wmbiff,
 /usr/local/share/wmbiff, and the current directory for the
 pixmap file.
+.TP
+\fBglobalnotify\fP
+Command to be executed when new mail is recieved in any mailbox. Set
+notify.n to override this option for mailbox n.
 .TP
 \fBlabel.n\fP
 Specifies the displayed label for a mailbox. It can be up to five characters

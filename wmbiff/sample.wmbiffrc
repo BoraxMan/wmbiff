@@ -1,4 +1,4 @@
-# $Id: sample.wmbiffrc,v 1.13 2002/05/03 05:42:44 bluehal Exp $
+# $Id: sample.wmbiffrc,v 1.14 2002/12/09 21:45:29 bluehal Exp $
 #
 # See wmbiffrc(5) for more info.
 #
@@ -47,9 +47,15 @@ label.0=Spool
 # port are optional, default - 110
 path.0=mbox:/var/mail/gb
 
+# Command, which will be executed for new mail in any watched mailbox
+globalnotify=my_play /home/gb/sounds/new_mail_has_arrived.wav
+
 # Command, which executed on new mail arrival, or special keyword 'beep'
 #notify.0=beep
-notify.0=my_play /home/gb/sounds/new_mail_has_arrived.wav
+#notify.0=my_play /home/gb/sounds/new_mail_has_arrived.wav
+
+# Don't want any global notification for this mailbox
+notify.0=true
 
 # Command, which executed on left mouse click on label 
 action.0=rxvt -name mutt -e mutt
@@ -71,7 +77,7 @@ action.0=rxvt -name mutt -e mutt
 label.1 = MBOX
 # MBOX format: mbox:fullpathname
 path.1=mbox:/home/gb/mail/10_ksi-linux-list
-notify.1=my_play /home/gb/sounds/new_mail_has_arrived.wav
+#notify.1=my_play /home/gb/sounds/new_mail_has_arrived.wav
 action.1=rxvt -name mutt -e mutt -f /home/gb/mail/10_ksi-linux-list
 
 # label.1 = MDIR
@@ -95,7 +101,7 @@ action.2=licq&
 label.3=POP3
 # pop3 format: pop3:user:password@server[:port] [auth]
 path.3=pop3:user:password@server apop
-notify.3=my_play /home/gb/sounds/new_mail_has_arrived.wav
+#notify.3=my_play /home/gb/sounds/new_mail_has_arrived.wav
 action.3=rxvt -name mutt -e mutt -f /home/gb/mail/30_nftp-list
 interval.3=300		# 5 minutes
 fetchinterval.3=-1
