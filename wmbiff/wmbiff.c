@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.67 2004/10/01 21:02:50 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.68 2004/12/12 00:01:53 bluehal Exp $ */
 
 // typedef int gcry_error_t;
 
@@ -23,6 +23,7 @@
 #include <X11/Xlib.h>
 #include <X11/xpm.h>
 #include <X11/cursorfont.h>
+#include <X11/keysym.h>
 
 #include <errno.h>
 #include <string.h>
@@ -37,6 +38,25 @@
 #ifdef USE_DMALLOC
 #include <dmalloc.h>
 #endif
+
+#ifdef __LCLINT__
+/* lclint doesn't do typeof */
+#define min(x,y) ((x > y) ? x : y)
+#define max(x,y) ((x > y) ? x : y)
+#else
+/* from linux/kernel.h */
+#define min(x,y) ({ \
+        const typeof(x) _xi = (x);       \
+        const typeof(y) _yi = (y);       \
+        (void) (&_xi == &_yi);            \
+        _xi < _yi ? _xi : _yi; })
+#define max(x,y) ({ \
+        const typeof(x) _xa = (x);       \
+        const typeof(y) _ya = (y);       \
+        (void) (&_xa == &_ya);            \
+        _xa > _ya ? _xa : _ya; })
+#endif
+
 
 #include "wmbiff-master-led.xpm"
 static char wmbiff_mask_bits[64 * 64];
@@ -210,6 +230,7 @@ struct path_demultiplexer {
 
 static struct path_demultiplexer paths[] = {
 	{"pop3:", pop3Create},
+	{"pop3s:", pop3Create},
 	{"shell:", shellCreate},
 	{"gicu:", gicuCreate},
 	{"licq:", licqCreate},
@@ -217,7 +238,6 @@ static struct path_demultiplexer paths[] = {
 	{"imap:", imap4Create},
 	{"imaps:", imap4Create},
 	{"sslimap:", imap4Create},
-	{"pop3:", pop3Create},
 	{"maildir:", maildirCreate},
 	{"mbox:", mboxCreate},
 	{NULL, NULL}
@@ -1185,6 +1205,26 @@ static void do_biff(int argc, const char **argv)
 				but_pressed_region = -1;
 				/* RedrawWindow(); */
 				break;
+            case MotionNotify:
+                break;
+            case KeyPress: {
+                XKeyPressedEvent *xkpe = (XKeyPressedEvent *)&Event;
+                KeySym ks = XKeycodeToKeysym(display, xkpe->keycode, 0);
+                if( ks > XK_0 && ks < XK_0 + min(9U, num_mailboxes)) {
+					const char *click_action = mbox[ks - XK_1].action;
+					if (click_action != NULL
+						&& click_action[0] != '\0'
+						&& strcmp(click_action, "msglst")) {
+						DM(&mbox[but_released_region], DEBUG_INFO,
+						   "running: %s", click_action);
+						(void) execCommand(click_action);
+					}
+                }
+                    
+            }
+                break;
+            default:
+                break;
 			}
 		}
 		XSleep(Sleep_Interval);
