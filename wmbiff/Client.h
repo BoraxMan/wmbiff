@@ -1,11 +1,11 @@
-/* $Id: Client.h,v 1.36 2003/07/07 08:57:12 bluehal Exp $ */
+/* $Id: Client.h,v 1.37 2003/11/08 23:46:02 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
  *
  * Email Checker Pop3/Imap4/Licq/Gicu/mbox/maildir/finger
  *
- * Last Updated : $Date: 2003/07/07 08:57:12 $
+ * Last Updated : $Date: 2003/11/08 23:46:02 $
  *
  */
 
@@ -153,6 +153,12 @@ do { \
 #endif
 #endif							/* gnuc */
 #endif							/* client.h */
+
+#ifndef FALSE
+#define FALSE (0)
+#define TRUE (!FALSE)
+#endif
+
 /* vim:set ts=4: */
 /*
  * Local Variables:
