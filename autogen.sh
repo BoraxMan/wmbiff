@@ -10,6 +10,8 @@
 # it's skanky that I have to look explicitly for a newer 
 # version to invoke.
 
+AUTORECONF=autoreconf
+
 if [ -x /usr/bin/automake-1.7 ]; then 
     echo "Using automake 1.7";
     AUTOMAKE=automake-1.7
@@ -34,6 +36,7 @@ else
         echo "Using autoconf 2.53 (redhat-hack)";
         AUTOCONF=autoconf-2.53
         AUTOHEADER=autoheader-2.53
+        AUTORECONF=autoreconf-2.53
     else
         AUTOCONF=autoconf
         AUTOHEADER=autoheader
@@ -42,7 +45,7 @@ fi
 
 ACLOCAL=${ACLOCAL} AUTOHEADER=${AUTOHEADER} \
 AUTOCONF=${AUTOCONF} AUTOMAKE=${AUTOMAKE}  \
-autoreconf --install && \
+${AUTORECONF} --install && \
  ./configure && \
  make
 
