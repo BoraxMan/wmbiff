@@ -1,7 +1,7 @@
 Release Notes
 ~~~~~~~~~~~~~
 
-Release 0.3.4 - [UNRELEASED]
+Release 0.3.4 - Fri, 23 Nov 2001 16:56:29 +0100
 
   * "imaps" is now prefered to "sslimap" in config files. The old type
     is still supported for backwards compatibility.
