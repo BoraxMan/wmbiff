@@ -1,11 +1,11 @@
-/* $Id: maildirClient.c,v 1.11 2002/09/18 23:45:57 bluehal Exp $ */
+/* $Id: maildirClient.c,v 1.12 2002/10/14 05:52:26 bluehal Exp $ */
 /* Author : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
    Modified : Dwayne C. Litzenberger ( dlitz@dlitz.net )
  * 
  * Maildir checker.
  *
- * Last Updated : $Date: 2002/09/18 23:45:57 $
+ * Last Updated : $Date: 2002/10/14 05:52:26 $
  *
  */
 
@@ -55,8 +55,6 @@ int maildirCheckHistory(Pop3 pc)
 	struct stat st_cur;
 	struct utimbuf ut;
 	char path_new[256], path_cur[256];
-	char path_newtmp[512];
-	char *fn;
 
 	int count_new = 0, count_cur = 0;
 
@@ -66,13 +64,16 @@ int maildirCheckHistory(Pop3 pc)
 	strcat(path_new, "/new/");
 	strcpy(path_cur, pc->path);
 	strcat(path_cur, "/cur/");
-	strcpy(path_newtmp, path_new);
-	strcat(path_newtmp, ".wmbiff.dircache_flush.XXXXXX");
 
 	if (pc->u.maildir.dircache_flush) {
 		/* hack to clear directory cache for network-mounted maildirs */
-		if ((fn = mktemp(path_newtmp)) != NULL) {
-			unlink(fn);
+		int fd;
+		char path_newtmp[512];
+		strcpy(path_newtmp, path_new);
+		strcat(path_newtmp, ".wmbiff.dircache_flush.XXXXXX");
+		if ((fd = mkstemp(path_newtmp)) >= 0) {
+			close(fd);
+			unlink(path_newtmp);
 		} else {
 			DM(pc, DEBUG_ERROR,
 			   "Can't create dircache flush file '%s': %s\n", path_newtmp,
@@ -171,3 +172,10 @@ int maildirCreate(Pop3 pc, const char *str)
 }
 
 /* vim:set ts=4: */
+/*
+ * Local Variables:
+ * tab-width: 4
+ * c-indent-level: 4
+ * c-basic-offset: 4
+ * End:
+ */
