@@ -121,8 +121,7 @@ int shellCmdCheck(Pop3 pc)
 	} else if (sscanf(linebuf, "%9s\n", pc->TextStatus) == 1) {
 		/* validate the string input */
 		int i;
-		for (i = 0;
-			 pc->TextStatus[i] != '\0' && isalnum(pc->TextStatus[i])
+		for (i = 0; pc->TextStatus[i] != '\0' && isalnum(pc->TextStatus[i])
 			 && i < 10; i++);
 		if (pc->TextStatus[i] != '\0') {
 			SH_DM(pc, DEBUG_ERROR,

@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.21 2002/04/15 01:30:04 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.22 2002/04/15 01:58:35 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -625,7 +625,7 @@ void parse_mbox_path(int item)
 		sprintf(buf, "shell:::finger -lm %s | "
 				"perl -ne '(/^new mail/i && print \"new\");' "
 				"-e '(/^mail last read/i && print \"old\");' "
-				"-e '(/^no( unread)? mail/i && print \"0\");'",
+				"-e '(/^no( unread)? mail/i && print \"no\");'",
 				mbox[item].path + 7);
 		shellCreate((&mbox[item]), buf);
 	} else if (!strncasecmp(mbox[item].path, "licq:", 5)) {	/* licq history file */
@@ -738,7 +738,7 @@ void XSleep(int millisec)
 
 void sigchld_handler(int sig __attribute__ ((unused)))
 {
-	waitpid(0, NULL, WNOHANG);
+	while (waitpid(0, NULL, WNOHANG));
 	signal(SIGCHLD, sigchld_handler);
 }
 
