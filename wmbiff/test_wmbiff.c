@@ -145,42 +145,42 @@ printf("Failed: expected '" #shouldbe "' but got '%d'\n", x); \
 int test_imap4creator(void) {
     mbox_t m;
     
-    if(imap4Create(&m, "imaps:foo:@bar/mybox")) {
+    if(imap4Create(&m, "imap:foo:@bar/mybox")) {
         return 1;
     }
     CKSTRING(m.path, "mybox");
     CKSTRING(m.u.pop_imap.serverName, "bar");
-    CKINT(m.u.pop_imap.serverPort, 993);
+    CKINT(m.u.pop_imap.serverPort, 143);
 
-    if(imap4Create(&m, "imaps:foo:@bar/\"mybox\"")) {
+    if(imap4Create(&m, "imap:foo:@bar/\"mybox\"")) {
         return 1;
     }
     CKSTRING(m.path, "\"mybox\"");
     CKSTRING(m.u.pop_imap.serverName, "bar");
-    CKINT(m.u.pop_imap.serverPort, 993);
+    CKINT(m.u.pop_imap.serverPort, 143);
 
-    if(imap4Create(&m, "imaps:foo:@bar/\"space box\"")) {
+    if(imap4Create(&m, "imap:foo:@bar/\"space box\"")) {
         return 1;
     }
     CKSTRING(m.path, "\"space box\"");
     CKSTRING(m.u.pop_imap.serverName, "bar");
-    CKINT(m.u.pop_imap.serverPort, 993);
+    CKINT(m.u.pop_imap.serverPort, 143);
 
-    if(imap4Create(&m, "imaps:user pass bar/\"space box\"")) {
+    if(imap4Create(&m, "imap:user pass bar/\"space box\"")) {
         return 1;
     }
     CKSTRING(m.path, "\"space box\"");
     CKSTRING(m.u.pop_imap.serverName, "bar");
-    CKINT(m.u.pop_imap.serverPort, 993);
+    CKINT(m.u.pop_imap.serverPort, 143);
 
-    if(imap4Create(&m, "imaps:user pass bar/\"space box\" 12")) {
+    if(imap4Create(&m, "imap:user pass bar/\"space box\" 12")) {
         return 1;
     }
     CKSTRING(m.path, "\"space box\"");
     CKSTRING(m.u.pop_imap.serverName, "bar");
     CKINT(m.u.pop_imap.serverPort, 12);
 
-    if(imap4Create(&m, "imaps:foo:@bar/\"mybox\":12")) {
+    if(imap4Create(&m, "imap:foo:@bar/\"mybox\":12")) {
         return 1;
     }
     CKSTRING(m.path, "\"mybox\"");
