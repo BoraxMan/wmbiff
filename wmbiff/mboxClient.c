@@ -1,4 +1,4 @@
-/* $Id: mboxClient.c,v 1.12 2002/04/20 09:12:35 bluehal Exp $ */
+/* $Id: mboxClient.c,v 1.13 2002/05/03 05:43:51 bluehal Exp $ */
 /* Author:		Yong-iL Joh <tolkien@mizi.com>
    Modified:	Jorge García <Jorge.Garcia@uv.es>
    			 	Rob Funk <rfunk@funknet.net>
@@ -6,7 +6,7 @@
  * 
  * MBOX checker.
  *
- * Last Updated : $Date: 2002/04/20 09:12:35 $
+ * Last Updated : $Date: 2002/05/03 05:43:51 $
  *
  */
 
@@ -97,7 +97,7 @@ int fileHasChanged(const char *mbox_filename, time_t * atime,
 		DMA(DEBUG_INFO, " %s was changed,"
 			" mTIME: %lu -> %lu; SIZE: %lu -> %lu\n",
 			mbox_filename, *mtime, st.st_mtime,
-			(unsigned long) *size, st.st_size);
+			(unsigned long) *size, (unsigned long)st.st_size);
 
 		*atime = st.st_atime;
 		*mtime = st.st_mtime;
