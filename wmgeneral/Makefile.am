@@ -8,5 +8,3 @@ indent:
 	indent -npro -kr -i4 -ts4 $(libwmgeneral_a_SOURCES) || true
 
 dist-hook-local: indent
-
-

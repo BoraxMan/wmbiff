@@ -100,7 +100,6 @@ MOUSE_REGION mouse_region[MAX_MOUSE_REGION];
 static void GetXPM(XpmIcon *, const char **);
 static Pixel GetColor(const char *);
 void RedrawWindow(void);
-void AddMouseRegion(int, int, int, int, int);
 int CheckMouseRegion(int, int);
 
 /*******************************************************************************\
@@ -284,7 +283,7 @@ void RedrawWindowXY(int x, int y)
 |* AddMouseRegion															   *|
 \*******************************************************************************/
 
-void AddMouseRegion(int region_idx, int left, int top, int right,
+void AddMouseRegion(unsigned int region_idx, int left, int top, int right,
 					int bottom)
 {
 

@@ -42,7 +42,7 @@ Display *display;
  /* Function Prototypes */
 /***********************/
 
-void AddMouseRegion(int rgn_index, int left, int top, int right,
+void AddMouseRegion(unsigned int rgn_index, int left, int top, int right,
 					int bottom);
 int CheckMouseRegion(int x, int y);
 
