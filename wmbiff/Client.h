@@ -1,4 +1,4 @@
-/* $Id: Client.h,v 1.6 2001/11/16 01:13:36 bluehal Exp $ */
+/* $Id: Client.h,v 1.7 2002/02/02 18:04:18 jordi Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -15,6 +15,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 #ifdef WITH_GCRYPT
 #include <gcrypt.h>

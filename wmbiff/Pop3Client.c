@@ -1,4 +1,4 @@
-/* $Id: Pop3Client.c,v 1.5 2001/11/16 07:11:04 bluehal Exp $ */
+/* $Id: Pop3Client.c,v 1.6 2002/02/02 18:04:19 jordi Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -13,7 +13,6 @@
 
 #include "Client.h"
 #include "charutil.h"
-#include <regex.h>
 
 #ifdef USE_DMALLOC
 #include <dmalloc.h>

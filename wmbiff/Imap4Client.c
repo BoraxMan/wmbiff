@@ -15,7 +15,6 @@
 #include "tlsComm.h"
 
 #include <sys/types.h>
-#include <regex.h>
 #include <stdio.h>
 #include <assert.h>
 #include <unistd.h>
@@ -296,8 +295,8 @@ int imap4Create(Pop3 pc, const char *const str)
 	struct re_registers regs;
 	int i, matchedchars;
 	const char *regexes[] = {
-		".*imaps?:([^: ]{1,32}):([^@]{1,32})@([^/: ]+)(/[^: ]+)?(:[0-9]+)? (.+)? *",
-		".*imaps?:([^: ]{1,32}) ([^ ]{1,32}) ([^/: ]+)(/[^: ]+)?( [0-9]+)? (.+)? *",
+		".*imaps?:([^: ]{1,32}):([^@]{1,32})@([^/: ]+)(/[^: ]+)?(:[0-9]+)? *",
+		".*imaps?:([^: ]{1,32}) ([^ ]{1,32}) ([^/: ]+)(/[^: ]+)?( [0-9]+)? *",
 		NULL
 	};
 

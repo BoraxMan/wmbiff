@@ -1,34 +1,86 @@
-# $Id: Makefile,v 1.20 2002/01/27 19:52:52 jordi Exp $
+# Makefile for wmbiff
+#
+# $Id: Makefile,v 1.21 2002/02/02 18:04:19 jordi Exp $
 
-WMBIFF_VERSION = "0.3.6"
+# Disable gnutls crypto?
+#WITHOUT_CRYPTO=	1
 
-DESTDIR=
-prefix=/usr/local
-bindir=${prefix}/bin
-mandir=${prefix}/share/man
-CONF=/etc
+# If using v0.2.x of gnutls change the variabel below to 2
+GNUTLS_MINOR_VERSION=3
 
-CC     = gcc
-LIBDIR = -L/usr/X11R6/lib
-LIBS   = -lXpm -lXext -lX11 
-CFLAGS = -O2 -Wall -Wpointer-arith 
-#CFLAGS = -g -Wall -Wpointer-arith -Wwrite-strings -pedantic
+# Use external GNU regexp lib?
+#EXT_GNU_REGEX_LIB=1
+
+# Use debugging?
+#DEBUG=		1
+
+PREFIX?=	/usr/local
+BINDIR?=	$(PREFIX)/bin
+MANDIR?=	$(PREFIX)/share/man
+
+CC?=		gcc
+LIBDIR?=	-L/usr/X11R6/lib
+LIBS=		-lXpm -lXext -lX11
+CFLAGS?=	-O2 -Wall -Wpointer-arith
+
+###########################################################
+# Nothing below here should need to be changed
+###########################################################
+
+WMBIFF_VERSION=	"0.3.6"
+EXTRAFLAGS=	-DWMBIFF_VERSION='$(WMBIFF_VERSION)' 
+
+# Default linux owners
+INSTALL_USER=	root
+INSTALL_GROUP=	root
+
+# Debugging
+ifdef DEBUG
+CFLAGS=		-g -Wall -Wpointer-arith -Wwrite-strings -pedantic
 #-W -Wmissing-noreturn -Wtraditional
+endif
 
-EXTRAFLAGS = -DWMBIFF_VERSION='$(WMBIFF_VERSION)' 
+# FreeBSD overrides
+ifeq ($(OSTYPE),FreeBSD)
+INSTALL_GROUP=	wheel
+EXT_GNU_REGEX_LIB=1
+CFLAGS+=	-I/usr/X11R6/include/
+endif
 
-# Comment these out if you don't want cryto support.
-EXTRAFLAGS += -DWITH_TLS -DWITH_GCRYPT 
-LIBS   += -lgnutls -lgcrypt
-# if using v0.2.x of gnutls comment out the following:
-EXTRAFLAGS += -DGNUTLS_VER=3 
+# External GNU RegExp lib... needed on FreeBSD
+ifdef EXT_GNU_REGEX_LIB
+LIBS+=		-lgnuregex
+CFLAGS+=	-DEXT_GNU_REGEX_LIB
+endif
 
-#EXTRAFLAGS += -DDEBUG_POP3 -DDEBUG_IMAP4 -DDEBUG_LICQ \
+# Crypto support
+ifndef WITHOUT_CRYPTO
+EXTRAFLAGS+=	-DWITH_TLS -DWITH_GCRYPT
+LIBS+=		-lgnutls -lgcrypt
+endif
+ifeq ($(GNUTLS_MINOR_VERSION),3)
+EXTRAFLAGS+=	-DGNUTLS_VER=3 
+endif
+
+INSTALL?=	/usr/bin/install
+INSTALL_DIR?=	$(INSTALL) -d -o $(INSTALL_USER) -g $(INSTALL_GROUP) -m 755
+INSTALL_PRG?=	$(INSTALL) -p -o $(INSTALL_USER) -g $(INSTALL_GROUP) -m 755 -s
+INSTALL_FILE?=	$(INSTALL) -p -o $(INSTALL_USER) -g $(INSTALL_GROUP) -m 644
+
+
+# Misc debug stuff :
+#EXTRAFLAGS+=	-DDEBUG_POP3 -DDEBUG_IMAP4 -DDEBUG_LICQ \
 #	-DDEBUG_MBOX -DDEBUG_MAILDIR -DDEBUG -DDEBUG_MAIL_COUNT \
 #	-DDEBUG_COMM
 
-#CFLAGS += -DUSE_DMALLOC
-#LIBS   += -ldmalloc
+# For malloc debug :
+#CFLAGS	+= -DUSE_DMALLOC
+#LIBS	+= -ldmalloc
+
+
+###########################################################
+# Real make stuff begins :
+###########################################################
 
 OBJS =	wmbiff.o socket.o \
 	Pop3Client.o LicqClient.o mboxClient.o \
@@ -38,14 +90,11 @@ OBJS =	wmbiff.o socket.o \
 	../wmgeneral/list.o \
 	charutil.o
 
-INSTALL = /usr/bin/install
-INSTALL_DIR	= $(INSTALL) -p -d -o root -g root -m 755
-INSTALL_PROGRAM	= $(INSTALL) -p -o root -g root -m 755
-INSTALL_FILE 	= $(INSTALL) -p -o root -g root -m 644
-
-all: wmbiff-master.xpm wmbiff
+all: wmbiff
 
 Imap4Client.o: Imap4Client.c Client.h Makefile
+
+wmbiff.o: wmbiff-master.xpm wmbiff.c
 
 .c.o:
 	$(CC) $(CFLAGS) $(EXTRAFLAGS) -c $< -o $*.o
@@ -53,8 +102,8 @@ Imap4Client.o: Imap4Client.c Client.h Makefile
 wmbiff-master.xpm:
 	ln -s wmbiff-master-led.xpm wmbiff-master.xpm
 
-wmbiff:	$(OBJS)
-	$(CC) $(CFLAGS) $(EXTRAFLAGS) -o wmbiff -lX11 -lnsl $^ $(LIBDIR) $(LIBS)
+wmbiff: $(OBJS)
+	$(CC) $(CFLAGS) $(EXTRAFLAGS) -o wmbiff $^ $(LIBDIR) $(LIBS)
 
 clean:
 	for i in $(OBJS) ; do \
@@ -65,12 +114,12 @@ clean:
 distclean: clean
 
 install: wmbiff
-	$(INSTALL_DIR) $(DESTDIR)$(bindir)
-	$(INSTALL_DIR) $(DESTDIR)$(mandir)/man1
-	$(INSTALL_DIR) $(DESTDIR)$(mandir)/man5
-	$(INSTALL_PROGRAM) wmbiff $(DESTDIR)$(bindir)
-	$(INSTALL_FILE) wmbiff.1 $(DESTDIR)$(mandir)/man1
-	$(INSTALL_FILE) wmbiffrc.5 $(DESTDIR)$(mandir)/man5
+	$(INSTALL_DIR) $(BINDIR)
+	$(INSTALL_DIR) $(MANDIR)/man1
+	$(INSTALL_DIR) $(MANDIR)/man5
+	$(INSTALL_PROGRAM) wmbiff $(BINDIR)
+	$(INSTALL_FILE) wmbiff.1 $(MANDIR)/man1
+	$(INSTALL_FILE) wmbiffrc.5 $(MANDIR)/man5
 
 # CODING STYLE AND INDENTATION [2001-Mar-12]:
 #
