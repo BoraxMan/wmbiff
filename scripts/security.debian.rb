@@ -121,6 +121,11 @@ packagelists.each { |urlpath, sc, uc|
         puts "XX old"
         puts e
         exit 1;
+      rescue Timeout::Error => e
+        # if the net is down, we might get this error instead.
+        # but there is no good reason to print the specific exception. (execution expired)
+        puts "XX old"
+        exit 1;
       end
       test(?e, Cachedir) or Dir.mkdir(Cachedir)
       File.open(uc, 'w') { |o| o.puts data }
