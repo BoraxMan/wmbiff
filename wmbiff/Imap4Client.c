@@ -354,16 +354,9 @@ void imap_cacheHeaders( /*@notnull@ */ Pop3 pc)
 	}
 
 	if (pc->headerCache != NULL) {
-		/* make sure the current copy is "unlocked" */
-		if (pc->headerCache->in_use == 1) {
-			return;
-		}
-		/* free the old one */
-		for (h = pc->headerCache; h != NULL;) {
-			struct msglst *n = h->next;
-			free(h);
-			h = n;
-		}
+		/* decrement the reference count, and free our version */
+		imap_releaseHeaders(pc, pc->headerCache);
+		pc->headerCache = NULL;
 	}
 
 	IMAP_DM(pc, DEBUG_INFO, "working headers\n");
@@ -443,7 +436,16 @@ void imap_releaseHeaders(Pop3 pc
 {
 	assert(h != NULL);
 	/* allow the list to be released next time around */
-	h->in_use = 0;
+	if (h->in_use <= 0) {
+		/* free the old one */
+		while (h != NULL) {
+			struct msglst *n = h->next;
+			free(h);
+			h = n;
+		}
+	} else {
+		h->in_use--;
+	}
 }
 
 /* parse the config line to setup the Pop3 structure */
