@@ -571,7 +571,7 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 	IMAP_DM(pc, DEBUG_INFO, "authList= '%s'\n", PCU.authList);
 
 	if (strcmp(pc->action, "msglst") == 0 ||
-		strcmp(pc->notify, "msglst") == 0 ||
+		strcmp(pc->fetchcmd, "msglst") == 0 ||
 		strcmp(pc->button2, "msglst") == 0) {
 		PCU.wantCacheHeaders = 1;
 	} else {
