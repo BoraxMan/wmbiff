@@ -1,18 +1,27 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/time.h>
+#include <unistd.h>
 
 int debug_default = 2;
+int SkipCertificateCheck = 0;
+const char *certificate_filename = NULL;
+int exists(const char *filename __attribute__((unused))) { return(0); }
+int print_info(void * state __attribute__((unused))) { return(0); }
+int Relax = 1;
+
 
 int indices[12];
-char *sequence[][4] = { 
+const char *sequence[][4] = { 
   { NULL, NULL, NULL, NULL },
   { "prefix", " hello", NULL },
   { "pre", "fix", " hello", NULL },
 };
 
 /* trick tlscomm into believing it can read. */
-int read(int s, char *buf, int buflen) {
+int read(int s, void *buf, size_t buflen) {
   int val = indices[s]++;
 
   if(sequence[s][val] == NULL) {
@@ -25,9 +34,11 @@ int read(int s, char *buf, int buflen) {
   }
 }
 
-int select(int nfds, fd_set *r, fd_set *w, fd_set *x, struct timeval *tv) {
+int select(int nfds, fd_set *r, fd_set *w __attribute__((unused)), 
+					 	fd_set *x __attribute__((unused)), 
+							struct timeval *tv __attribute__((unused))) {
   int i;
-  int ready;
+  int ready = 0;
   for(i=0;i<nfds;i++) {
     if(FD_ISSET(i,r) && sequence[i][indices[i]] != NULL) {
       ready++;
@@ -38,6 +49,7 @@ int select(int nfds, fd_set *r, fd_set *w, fd_set *x, struct timeval *tv) {
   if(ready == 0) {
     printf("botched.\n");
   }
+	return ready;
 }
 
 #define BUF_SIZE 1024
@@ -51,17 +63,19 @@ struct connection_state {
 	void * pc;					/* mailbox handle for debugging messages */
 };
 
-int main(int argc, char **argv) {
+int main(int argc __attribute__((unused)), 
+         char **argv __attribute__((unused))) {
   char buf[255];
   struct connection_state scs;
-  scs.name = "test";
+  scs.name = strdup("test");
   scs.unprocessed[0] = '\0';
   scs.pc = NULL;
-  // alarm(10);
+  alarm(10);
   
   for(scs.sd = 1; scs.sd < 3; scs.sd++) {
     memset(scs.unprocessed, 0, BUF_SIZE);
     printf("%d\n", tlscomm_expect(&scs, "prefix", buf, 255));
   }
+	return 0;
   
 }

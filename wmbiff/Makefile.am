@@ -1,5 +1,5 @@
-TESTS = test_wmbiff
-noinst_PROGRAMS = test_wmbiff
+TESTS = test_wmbiff test_tlscomm
+noinst_PROGRAMS = test_wmbiff test_tlscomm
 bin_PROGRAMS = wmbiff
 wmbiff_SOURCES = wmbiff.c socket.c Pop3Client.c LicqClient.c mboxClient.c \
 	maildirClient.c Imap4Client.c tlsComm.c tlsComm.h ShellClient.c  \
@@ -11,6 +11,8 @@ wmbiff_DEPENDENCIES = ../wmgeneral/libwmgeneral.a Makefile @GNUTLS_COMMON_O@
 test_wmbiff_SOURCES = ShellClient.c charutil.c charutil.h Client.h \
 	test_wmbiff.c passwordMgr.c Imap4Client.c regulo.c Pop3Client.c \
 	tlsComm.c tlsComm.h socket.c 
+test_tlscomm_SOURCES = test_tlscomm.c \
+	tlsComm.c tlsComm.h 
 EXTRA_test_wmbiff_SOURCES = gnutls-common.c gnutls-common.h	
 test_wmbiff_LDADD = @LIBGCRYPT_LIBS@ 
 man_MANS = wmbiff.1 wmbiffrc.5
