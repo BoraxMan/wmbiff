@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.10 2001/11/02 08:53:55 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.11 2001/11/16 00:37:46 bluehal Exp $ */
 
 #define	USE_POLL
 
@@ -54,7 +54,7 @@ void usage(void);
 void printversion(void);
 void do_biff(int argc, char **argv);
 void parse_mbox_path(int item);
-void BlitString(char *name, int x, int y, int new);
+static void BlitString(const char *name, int x, int y, int new);
 void BlitNum(int num, int x, int y, int new);
 void ClearDigits(int i);
 void XSleep(int millisec);
@@ -376,7 +376,7 @@ int count_mail(int item)
 /* Blits a string at given co-ordinates
    If a ``new'' parameter is given, all digits will be yellow
 */
-void BlitString(char *name, int x, int y, int new)
+static void BlitString(const char *name, int x, int y, int new)
 {
 	int i, c, k = x;
 
