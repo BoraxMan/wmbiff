@@ -1,11 +1,11 @@
-/* $Id: Client.h,v 1.25 2002/06/08 22:14:54 bluehal Exp $ */
+/* $Id: Client.h,v 1.26 2002/06/21 04:29:58 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
  *
  * Email Checker Pop3/Imap4/Licq/Gicu/mbox/maildir/finger
  *
- * Last Updated : $Date: 2002/06/08 22:14:54 $
+ * Last Updated : $Date: 2002/06/21 04:29:58 $
  *
  */
 
@@ -65,7 +65,7 @@ typedef struct _mbox_t {
 		} pop_imap;
 	} u;
 
-	int (*checkMail) (Pop3);
+	int (*checkMail) ( /*@notnull@ */ Pop3);
 
 	time_t prevtime;
 	time_t prevfetch_time;
@@ -77,13 +77,15 @@ typedef struct _mbox_t {
 
 #define BUF_SIZE 1024
 
+/* creation calls must have this prototype */
+int pop3Create( /*@notnull@ */ Pop3 pc, const char *str);
+int imap4Create( /*@notnull@ */ Pop3 pc, const char *str);
+int licqCreate( /*@notnull@ */ Pop3 pc, const char *str);
+int shellCreate( /*@notnull@ */ Pop3 pc, const char *str);
+int mboxCreate( /*@notnull@ */ Pop3 pc, const char *str);
+int maildirCreate( /*@notnull@ */ Pop3 pc, const char *str);
+
 int sock_connect(const char *hostname, int port);
-int pop3Create(Pop3 pc, const char *str);
-int imap4Create(Pop3 pc, const char *str);
-int licqCreate(Pop3 pc, char *str);
-int shellCreate(Pop3 pc, const char *str);
-int mboxCreate(Pop3 pc, const char *str);
-int maildirCreate(Pop3 pc, char *str);
 FILE *openMailbox(Pop3 pc, const char *mbox_filename);
 /* backtickExpand returns null on failure *//*@null@ */
 char *backtickExpand(Pop3 pc, const char *path);
@@ -125,7 +127,9 @@ do { \
    without requiring gcc as the compiler */
 #if !defined(__GNUC__) || __GNUC__ < 2 || \
   (__GNUC__ == 2 && __GNUC_MINOR__ < 7)
+#ifndef __attribute__
 #define __attribute__(__x)
+#endif
 #endif							/* gnuc */
 #endif							/* client.h */
 /* vim:set ts=4: */
