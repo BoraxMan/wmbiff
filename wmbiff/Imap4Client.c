@@ -263,7 +263,7 @@ int imap_checkmail(Pop3 pc)
 	if (scs == NULL) {
 		IMAP_DM(pc, DEBUG_INFO, "Need new connection to %s@%s\n",
 				PCU.userName, PCU.serverName);
-		(void) pc->open(pc);
+		(void) imap_open(pc);
 		scs = state_for_pcu(pc);
 	}
 	if (scs == NULL) {
@@ -361,7 +361,6 @@ int imap4Create(Pop3 pc, const char *const str)
 	IMAP_DM(pc, DEBUG_INFO, "serverPort= '%d'\n", PCU.serverPort);
 	IMAP_DM(pc, DEBUG_INFO, "authList= '%s'\n", PCU.authList);
 
-	pc->open = imap_open;
 	pc->checkMail = imap_checkmail;
 	pc->TotalMsgs = 0;
 	pc->UnreadMsgs = 0;

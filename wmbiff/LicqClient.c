@@ -1,4 +1,4 @@
-/* $Id: LicqClient.c,v 1.6 2002/04/09 07:45:52 bluehal Exp $ */
+/* $Id: LicqClient.c,v 1.7 2002/04/16 07:37:38 bluehal Exp $ */
 /* Author : Yong-iL Joh ( tolkien@mizi.com )
    Modified: Jorge García ( Jorge.Garcia@uv.es )
  * 
@@ -46,7 +46,7 @@ int licqCheckHistory(Pop3 pc)
 		   (unsigned long) PCM.size, (unsigned long) st.st_size);
 		ut.actime = st.st_atime;
 		ut.modtime = st.st_mtime;
-		F = pc->open(pc);
+		F = openMailbox(pc);
 
 		/* count message */
 		while (fgets(buf, BUF_SIZE, F)) {
@@ -78,7 +78,6 @@ int licqCreate(Pop3 pc, char *str)
 	pc->UnreadMsgs = 0;
 	pc->OldMsgs = -1;
 	pc->OldUnreadMsgs = -1;
-	pc->open = openMailbox;
 	pc->checkMail = licqCheckHistory;
 
 	strcpy(pc->path, str + 5);	/* cut off ``licq:'' */

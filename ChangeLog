@@ -6,13 +6,41 @@ The latest changelog entry is in a different format, because it's inserted by
 CVS on commit.
 
   $Log: ChangeLog,v $
-  Revision 1.26  2002/04/15 08:15:18  bluehal
-  try to make the distcheck target work correctly.  voodoo.
+  Revision 1.27  2002/04/16 07:37:37  bluehal
+  remove vestigial pc->open()
 
   Revision 1.1  2002/04/07 05:08:23  bluehal
   use automake / autoconf; after checkout run ./FromCVS.sh
 
 
+
+2002-04-15 Monday 22:58 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* Makefile.am: dist the FAQ
+
+2002-04-15 Monday 22:58 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* TODO: be descriptive in TODO
+
+2002-04-15 Monday 21:19 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmgeneral/: Makefile.am, list.c, list.h, misc.c, misc.h,
+	wmgeneral.c, wmgeneral.h: run make indent; also tolerate standard
+	geometry string (dumping the dimensions provided)
+
+2002-04-15 Monday 21:06 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiff.c: bugfix to sigchld_handler (argh)
+
+2002-04-15 Monday 08:15 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* ChangeLog, Makefile.am, TODO, configure.in, wmbiff/Makefile.am,
+	autoconf/Makefile.am: try to make the distcheck target work
+	correctly.  voodoo.
+
+2002-04-15 Monday 08:14 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* FAQ: a little documentation
 
 2002-04-15 Monday 02:21 UTC -- Neil Spring <nspring@cs.washington.edu>
 

@@ -92,7 +92,6 @@ const char *passwordFor(const char *username,
 			/* else fall through, overwrite */
 		} else if (pc) {
 			/* if we've asked, but received nothing, disable this box */
-			pc->open = NULL;
 			pc->checkMail = NULL;
 			return (NULL);
 		}

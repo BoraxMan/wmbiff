@@ -1,4 +1,4 @@
-/* $Id: Client.h,v 1.15 2002/04/15 01:30:32 bluehal Exp $ */
+/* $Id: Client.h,v 1.16 2002/04/16 07:37:38 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -36,8 +36,8 @@ typedef struct _mbox_t {
 	int UnreadMsgs;				/* New (unread) messages in mailbox */
 	int OldMsgs;
 	int OldUnreadMsgs;
-	char TextStatus[10];		/* if set to a string, toupper() and blit that string. 
-								 * instead of a message count */
+	char TextStatus[10];		/* if set to a string, toupper() and blit 
+								 * that string. instead of a message count */
 	int blink_stat;				/* blink digits flag-counter */
 	int debug;					/* debugging status */
 
@@ -62,19 +62,20 @@ typedef struct _mbox_t {
 			int serverPort;
 			int localPort;
 			char authList[100];
-			unsigned int dossl:1,	/* use tls. */
-			 interactive_password:1;	/* prompt the user if we can't login / password is empty */
+			unsigned int dossl:1;	/* use tls. */
+			/* prompt the user if we can't login / password is empty */
+			unsigned int interactive_password:1;
 		} pop_imap;
 	} u;
 
-	FILE *(*open) (Pop3);
 	int (*checkMail) (Pop3);
 
 	time_t prevtime;
 	time_t prevfetch_time;
 	int loopinterval;			/* loop interval for this mailbox */
 
-	const char *askpass;		/* command to execute to get a password, if needed */
+	/* command to execute to get a password, if needed */
+	const char *askpass;
 } mbox_t;
 
 #define BUF_SIZE 1024
@@ -123,3 +124,10 @@ do { \
 #endif							/* gnuc */
 #endif							/* client.h */
 /* vim:set ts=4: */
+/*
+ * Local Variables:
+ * tab-width: 4
+ * c-indent-level: 4
+ * c-basic-offset: 4
+ * End:
+ */

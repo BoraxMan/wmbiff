@@ -1,4 +1,4 @@
-/* $Id: Pop3Client.c,v 1.12 2002/04/11 07:24:15 bluehal Exp $ */
+/* $Id: Pop3Client.c,v 1.13 2002/04/16 07:37:38 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -105,7 +105,7 @@ int pop3CheckMail(Pop3 pc)
 	int read;
 	char buf[BUF_SIZE];
 
-	f = pc->open(pc);
+	f = pop3Login(pc);
 	if (f == NULL)
 		return -1;
 
@@ -203,7 +203,6 @@ int pop3Create(Pop3 pc, const char *str)
 	POP_DM(pc, DEBUG_INFO, "serverPort= '%d'\n", PCU.serverPort);
 	POP_DM(pc, DEBUG_INFO, "authList= '%s'\n", PCU.authList);
 
-	pc->open = pop3Login;
 	pc->checkMail = pop3CheckMail;
 	pc->TotalMsgs = 0;
 	pc->UnreadMsgs = 0;

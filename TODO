@@ -6,9 +6,6 @@
   Because interesting mailboxes can be defined by date.
 * \ line continuations in configuration file.
   Because shell commands can be quite long.
-* Remove (*open)() from mbox_t
-  Because it's rarely used, and can be easily integrated
-  with the command check.
 * Generic constructors for mboxes.  
   There's a lot of common code across different Clients;
   this is one piece that could use refactoring.
@@ -30,8 +27,15 @@
   STATUS) and a bad response (a003 NO STATUS).  As soon as
   one of them is received, we're done.
 
-$Id: TODO,v 1.7 2002/04/15 22:58:05 bluehal Exp $
 
-;;; Local Variables: ***
-;;; mode: outline ***
-;;; End: ***
+* Unlikely to get done, unless someone volunteers:
+* Support pops
+  tlsComm.c should make it easy to provide TLS support
+  for POP.  Unfortunately, this would only be useful for
+  someone who has such a server that doesn't support IMAPS.
+
+$Id: TODO,v 1.8 2002/04/16 07:37:37 bluehal Exp $
+
+Local Variables:
+mode: outline
+End:
