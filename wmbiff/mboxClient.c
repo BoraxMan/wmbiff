@@ -1,4 +1,4 @@
-/* $Id: mboxClient.c,v 1.4 2002/03/01 08:41:29 bluehal Exp $ */
+/* $Id: mboxClient.c,v 1.5 2002/03/04 06:57:17 bluehal Exp $ */
 /* Author:		Yong-iL Joh <tolkien@mizi.com>
    Modified:	Jorge García <Jorge.Garcia@uv.es>
    			 	Rob Funk <rfunk@funknet.net>
@@ -49,7 +49,7 @@ int mboxCheckHistory(Pop3 pc)
 
 	/* mbox file */
 	if (stat(pc->path, &st)) {
-		fprintf(stderr, "wmbiff: Can't stat mailbox '%s': %s\n",
+		DM(pc, DEBUG_ERROR, "Can't stat mailbox '%s': %s\n",
 				pc->path, strerror(errno));
 		return -1;				/* Error stating mailbox */
 	}
