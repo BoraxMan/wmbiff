@@ -1,5 +1,5 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiffrc.5.in,v 1.7 2002/10/14 01:47:18 bluehal Exp $
+.\" $Id: wmbiffrc.5.in,v 1.8 2002/10/20 21:58:58 jordi Exp $
 .\"
 .\" @configure_input@
 .\"
@@ -237,7 +237,7 @@ per-user wmbiff configuration file.
 
 .SH AUTHOR
 This manual page was written by Jordi Mallach <jordi@debian.org>,
-originally for the Debian GNU/Linux system (but may be used by others).
+originally for the Debian system (but may be used by others).
 
 .SH SEE ALSO
 .PD 0
