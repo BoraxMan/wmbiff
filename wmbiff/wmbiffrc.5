@@ -1,0 +1,121 @@
+.\" Hey, Emacs!  This is an -*- nroff -*- source file.
+.\" wmbiff.1 and wmbiffrc.5 are copyright 1999-2001 by 
+.\" Jordi Mallach <jordi@debian.org>
+.\"
+.\" This is free documentation, see the latest version of the GNU
+.\" General Public License for copying conditions. There is NO warranty.
+.TH WMBIFFRC 5 "March 12, 2001" "wmbiff"
+
+.SH NAME
+wmbiffrc \- configuration file for
+.BR wmbiff (1)
+
+.SH DESCRIPTION
+\fBWMbiff\fP is a mail notification tool for the WindowMaker and AfterStep
+window managers. It can handle up to 5 mailboxes, and you can define actions
+on mouse clicks for the different mailboxes. This manpage explains the
+different options which can be specified in a user's wmbiffrc.
+
+.SH OPTIONS
+Each option takes the form
+.IR option[.mbox] " = " value .
+Comment must be preceeded by pound signs (#).
+
+The supported configuration options are:
+
+.TP
+\fBinterval\fP
+Global interval between mailbox checking. Value is the number of seconds, 5
+is the default.
+.TP
+\fBlabel.n\fP
+Specifies the displayed label for a mailbox. It can be up to five characters
+long.
+.TP
+\fBpath.n\fP
+Path to the mailbox, local or remote one. Path lines start with a prefix,
+which specifies the type of wmbiff box you're setting up. The following types
+are supported:
+.RS
+.TP
+.I mbox
+This is a local mbox mailbox. After the prefix, you only need to put the
+path to the mailbox wmbiff needs to read.  This is also the default.
+.RS
+mbox:/path/to/mail/debian-devel
+.RS
+- or -
+.RE
+/path/to/mail/debian-devel
+.RE
+.TP
+.I maildir
+\fBMaildir mailboxes are now supported!\fP
+This works just like \fImbox\fP above.  After the prefix, you need to put
+the path to the maildir wmbiff will read.
+.RS
+maildir:/path/to/mail/bugtraq/
+.RE
+.TP
+.I pop3
+Using this type, wmbiff will fetch mail from a pop3 server, using the
+specified username, password, host and an optional port number (defaulting
+to 110). If your passwd contained special character, eg. '@' or ':',
+use another path format.
+.RS
+pop3:user:password@server[:port]
+pop3:user password server[ port] (another format)
+.RE
+.TP
+.I imap
+These are IMAP4 boxes. As with pop3, wmbiff will read a imap4 mbox using
+the given values and will display info about the remote mail. This type
+accepts user, password, host and optional path to mailbox and port number.
+.RS
+imap:user:password@server[/mailbox][:port]
+.RE
+.TP
+.I licq
+With this box type, wmbiff will read the given history file and track the
+number of messages in it. It just needs a path to a given licq history file.
+.RS
+licq:/path/to/.licq/history/file.history
+.RE
+.RE
+.TP
+\fBnotify.n\fP
+Command to be executed on new mail arrival in the given mailbox. Accepts
+the special keyword "beep" to use the pc speaker.
+.TP
+\fBaction.n\fP
+Command to be executed on left mouse click on a mailbox label.
+.TP
+\fBinterval.n\fP
+Per mailbox check interval. Value is the amount of seconds between
+checkings, default is the global interval.
+.TP
+\fBfetchinterval.n\fP
+Interval between mail auto-fetching. Values accept 0 to disable, -1 for
+autofetching on new mail arrival, and positive values for a given interval
+in seconds.
+.TP
+\fBfetchcmd.n\fP
+Command to be executed to fetch mail. If not specified, fetching through
+wmbiff is disabled completely.
+
+.SH FILES
+.TP
+.I ~/.wmbiffrc
+peruser wmbiff configuration file.
+
+.SH AUTHOR
+This manual page was written by Jordi Mallach <jordi@debian.org>,
+originally for the Debian GNU/Linux system (but may be used by others).
+
+.SH SEE ALSO
+.PD 0
+.TP
+\fBwmbiff\fP(1)
+.PP
+\fI/usr/share/doc/wmbiff/examples/sample.wmbiffrc\fP
+(or equivalent on your system)

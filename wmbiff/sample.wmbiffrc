@@ -1,0 +1,68 @@
+# Global interval -- seconds between check mailboxes
+interval=60
+
+### First string ###
+
+# Label, that will be displayed
+label.0=Spool
+
+# Path to mailbox for UNIX-style mailboxes,
+# or pop3:user:password@mailserver[:port] for POP3 accounts
+# port are optional, default - 110
+path.0=/var/spool/mail/gb
+
+# Command, which executed on new mail arrival, or special keyword 'beep'
+#notify.0=beep
+notify.0=my_play /home/gb/sounds/new_mail_has_arrived.wav
+
+# Command, which executed on left mouse click on label 
+action.0=rxvt -name mutt -e mutt
+
+# Rescan interval; default to global interval
+# For POP3-accounts bigger values (>60sec) is recommended
+#interval.0=5
+
+# Interval between mail auto-fetching; use 0 for disable (only
+# mouse right-clicking still worked)
+# use -1 for auto-fetching on new mail arrival
+#fetchinterval.0=300
+
+# Command, which used for fetching mail. Leave commented out for full disable
+#fetchcmd.0=/usr/bin/fetchmail
+
+###
+# NOTE: line under this line will not be parsed because the space before equal
+label.1 = MBOX
+# MBOX format: mbox:fullpathname
+path.1=mbox:/home/gb/mail/10_ksi-linux-list
+notify.1=my_play /home/gb/sounds/new_mail_has_arrived.wav
+action.1=rxvt -name mutt -e mutt -f /home/gb/mail/10_ksi-linux-list
+
+# label.1 = MDIR
+# # Maildir format: maildir:fullpathname
+# path.1=maildir:/home/gb/Maildir/
+# notify.1=my_play /home/gb/sounds/new_mail_has_arrived.wav
+# action.1=rxvt -name mutt -e mutt -f /home/gb/Maildir
+
+label.2=LICQ
+# LICQ format: licq:fullpathname
+path.2=licq:/home/person/.licq/history/1111111.history
+notify.2=beep
+action.2=licq&
+
+label.3=POP3
+# pop3 format: pop3:user:password@server[:port]
+path.3=pop3:user:password@server
+notify.3=my_play /home/gb/sounds/new_mail_has_arrived.wav
+action.3=rxvt -name mutt -e mutt -f /home/gb/mail/30_nftp-list
+interval.3=300		# 5 minutes
+fetchinterval.3=-1
+fetchcmd.3=fetchmail
+
+label.4=IMAP4
+# IMAP4 format: imap:user:password@server[/mailbox][:port]
+# mailbox is optional, default - INBOX
+# port is optional, default - 143
+path.4=imap:user:password@server
+interval.4=300		# 5 minutes
+
