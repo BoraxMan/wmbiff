@@ -1,8 +1,11 @@
 Release Notes
 ~~~~~~~~~~~~~
-Release 0.4.10 - 
+Release 0.4.10 - Dec 12, 2002
   * Peter McAlpine's globalnotify feature - elect to play a 
-    sound on new mail in any mailbox.
+    sound on new mail in *any* mailbox without a chorus of
+    sounds from every mailbox.
+  * -skip-certificate-check option for when your imaps server
+    is misconfigured and you can't do anything about it.
 
 Release 0.4.9 - Dec 1, 2002
   * GNUTLS v0.5.9 or higher required
@@ -374,4 +377,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.32 2002/12/09 21:47:36 bluehal Exp $
+$Id: NEWS,v 1.33 2002/12/13 05:38:39 bluehal Exp $

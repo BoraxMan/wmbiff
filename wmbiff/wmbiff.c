@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.36 2002/12/09 21:45:29 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.37 2002/12/13 05:38:39 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -90,6 +90,7 @@ int debug_default = DEBUG_ERROR;
 /* color from wmbiff's xpm, down to 24 bits. */
 const char *foreground = "#21B3AF";
 const char *highlight = "yellow";
+int SkipCertificateCheck = 0;
 int notWithdrawn = 0;
 
 int num_mailboxes = 1;
@@ -1043,6 +1044,15 @@ void parse_cmd(int argc, char **argv, /*@out@ */ char *config_file)
 				printversion();
 				exit(EXIT_SUCCESS);
 				break;
+			case 's':
+				if (strcmp(arg + 1, "skip-certificate-check") == 0) {
+					SkipCertificateCheck = 1;
+				} else {
+					usage();
+					exit(EXIT_SUCCESS);
+				}
+
+				break;
 			case 'c':
 				if (argc > (i + 1)) {
 					strncpy(config_file, argv[i + 1], 255);
@@ -1089,6 +1099,10 @@ void usage(void)
 		   "    -geometry +XPOS+YPOS      initial window position\n"
 		   "    -h                        this help screen\n"
 		   "    -hi <color>               highlight color for new mail\n"
+#ifdef USE_GNUTLS
+		   "    -skip-certificate-check   using TLS, don't validate the\n"
+		   "                              server's certificate\n"
+#endif
 		   "    -v                        print the version number\n"
 		   "    +w                        not withdrawn: run as a window\n"
 		   "\n");

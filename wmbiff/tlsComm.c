@@ -33,6 +33,9 @@
 
 /* if non-null, set to a file for certificate verification */
 extern const char *certificate_filename;
+/* if set, don't fail when dealing with a bad certificate.
+   (continue to whine, though, as bad certs should be fixed) */
+extern int SkipCertificateCheck;
 
 /* WARNING: implcitly uses scs to gain access to the mailbox
    that holds the per-mailbox debug flag. */
@@ -267,6 +270,17 @@ void tlscomm_printf(struct connection_state *scs, const char *format, ...)
 #ifdef USE_GNUTLS
 #include "gnutls-common.h"
 
+static int
+bad_certificate(const struct connection_state *scs, const char *msg)
+{
+	TDM(DEBUG_ERROR, "%s", msg);
+	if (!SkipCertificateCheck) {
+		TDM(DEBUG_ERROR, "to ignore this error, run wmbiff "
+			"with the -skip-certificate-check option");
+		exit(1);
+	}
+}
+
 /* a start of a hack at verifying certificates.  does not
    provide any security at all.  I'm waiting for either
    gnutls to make this as easy as it should be, or someone
@@ -280,23 +294,17 @@ int tls_check_certificate(struct connection_state *scs,
 	int cert_list_size = 0;
 
 	if (gnutls_auth_get_type(scs->state) != GNUTLS_CRD_CERTIFICATE) {
-		TDM(DEBUG_ERROR, "Unable to get certificate from peer.\n");
-		exit(1);
+		bad_certificate(scs, "Unable to get certificate from peer.\n");
 	}
 	certstat = gnutls_certificate_verify_peers(scs->state);
 	if (certstat ==
 		(GNUTLS_CertificateStatus) GNUTLS_E_NO_CERTIFICATE_FOUND) {
-		TDM(DEBUG_ERROR, "server has no certificate.\n");
-		exit(1);
 	} else if (certstat & GNUTLS_CERT_CORRUPTED) {
-		TDM(DEBUG_ERROR, "server's certificate is corrupt.\n");
-		exit(1);
+		bad_certificate(scs, "server's certificate is corrupt.\n");
 	} else if (certstat & GNUTLS_CERT_REVOKED) {
-		TDM(DEBUG_ERROR, "server's certificate has been revoked.\n");
-		exit(1);
+		bad_certificate(scs, "server's certificate has been revoked.\n");
 	} else if (certstat & GNUTLS_CERT_INVALID) {
-		TDM(DEBUG_ERROR, "server's certificate is invalid.\n");
-		exit(1);
+		bad_certificate(scs, "server's certificate is invalid.\n");
 	} else if (certstat & GNUTLS_CERT_NOT_TRUSTED) {
 		TDM(DEBUG_INFO, "server's certificate is not trusted.\n");
 		TDM(DEBUG_INFO,
@@ -309,13 +317,11 @@ int tls_check_certificate(struct connection_state *scs,
 
 	if (gnutls_x509_extract_certificate_expiration_time(&cert_list[0]) <
 		time(NULL)) {
-		TDM(DEBUG_ERROR, "server's certificate has expired.\n");
-		exit(1);
+		bad_certificate(scs, "server's certificate has expired.\n");
 	} else
 		if (gnutls_x509_extract_certificate_activation_time(&cert_list[0])
 			> time(NULL)) {
-		TDM(DEBUG_ERROR, "server's certificate is not yet valid.\n");
-		exit(1);
+		bad_certificate(scs, "server's certificate is not yet valid.\n");
 	} else {
 		TDM(DEBUG_INFO, "certificate passed time check.\n");
 	}
@@ -327,7 +333,8 @@ int tls_check_certificate(struct connection_state *scs,
 		TDM(DEBUG_ERROR,
 			"server's certificate (%s) does not match its hostname (%s).\n",
 			dn.common_name, remote_hostname);
-		exit(1);
+		bad_certificate(scs,
+						"server's certificate does not match its hostname.\n");
 	} else {
 		if ((scs->pc)->debug >= DEBUG_INFO) {
 			gnutls_DN dn;

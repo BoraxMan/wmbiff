@@ -1,5 +1,5 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiff.1,v 1.11 2002/11/13 06:44:08 bluehal Exp $
+.\" $Id: wmbiff.1,v 1.12 2002/12/13 05:38:39 bluehal Exp $
 .\"
 .\" wmbiff.1 and wmbiffrc.5 are copyright 1999-2001 by
 .\" Jordi Mallach <jordi@debian.org>
@@ -70,6 +70,16 @@ time default.
 .B \-hi <color>
 Use specified X11 color for new mail counters.  Implies -font
 default, unless overridden.
+.TP
+.B \-skip-certificate-check
+When using TLS (IMAPS), keep going, even if the server's
+certificate is invalid.  Invalid certificates have expired,
+have a different hostname than you connected to, are
+corrupt, or have been revoked.  Do not use this option
+unless wmbiff fails and suggests it to you, and even then,
+be careful and consider alerting your mail system
+administrator first.  The need to use this option is a sign
+of server misconfiguration.
 .TP
 .B \+w 
 Do not use the "withdrawn" state: the wmbiff window will not
