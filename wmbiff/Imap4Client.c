@@ -322,6 +322,7 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 		".*imaps?:([^: ]{1,32}) ([^ ]{1,32}) ([^/: ]+)(/(\"[^\"]+\")|([^: ]+))?( [0-9]+)? *",
 		NULL
 	};
+	char *unaliased_str;
 
 	struct regulo regulos[] = {
 		{1, PCU.userName, regulo_strcpy},
@@ -331,6 +332,7 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 		{7, &PCU.serverPort, regulo_atoi},
 		{0, NULL, NULL}
 	};
+
 
 	/* IMAP4 format: imap:user:password@server/mailbox[:port] */
 	/* If 'str' line is badly formatted, wmbiff won't display the mailbox. */
@@ -358,26 +360,31 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 
 	/* defaults */
 	PCU.serverPort = (PCU.dossl != 0) ? 993 : 143;
+
+	/* argh, str and pc->path are aliases, so we can't just write the default
+	   value into the string we're about to parse. */
+	unaliased_str = strdup(str);
 	strcpy(pc->path, "INBOX");
 
 	for (matchedchars = 0, i = 0;
 		 regexes[i] != NULL && matchedchars <= 0; i++) {
-		matchedchars = regulo_match(regexes[i], str, regulos);
+		matchedchars = regulo_match(regexes[i], unaliased_str, regulos);
 	}
 
 	/* failed to match either regex */
 	if (matchedchars <= 0) {
 		pc->label[0] = '\0';
-		IMAP_DM(pc, DEBUG_ERROR, "Couldn't parse line %s (%d)\n", str,
-				matchedchars);
+		IMAP_DM(pc, DEBUG_ERROR, "Couldn't parse line %s (%d)\n",
+				unaliased_str, matchedchars);
 		return -1;
 	}
 
 	if (PCU.password[0] == '\0')
 		PCU.interactive_password = 1;
 
-	grab_authList(str + matchedchars, PCU.authList);
+	grab_authList(unaliased_str + matchedchars, PCU.authList);
 
+	free(unaliased_str);
 
 	IMAP_DM(pc, DEBUG_INFO, "userName= '%s'\n", PCU.userName);
 	IMAP_DM(pc, DEBUG_INFO, "password is %d characters long\n",
