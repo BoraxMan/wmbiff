@@ -31,6 +31,10 @@
    that holds the per-mailbox debug flag. */
 #define TDM(lvl, args...) DM(scs->pc, lvl, "comm: " args)
 
+/* how long to wait for the server to do its thing 
+   when we issue it a command (in seconds) */
+#define EXPECT_TIMEOUT 20
+
 /* this is the per-connection state that is maintained for
    each connection; BIG variables are for ssl (null if not
    used). */
@@ -83,14 +87,20 @@ static int wait_for_it(int sd, int timeoutseconds)
 {
 	fd_set readfds;
 	struct timeval tv;
+	int ready_descriptors;
 	tv.tv_sec = timeoutseconds;
 	tv.tv_usec = 0;
 	FD_ZERO(&readfds);
 	FD_SET(sd, &readfds);
-	if (select(sd + 1, &readfds, NULL, NULL, &tv) == 0) {
+	ready_descriptors = select(sd + 1, &readfds, NULL, NULL, &tv);
+	if (ready_descriptors == 0) {
 		DMA(DEBUG_INFO,
 			"select timed out after %d seconds on socket: %d\n",
 			timeoutseconds, sd);
+		return (0);
+	} else if (ready_descriptors == -1) {
+		DMA(DEBUG_ERROR,
+			"select failed on socket %d: %s\n", sd, strerror(errno));
 		return (0);
 	}
 	return (FD_ISSET(sd, &readfds));
@@ -125,6 +135,10 @@ getline_from_buffer(char *readbuffer, char *linebuffer, int linebuflen)
 		*(q++) = *(p++);
 		/* return the length of the line */
 	}
+	if (i < 0 || i > linebuflen) {
+		DM((Pop3) NULL, DEBUG_ERROR, "bork bork bork!: %d %d\n", i,
+		   linebuflen);
+	}
 	return i;
 }
 
@@ -137,10 +151,10 @@ int tlscomm_expect(struct connection_state *scs,
 				   const char *prefix, char *buf, int buflen)
 {
 	int prefixlen = (int) strlen(prefix);
+	int readbytes = -1;
 	memset(buf, 0, buflen);
 	TDM(DEBUG_INFO, "%s: expecting: %s\n", scs->name, prefix);
-	while (wait_for_it(scs->sd, 10)) {
-		int readbytes;
+	while (wait_for_it(scs->sd, EXPECT_TIMEOUT)) {
 #ifdef WITH_TLS
 		if (scs->state) {
 			readbytes =
@@ -148,6 +162,10 @@ int tlscomm_expect(struct connection_state *scs,
 			if (readbytes < 0) {
 				handle_gnutls_read_error(readbytes, scs);
 				return 0;
+			}
+			if (readbytes > BUF_SIZE) {
+				TDM(DEBUG_ERROR, "%s: unexpected bork!: %d %s\n",
+					scs->name, readbytes, strerror(errno));
 			}
 		} else
 #endif
@@ -157,6 +175,10 @@ int tlscomm_expect(struct connection_state *scs,
 				TDM(DEBUG_ERROR, "%s: error reading: %s\n", scs->name,
 					strerror(errno));
 				return 0;
+			}
+			if (readbytes > BUF_SIZE) {
+				TDM(DEBUG_ERROR, "%s: unexpected read bork!: %d %s\n",
+					scs->name, readbytes, strerror(errno));
 			}
 		}
 		if (readbytes == 0) {
@@ -180,8 +202,13 @@ int tlscomm_expect(struct connection_state *scs,
 				}
 			}
 	}
-	TDM(DEBUG_ERROR, "%s: expecting: '%s', saw: '%s'\n", scs->name, prefix,
-		buf);
+	if (readbytes == -1) {
+		TDM(DEBUG_INFO, "%s: timed out while expecting '%s'\n",
+			scs->name, prefix);
+	} else {
+		TDM(DEBUG_ERROR, "%s: expecting: '%s', saw (%d): %s\n",
+			scs->name, prefix, readbytes, buf);
+	}
 	return 0;					/* wait_for_it failed */
 }
 
