@@ -20,6 +20,7 @@ maintainer-clean-local:
 DISTCLEANFILES = conf.libgnutlstest build-stamp install-stamp
 
 dist-hook-local: ChangeLog
+	chmod -R g-s .
 
 indent:
 	cd wmbiff && make indent	
