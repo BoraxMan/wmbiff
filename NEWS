@@ -1,5 +1,9 @@
 Release Notes
 ~~~~~~~~~~~~~
+Release 0.4.23 - April 27, 2004
+  * Allow server hostnames in IMAP to be IP addresses 
+    (start with a number).
+
 Release 0.4.22 - March 27, 2004
   * Skip examine/search unless requested with msglst option.
   * Exit if ssh-askpass permissions check fails.
@@ -467,4 +471,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.56 2004/03/28 00:36:11 bluehal Exp $
+$Id: NEWS,v 1.57 2004/04/27 23:35:58 bluehal Exp $
