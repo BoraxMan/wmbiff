@@ -20,6 +20,10 @@ elif [ -x /usr/bin/automake-1.6 ]; then
     echo "Using automake 1.6";
     AUTOMAKE=automake-1.6
     ACLOCAL=aclocal-1.6
+elif [ -x /usr/bin/automake-1.5 ]; then
+    echo "Using automake 1.5";
+    AUTOMAKE=automake-1.5
+    ACLOCAL=aclocal-1.5
 else
     AUTOMAKE=automake
     ACLOCAL=aclocal
