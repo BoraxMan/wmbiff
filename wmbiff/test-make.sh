@@ -2,6 +2,9 @@
 # a short script to make sure that wmbiff builds under various
 # options.  this is not necessary for normal users, and is 
 # intended as a last-minute sanity check before a release.
+
+make indent
+
 echo NO-CRYPTO BUILD
 make clean
 WITHOUT_CRYPTO=1 make 

@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.17 2002/03/06 07:59:24 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.18 2002/04/05 19:43:54 bluehal Exp $ */
 
 #define	USE_POLL
 
@@ -13,6 +13,7 @@
 
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <signal.h>
 
 #include <X11/Xlib.h>
@@ -44,6 +45,18 @@ const int wmbiff_mask_height = 64;
 #define DEFAULT_LOOP 5
 
 mbox_t mbox[5];
+/* this is the normal pixmap. */
+const char *skin_filename = "wmbiff-master-led.xpm";
+/* path to search for pixmaps */
+/* /usr/share/wmbiff should have the default pixmap. */
+/* /usr/local/share/wmbiff if compiled locally. */
+/* / is there in case a user wants to specify a complete path */
+/* . is there for development. */
+/* this should eventually be derived at compile (or
+   configure) time to use PREFIX from the makefile, but I (blueHal)
+   prefer to wait for autoconf integration. */
+const char *skin_search_path =
+	"/usr/share/wmbiff:/usr/local/share/wmbiff:.";
 
 int ReadLine(FILE *, char *, char *, int *);
 int Read_Config_File(char *, int *);
@@ -78,6 +91,7 @@ void init_biff(char *uconfig_file)
 		mbox[i].fetchcmd[0] = 0;
 		mbox[i].loopinterval = 0;
 		mbox[i].debug = debug_default;
+		mbox[i].askpass = "/usr/bin/ssh-askpass";
 	}
 
 	/* Some defaults, if config file is unavailable */
@@ -142,6 +156,77 @@ void init_biff(char *uconfig_file)
 	}
 }
 
+char **LoadXPM(const char *pixmap_filename)
+{
+	char **xpm;
+	int success;
+	success = XpmReadFileToData((char *) pixmap_filename, &xpm);
+	if (success == XpmOpenFailed) {
+		DMA(DEBUG_ERROR, "Unable to open %s\n", pixmap_filename);
+	} else if (success == XpmFileInvalid) {
+		DMA(DEBUG_ERROR, "%s is not a valid pixmap\n", pixmap_filename);
+	} else if (success == XpmNoMemory) {
+		DMA(DEBUG_ERROR, "Insufficient memory to read %s\n",
+			pixmap_filename);
+	}
+	return (xpm);
+}
+
+int exists(const char *filename)
+{
+	struct stat st_buf;
+	DMA(DEBUG_INFO, "looking for %s\n", filename);
+	if (stat(filename, &st_buf) == 0) {
+		if (S_ISREG(st_buf.st_mode)) {
+			DMA(DEBUG_INFO, "found %s\n", filename);
+			return (1);
+		}
+	}
+	return (0);
+}
+
+/* acts like execvp, with code inspired by it */
+/* mustfree */
+char *search_path(const char *path, const char *find_me)
+{
+	char *buf;
+	const char *p;
+	int len, pathlen;
+	if (strchr(find_me, '/') != NULL) {
+		return (strdup(find_me));
+	}
+	pathlen = strlen(path);
+	len = strlen(find_me) + 1;
+	buf = malloc(pathlen + len + 1);
+	memcpy(buf + pathlen + 1, find_me, len);
+	buf[pathlen] = '/';
+
+	for (p = path; p != NULL; path = p, path++) {
+		char *startp;
+		p = strchr(path, ':');
+		if (p == NULL) {
+			/* not found; p should point to the null char at the end */
+			startp =
+				memcpy(buf + pathlen - strlen(path), path, strlen(path));
+		} else if (p == path) {
+			/* double colon apparently means try here */
+			startp = &buf[pathlen + 1];
+		} else {
+			/* copy the part between the colons to the buffer */
+			startp = memcpy(buf + pathlen - (p - path), path, p - path);
+		}
+		if (exists(startp)) {
+			char *ret = strdup(startp);
+			free(buf);
+			return (ret);
+		}
+	}
+	free(buf);
+	return (NULL);
+}
+
+
+
 void do_biff(int argc, char **argv)
 {
 	int i;
@@ -152,12 +237,22 @@ void do_biff(int argc, char **argv)
 	int Sleep_Interval = DEFAULT_SLEEP_INTERVAL;	/* Default sleep time (in msec) */
 	int Blink_Mode = 0;			/* Bit mask, digits are in blinking mode or not.
 								   Each bit for separate mailbox */
+	const char **skin_xpm = NULL;
+	char *skin_file_path = search_path(skin_search_path, skin_filename);
 
+	if (skin_file_path != NULL) {
+		skin_xpm = (const char **) LoadXPM(skin_file_path);
+	}
+	if (skin_xpm == NULL) {
+		DMA(DEBUG_ERROR, "using built-in xpm; %s wasn't found in %s\n",
+			skin_filename, skin_search_path);
+		skin_xpm = wmbiff_master_xpm;
+	}
 
-	createXBMfromXPM(wmbiff_mask_bits, wmbiff_master_xpm,
+	createXBMfromXPM(wmbiff_mask_bits, skin_xpm,
 					 wmbiff_mask_width, wmbiff_mask_height);
 
-	openXwindow(argc, argv, wmbiff_master_xpm, wmbiff_mask_bits,
+	openXwindow(argc, argv, skin_xpm, wmbiff_mask_bits,
 				wmbiff_mask_width, wmbiff_mask_height);
 
 	AddMouseRegion(0, 5, 6, 58, 16);
@@ -434,6 +529,7 @@ int ReadLine(FILE * fp, char *setting, char *value, int *mbox_index)
 
 	*setting = 0;
 	*value = 0;
+	*mbox_index = -1;
 
 	if (!fp || feof(fp) || !fgets(buf, BUF_SIZE - 1, fp))
 		return -1;
@@ -517,10 +613,23 @@ int Read_Config_File(char *filename, int *loopinterval)
 	while (!feof(fp)) {
 		if (ReadLine(fp, setting, value, &mbox_index) == -1)
 			continue;
+		/* settings that can be global go here. */
 		if (!strcmp(setting, "interval")) {
 			*loopinterval = atoi(value);
+		} else if (!strcmp(setting, "askpass")) {
+			const char *askpass = strdup(value);
+			if (mbox_index == -1) {
+				DMA(DEBUG_INFO, "setting all to askpass %s\n", askpass);
+				for (mbox_index = 0; mbox_index < 5; mbox_index++)
+					mbox[mbox_index].askpass = askpass;
+			} else {
+				mbox[mbox_index].askpass = askpass;
+			}
+		} else if (!strcmp(setting, "skinfile")) {
+			skin_filename = strdup(value);
 		} else if (mbox_index == -1)
 			continue;			/* Didn't read any setting.[0-5] value */
+		/* now only local settings */
 		if (!strcmp(setting, "label.")) {
 			strcpy(mbox[mbox_index].label, value);
 		} else if (!strcmp(setting, "path.")) {

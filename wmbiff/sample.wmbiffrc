@@ -1,4 +1,4 @@
-# $Id: sample.wmbiffrc,v 1.9 2002/04/04 08:51:50 bluehal Exp $
+# $Id: sample.wmbiffrc,v 1.10 2002/04/05 19:43:54 bluehal Exp $
 #
 # See wmbiffrc(5) for more info.
 #
@@ -6,11 +6,36 @@
 interval=60
 
 # Global askpass -- choose a password acting program
-# that behaves like ssh-askpass
+# that behaves like ssh-askpass.  The default is 
+# askpass = /usr/bin/ssh-askpass.
+# askpass is invoked on IMAP entries that have no password
+# below.
 # the commented version below is likely to work on RedHat 
 # systems; wmbiff's default is likely to work on Debian
 # systems with ssh-askpass installed.
 #askpass = /usr/libexec/openssh/x11-ssh-askpass
+
+# If you'd like it to be visually distinct so that
+# you aren't confused with your normal passphrase:
+#askpass = /usr/bin/ssh-askpass -fg cyan -bg black -xrm '*Dialog.font: -b&h-lucida-medium-r-normal-*-*-100-*-*-*-*-iso8859-1' -xrm '*Dialog.title: WMBiff Password Entry'
+
+# If you're writing a better program for password prompting,
+# or that stores passwords cleverly, and don't like that
+# wmbiff adds 'password for wmbiff: user@site' to the command
+# line, you can use something like this:
+#askpass = /bin/echo mypassword ; true
+
+# Skin.  A different source pixmap can be loaded dynamically.
+# If not a full path, wmbiff will search /usr/share/wmbiff:/usr/local/share/wmbiff:.
+# which is intended to keep the .wmbiffrc simple and portable to
+# different systems with wmbiff installed differently.
+#
+# default
+#skinfile=wmbiff-master-led.xpm
+# higher contrast for lower-color displays
+#skinfile=wmbiff-master-contrast.xpm
+# make your own derivative and submit it 
+# to us at wmbiff-devel@lists.sourceforge.net
 
 ### First string ###
 

@@ -1,6 +1,6 @@
 # Makefile for wmbiff
 #
-# $Id: Makefile,v 1.29 2002/04/04 08:51:50 bluehal Exp $
+# $Id: Makefile,v 1.30 2002/04/05 19:43:54 bluehal Exp $
 
 # Disable gnutls crypto?
 #WITHOUT_CRYPTO=	1
@@ -14,6 +14,7 @@
 PREFIX?=	/usr/local
 BINDIR?=	$(PREFIX)/bin
 MANDIR?=	$(PREFIX)/share/man
+XPMDIR?=	$(PREFIX)/share/wmbiff
 
 CC?=		gcc
 LIBDIR?=	-L/usr/X11R6/lib
@@ -111,6 +112,9 @@ install: wmbiff
 	$(INSTALL_PRG) wmbiff $(BINDIR)
 	$(INSTALL_FILE) wmbiff.1 $(MANDIR)/man1
 	$(INSTALL_FILE) wmbiffrc.5 $(MANDIR)/man5
+	$(INSTALL_DIR) $(XPMDIR)
+	$(INSTALL_FILE) wmbiff-master-led.xpm $(XPMDIR)
+	$(INSTALL_FILE) wmbiff-master-contrast.xpm $(XPMDIR)
 
 # CODING STYLE AND INDENTATION [2001-Mar-12]:
 #
