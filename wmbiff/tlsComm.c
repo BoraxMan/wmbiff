@@ -460,7 +460,11 @@ tls_check_certificate(struct connection_state *scs,
 		}
 	}
 
-	tls_compare_certificates(&cert_list[0]);
+	if ( certificate_filename != NULL && 
+         tls_compare_certificates(&cert_list[0]) == 0 ) {
+		bad_certificate(scs,
+						"server's certificate was not found in the certificate file.\n");
+    }
 
 	gnutls_x509_crt_deinit(cert);
 
