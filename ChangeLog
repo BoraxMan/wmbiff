@@ -1,3 +1,21 @@
+2001-10-28 Sunday 22:22 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiff.c: Bugfix: initialize libgcrypt properly before
+	cram-md5 (or probably apop) authentication.
+
+2001-10-24 Wednesday 15:35 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* maint/changelog.sed: Added Neil to the sed script.
+
+2001-10-23 Tuesday 21:14 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Imap4Client.c: error check just in case sighup patch is
+	applied
+
+2001-10-23 Tuesday 18:35 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, NEWS: Released WMBiff 0.3.2.
+
 2001-10-23 Tuesday 18:33 UTC -- Jordi Mallach <jordi@sindominio.net>
 
 	* wmbiff/Makefile: Bump WMBIFF_VERSION to 0.3.2.

@@ -1,9 +1,12 @@
 
                                   Introducing
                                        
-   wmBiff is an WindowMaker docking utility, that displays number of
+   WMBiff is an WindowMaker docking utility, that displays number of
    total messages count or unread mail messages count in differrent
    mailboxes.
+
+   WMBiff was created by Gennady Belyakov in 1999, and was continued by
+   a team of volunteers after his death.
 
    Green ( cyan? :) ) digits display total number of messages, if there
    are no unread messages in it.
@@ -12,8 +15,8 @@
    mail arrival, if any.
    
    At this moment unix-style (mbox), maildir, POP3, APOP and IMAP mailboxes
-   are supported. wmBiff also understands Licq's history files.
-   wmBiff supports up to 5 mailboxes (but you can start 2 or more
+   are supported. WMBiff also understands Licq's history files.
+   WMBiff supports up to 5 mailboxes (but you can start 2 or more
    wmbiff's with differrent configs).
    
    Pressing on a 1st (left) mouse button will execute appropriate mail
@@ -33,6 +36,11 @@ Extract the archive:
 Enter the wmbiff directory and edit the Makefile:
         cd wmbiff-0.x/
         vi Makefile
+
+If you want crypto support disabled, comment the "WITH_TLS" and
+"WITH_GCRYPT" defines in the Makefile. It is enabled by default, and
+you need to have libgcrypt and GNUtls installed in the system to compile
+it.
 
 Make the binary:
         make
@@ -88,9 +96,6 @@ position. All other positions will be empty.
    Any suggestions/bug reports please send to our mailing list,
  
     wmbiff-devel@lists.sourceforge.net
-
-    or the original author, Gennady Belyakov gb@ccat.elect.ru, if he
-    reappears.
 
      _________________________________________________________________
 

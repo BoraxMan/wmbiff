@@ -1,4 +1,6 @@
-# $Id: sample.wmbiffrc,v 1.5 2001/10/04 08:54:02 jordi Exp $
+# $Id: sample.wmbiffrc,v 1.6 2001/10/28 23:32:55 jordi Exp $
+#
+# See wmbiffrc(5) for more info.
 #
 # Global interval -- seconds between check mailboxes
 interval=60
@@ -68,3 +70,9 @@ label.4=IMAP4
 path.4=imap:user:password@server
 interval.4=300		# 5 minutes
 
+# label.4=IMAPS
+# Secure IMAP format: sslimap:user:password@server[/mailbox][:port]
+# mailbox is optional, default - INBOX
+# port is optional, default - 993
+# path.4=sslimap:user:password@server
+# interval.4=300          # 5 minutes

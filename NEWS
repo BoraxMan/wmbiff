@@ -1,6 +1,13 @@
 Release Notes
 ~~~~~~~~~~~~~
 
+Release 0.3.3 - [UNRELEASED]
+
+  * Sanity check to IMAP code: exit if wmbiff tries to connect to more
+    than 5 servers.
+  * Fix a missbehaviour of cram-md5 (broke pop3).
+  * Documentation updates.
+
 Release 0.3.2 - Tue, 23 Oct 2001 20:30:37 +0200
 
   * After some tries (other OpenSSL based patches, independent APOP
