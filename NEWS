@@ -1,5 +1,9 @@
 Release Notes
 ~~~~~~~~~~~~~
+Release 0.4.10 - 
+  * Peter McAlpine's globalnotify feature - elect to play a 
+    sound on new mail in any mailbox.
+
 Release 0.4.9 - Dec 1, 2002
   * GNUTLS v0.5.9 or higher required
   * Check TLS certificate hostname against the hostname we're
@@ -370,4 +374,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.31 2002/12/02 07:16:43 bluehal Exp $
+$Id: NEWS,v 1.32 2002/12/09 21:47:36 bluehal Exp $
