@@ -1,11 +1,11 @@
-/* $Id: Client.h,v 1.32 2003/04/16 08:18:32 bluehal Exp $ */
+/* $Id: Client.h,v 1.33 2003/04/17 01:56:00 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
  *
  * Email Checker Pop3/Imap4/Licq/Gicu/mbox/maildir/finger
  *
- * Last Updated : $Date: 2003/04/16 08:18:32 $
+ * Last Updated : $Date: 2003/04/17 01:56:00 $
  *
  */
 
@@ -52,6 +52,9 @@ typedef struct _mbox_t {
 			time_t mtime;
 			off_t size;
 		} mbox;
+		struct {
+			char *detail;
+		} shell;
 		struct {
 			time_t mtime_new;
 			off_t size_new;
@@ -102,7 +105,8 @@ char *backtickExpand(Pop3 pc, const char *path);
 int fileHasChanged(const char *mbox_filename, time_t * atime,
 				   time_t * mtime, off_t * size);
 int grabCommandOutput(Pop3 pc, const char *command,
-					  /*@out@ */ char **output);
+					  /*@out@ */ char **output,
+					  /*@out@ *//*@null@ */ char **details);
 int exists(const char *filename);	/* test -f */
 
 /* _NONE is for silent operation.  _ERROR is for things that should

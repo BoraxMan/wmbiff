@@ -130,7 +130,7 @@ char *passwordFor(const char *username,
 			snprintf(command, len, "%s 'password for wmbiff: %s@%s'",
 					 pc->askpass, username, servername);
 
-			(void) grabCommandOutput(pc, command, &password_ptr);
+			(void) grabCommandOutput(pc, command, &password_ptr, NULL);
 			/* it's not clear what to do with the exit
 			   status, though we can get it from
 			   grabCommandOutput if needed to deal with some

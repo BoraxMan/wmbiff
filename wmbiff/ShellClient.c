@@ -21,6 +21,7 @@
 #include <assert.h>
 #include <strings.h>
 #include "charutil.h"
+#include "MessageList.h"
 #ifdef USE_DMALLOC
 #include <dmalloc.h>
 #endif
@@ -87,7 +88,7 @@ static int kind_pclose( /*@only@ */ FILE * F,
 }
 
 int grabCommandOutput(Pop3 pc, const char *command,	/*@out@ */
-					  char **output)
+					  char **output, /*@out@ *//*@null@ */ char **details)
 {
 	FILE *F;
 	char linebuf[512];
@@ -101,8 +102,19 @@ int grabCommandOutput(Pop3 pc, const char *command,	/*@out@ */
 			  "fgets: unable to read the output of '%s': %s\n", command,
 			  strerror(errno));
 	} else {
-		chomp(linebuf);
+		chomp(linebuf);			/* remove trailing newline */
 		*output = strdup_ordie(linebuf);
+	}
+	if (details) {
+		static char allbuf[4096];
+		allbuf[0] = '\0';
+		if (fread(allbuf, 1, 4095, F) == 0 && !feof(F)) {
+			SH_DM(pc, DEBUG_ERROR,
+				  "fread: unable to read the detailed output of '%s': %s\n",
+				  command, strerror(errno));
+		}
+		allbuf[4095] = '\0';
+		*details = strdup_ordie(allbuf);
 	}
 	return (kind_pclose(F, command, pc));
 }
@@ -126,7 +138,7 @@ char *backtickExpand(Pop3 pc, const char *path)
 		strncat(bigbuffer, path, tickstart - path);
 		command = strdup_ordie(tickstart + 1);
 		command[tickend - tickstart - 1] = '\0';
-		(void) grabCommandOutput(pc, command, &commandoutput);
+		(void) grabCommandOutput(pc, command, &commandoutput, NULL);
 		free(command);
 		if (commandoutput != NULL) {
 			strcat(bigbuffer, commandoutput);
@@ -151,7 +163,12 @@ int shellCmdCheck(Pop3 pc)
 
 	/* fetch the first line of input */
 	pc->TextStatus[0] = '\0';
-	(void) grabCommandOutput(pc, pc->path, &commandOutput);
+	if (pc->u.shell.detail != NULL) {
+		free(pc->u.shell.detail);
+		pc->u.shell.detail = NULL;
+	}
+	(void) grabCommandOutput(pc, pc->path, &commandOutput,
+							 &pc->u.shell.detail);
 	if (commandOutput == NULL) {
 		return -1;
 	}
@@ -201,6 +218,32 @@ int shellCmdCheck(Pop3 pc)
 	return (0);
 }
 
+struct msglst *shell_getHeaders( /*@notnull@ */ Pop3 pc)
+{
+	struct msglst *message_list = NULL;
+
+	char *ln = pc->u.shell.detail;
+	int i, j;
+	if (ln == NULL)
+		return NULL;
+
+	for (j = 0; ln[j] != '\0';) {
+		struct msglst *m = malloc(sizeof(struct msglst));
+		m->next = message_list;
+		m->subj[0] = '\0';
+		m->from[0] = '\0';
+
+		for (i = 0; i < SUBJ_LEN - 1 && ln[j + i] != '\n'; i++) {
+			m->subj[i] = ln[j + i];
+		}
+		m->subj[i] = '\0';
+		j += i + 1;
+
+		message_list = m;
+	}
+	return message_list;
+}
+
 int shellCreate( /*@notnull@ */ Pop3 pc, const char *str)
 {
 	/* SHELL format: shell:::/path/to/script */
@@ -211,6 +254,7 @@ int shellCreate( /*@notnull@ */ Pop3 pc, const char *str)
 	pc->OldMsgs = -1;
 	pc->OldUnreadMsgs = -1;
 	pc->checkMail = shellCmdCheck;
+	pc->getHeaders = shell_getHeaders;
 	reserved1 = str + 6;		/* shell:>:: */
 
 	assert(strncasecmp("shell:", str, 6) == 0);
