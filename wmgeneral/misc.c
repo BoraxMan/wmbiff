@@ -24,7 +24,7 @@
 #include "list.h"
 #include "misc.h"
 
-extern pid_t execCommand(char *command)
+extern pid_t execCommand(const char *command)
 {
 	pid_t pid;
 
