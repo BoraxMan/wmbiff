@@ -1,6 +1,6 @@
 Release Notes
 ~~~~~~~~~~~~~
-Release 0.4.16 - 
+Release 0.4.16 - July 7, 2003
   * Check TLS certificates.  See wmbiffrc(5) for 
     details on the certfile option.  
   * #'s are now only comments in .wmbiffrc at the 
@@ -13,8 +13,9 @@ Release 0.4.16 -
     and program output for shell methods.  This is 
     intended to be faster than starting up a new 
     mail program or re-executing a script.
-  * Avoid repetitive error messages.
+  * Avoid repetitive error messages when disconnected.
   * Use conventional -geometry option handling.
+  * Fix bug in 0.4.15 to re-enable *'s in IMAP passwords.
 
 Release 0.4.15 - Mar 30, 2003
   * Frobnicate internally stored passwords, partially 
@@ -429,4 +430,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.45 2003/07/03 05:43:41 bluehal Exp $
+$Id: NEWS,v 1.46 2003/07/07 08:57:12 bluehal Exp $

@@ -579,11 +579,11 @@ void openXwindow(int argc, const char *argv[],
 	if (geometry) {
 		/* we'll silently drop width and height as well as negative positions */
 		/* mostly because I don't know how to deal with them */
-        /*
-		int wx, wy, x, y;
-		int specified = XParseGeometry(geometry, &x, &y, &wx, &wy);
-		printf("%d %d %d %d\n", x, y, wx, wy);
-		 if( specified & XNegative ) {
+		/*
+		   int wx, wy, x, y;
+		   int specified = XParseGeometry(geometry, &x, &y, &wx, &wy);
+		   printf("%d %d %d %d\n", x, y, wx, wy);
+		   if( specified & XNegative ) {
 		   x = DisplayWidth(display, DefaultScreen(display)) - x - pixmask_width;
 		   }
 		   if( specified & YNegative ) {

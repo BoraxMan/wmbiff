@@ -1,11 +1,11 @@
-/* $Id: Client.h,v 1.35 2003/07/07 08:43:01 bluehal Exp $ */
+/* $Id: Client.h,v 1.36 2003/07/07 08:57:12 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
  *
  * Email Checker Pop3/Imap4/Licq/Gicu/mbox/maildir/finger
  *
- * Last Updated : $Date: 2003/07/07 08:43:01 $
+ * Last Updated : $Date: 2003/07/07 08:57:12 $
  *
  */
 
@@ -74,7 +74,7 @@ typedef struct _mbox_t {
 			unsigned int dossl:1;	/* use tls. */
 			/* prompt the user if we can't login / password is empty */
 			unsigned int interactive_password:1;
-			unsigned char password_len;
+			unsigned char password_len;	/* memfrob may shorten passwords */
 		} pop_imap;
 	} u;
 
