@@ -34,6 +34,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/stat.h>
+#include "assert.h"
 
 typedef struct password_binding_struct {
 	struct password_binding_struct *next;
@@ -84,6 +85,9 @@ const char *passwordFor(const char *username,
 
 	password_binding p;
 
+	assert(username != NULL);
+	assert(username[0] != '\0');
+
 	/* find the binding */
 	for (p = pass_list;
 		 p != NULL
@@ -110,10 +114,14 @@ const char *passwordFor(const char *username,
 	if (pc->askpass != NULL) {
 		/* check that the executed file is a good one. */
 		if (permissions_ok(pc, pc->askpass)) {
-			char command[255];
+			char *command;
 			char *password_ptr;
-			sprintf(command, "%s 'password for wmbiff: %s@%s'",
-					pc->askpass, username, servername);
+			int len =
+				strlen(pc->askpass) + strlen(username) +
+				strlen(servername) + 40;
+			command = malloc(len);
+			snprintf(command, len, "%s 'password for wmbiff: %s@%s'",
+					 pc->askpass, username, servername);
 
 			(void) grabCommandOutput(pc, command, &password_ptr);
 			/* it's not clear what to do with the exit
@@ -121,6 +129,7 @@ const char *passwordFor(const char *username,
 			   grabCommandOutput if needed to deal with some
 			   programs that will print a message but exit
 			   non-zero on error */
+			free(command);
 
 			if (password_ptr == NULL) {
 				/* this likely means that the user cancelled, and doesn't
@@ -147,3 +156,12 @@ const char *passwordFor(const char *username,
 
 	return (NULL);
 }
+
+/* vim:set ts=4: */
+/*
+ * Local Variables:
+ * tab-width: 4
+ * c-indent-level: 4
+ * c-basic-offset: 4
+ * End:
+ */
