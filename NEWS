@@ -1,7 +1,10 @@
 Release Notes
 ~~~~~~~~~~~~~
-Release 0.4.18 - October 11, 2003
+Release 0.4.18 - October 29, 2003
   * Update security.debian.rb for ruby 1.8.
+  * Bugfix to avoid infinite loop when reading from IMAP.
+  * Bugfix to msglst to allow capitalized header names.
+  * Add msglst feature to Pop3 mailboxes.
 
 Release 0.4.17 - August 31, 2003
   * On Mac, ask the keychain for passwords if 
@@ -445,4 +448,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.50 2003/10/10 18:00:18 bluehal Exp $
+$Id: NEWS,v 1.51 2003/10/29 18:18:35 bluehal Exp $
