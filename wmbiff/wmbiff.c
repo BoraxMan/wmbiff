@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.9 2001/10/29 13:54:00 jordi Exp $ */
+/* $Id: wmbiff.c,v 1.10 2001/11/02 08:53:55 bluehal Exp $ */
 
 #define	USE_POLL
 
@@ -488,9 +488,9 @@ void parse_mbox_path(int item)
 		pop3Create((&mbox[item]), mbox[item].path);
 	} else if (!strncasecmp(mbox[item].path, "licq:", 5)) {	/* licq history file */
 		licqCreate((&mbox[item]), mbox[item].path);
-	} else if (!strncasecmp(mbox[item].path, "imap:", 5)) {	/* imap4 account */
-		imap4Create((&mbox[item]), mbox[item].path);
-	} else if (!strncasecmp(mbox[item].path, "sslimap:", 8)) {	/* sslimap4 account */
+	} else if (!strncasecmp(mbox[item].path, "imap:", 5) ||	/* imap4 account */
+			   !strncasecmp(mbox[item].path, "sslimap:", 8) ||	/* sslimap4 account */
+			   !strncasecmp(mbox[item].path, "imaps:", 6)) {	/* sslimap4 account */
 		imap4Create((&mbox[item]), mbox[item].path);
 	} else if (!strncasecmp(mbox[item].path, "maildir:", 8)) {	/* maildir */
 		maildirCreate((&mbox[item]), mbox[item].path);

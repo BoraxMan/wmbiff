@@ -281,11 +281,11 @@ int imap4Create(Pop3 pc, const char *const str)
 	struct re_registers regs;
 	const char *errstr;
 	const char *regex =
-		".*imap:([^:]+):([^@]+)@([^/:]+)(/[^:]+)?(:[0-9]+)?";
+		".*imaps?:([^:]+):([^@]+)@([^/:]+)(/[^:]+)?(:[0-9]+)?";
 
 	/* IMAP4 format: imap:user:password@server/mailbox[:port] */
 	/* If 'str' line is badly formatted, wmbiff won't display the mailbox. */
-	if (strncmp("ssl", str, 3) == 0) {
+	if (strncmp("sslimap:", str, 8) == 0 || strncmp("imaps:", str, 6) == 0) {
 #ifdef WITH_TLS
 		static int haveBeenWarned;
 		PCU.dossl = 1;
@@ -299,7 +299,7 @@ int imap4Create(Pop3 pc, const char *const str)
 		}
 #else
 		printf("This copy of wmbiff was not compiled with gnutls;\n"
-			   "sslimap is unavailable.  Exiting to protect your\n"
+			   "imaps is unavailable.  Exiting to protect your\n"
 			   "passwords and privacy.\n");
 		exit(EXIT_FAILURE);
 #endif
