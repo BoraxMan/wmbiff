@@ -316,7 +316,7 @@ int tls_check_certificate(struct connection_state *scs,
 	} else if (certstat & GNUTLS_CERT_NOT_TRUSTED) {
 		TDM(DEBUG_INFO, "server's certificate is not trusted.\n");
 		TDM(DEBUG_INFO,
-			"at the moment, wmbiff doesn't trust certificates.\n");
+			"to verify that a certificate is trusted, use the certfile option.\n");
 	}
 
 	/* not checking for not-yet-valid certs... this would make sense
@@ -398,7 +398,7 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc,
 			exit(1);
 		}
 
-		/* certfile really isn't supported; this is just a start. */
+		/* certfile seems to work. */
 		if (certificate_filename != NULL) {
 			if (!exists(certificate_filename)) {
 				DMA(DEBUG_ERROR,
@@ -433,9 +433,7 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc,
 		TDM(DEBUG_ERROR, "%s: This may be a problem in gnutls, "
 			"which is under development\n", name);
 		TDM(DEBUG_ERROR,
-			"%s: Specifically, problems have been found where the extnValue \n"
-			"  buffer in _gnutls_get_ext_type() in lib/x509_extensions.c is too small in\n"
-			"  gnutls versions up to 0.2.3.  This copy of wmbiff was compiled with \n"
+			"%s: This copy of wmbiff was compiled with \n"
 			"  gnutls version %s.\n", name, LIBGNUTLS_VERSION);
 		gnutls_perror(zok);
 		gnutls_deinit(scs->state);
