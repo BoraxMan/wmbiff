@@ -1,11 +1,11 @@
-/* $Id: Client.h,v 1.40 2004/04/28 00:19:03 bluehal Exp $ */
+/* $Id: Client.h,v 1.41 2004/06/19 20:53:01 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
  *
  * Email Checker Pop3/Imap4/Licq/Gicu/mbox/maildir/finger
  *
- * Last Updated : $Date: 2004/04/28 00:19:03 $
+ * Last Updated : $Date: 2004/06/19 20:53:01 $
  *
  */
 
@@ -124,7 +124,7 @@ int fileHasChanged(const char *mbox_filename, time_t * atime,
 				   time_t * mtime, off_t * size);
 int grabCommandOutput(Pop3 pc, const char *command,
 					  /*@out@ */ char **output,
-/*@out@ *//*@null@ */ char **details);
+					  /*@out@ *//*@null@ */ char **details);
 int exists(const char *filename);	/* test -f */
 
 /* _NONE is for silent operation.  _ERROR is for things that should

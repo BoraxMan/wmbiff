@@ -22,6 +22,8 @@
 #ifdef HAVE_GNUTLS_GNUTLS_H
 #define USE_GNUTLS
 #include <gnutls/gnutls.h>
+#include <gnutls/x509.h>
+#include <sys/stat.h>
 #endif
 #ifdef USE_DMALLOC
 #include <dmalloc.h>
@@ -59,8 +61,8 @@ struct connection_state {
 	int sd;
 	char *name;
 #ifdef USE_GNUTLS
-	GNUTLS_STATE tls_state;
-	GNUTLS_CERTIFICATE_CLIENT_CREDENTIALS xcred;
+	gnutls_session tls_state;
+	gnutls_certificate_credentials xcred;
 #else
 	/*@null@ */ void *tls_state;
 	/*@null@ */ void *xcred;
@@ -83,7 +85,7 @@ void tlscomm_close(struct connection_state *scs)
 	if (scs->tls_state) {
 #ifdef USE_GNUTLS
 		gnutls_bye(scs->tls_state, GNUTLS_SHUT_RDWR);
-		gnutls_certificate_free_sc(scs->xcred);
+		gnutls_certificate_free_credentials(scs->xcred);
 		gnutls_deinit(scs->tls_state);
 		scs->xcred = NULL;
 #endif
@@ -182,7 +184,7 @@ tlscomm_expect(struct connection_state *scs,
 			   const char *prefix, char *linebuf, int buflen)
 {
 	int prefixlen = (int) strlen(prefix);
-	int readbytes = 0;
+	int buffered_bytes = 0;
 	memset(linebuf, 0, buflen);
 	TDM(DEBUG_INFO, "%s: expecting: %s\n", scs->name, prefix);
 	/*     if(scs->unprocessed[0]) {
@@ -190,15 +192,15 @@ tlscomm_expect(struct connection_state *scs,
 	   } */
 	while (scs->unprocessed[0] != '\0'
 		   || wait_for_it(scs->sd, EXPECT_TIMEOUT)) {
-		if (scs->unprocessed[readbytes] == '\0') {
+		if (scs->unprocessed[buffered_bytes] == '\0') {
 			int thisreadbytes;
 #ifdef USE_GNUTLS
 			if (scs->tls_state) {
 				/* BUF_SIZE - 1 leaves room for trailing \0 */
 				thisreadbytes =
 					gnutls_read(scs->tls_state,
-								&scs->unprocessed[readbytes],
-								BUF_SIZE - 1 - readbytes);
+								&scs->unprocessed[buffered_bytes],
+								BUF_SIZE - 1 - buffered_bytes);
 				if (thisreadbytes < 0) {
 					handle_gnutls_read_error(thisreadbytes, scs);
 					return 0;
@@ -207,47 +209,47 @@ tlscomm_expect(struct connection_state *scs,
 #endif
 			{
 				thisreadbytes =
-					read(scs->sd, &scs->unprocessed[readbytes],
-						 BUF_SIZE - 1 - readbytes);
+					read(scs->sd, &scs->unprocessed[buffered_bytes],
+						 BUF_SIZE - 1 - buffered_bytes);
 				if (thisreadbytes < 0) {
 					TDM(DEBUG_ERROR, "%s: error reading: %s\n",
 						scs->name, strerror(errno));
 					return 0;
 				}
 			}
-			readbytes += thisreadbytes;
+			buffered_bytes += thisreadbytes;
 			/* force null termination */
-			scs->unprocessed[readbytes] = '\0';
-			if (readbytes == 0) {
+			scs->unprocessed[buffered_bytes] = '\0';
+			if (buffered_bytes == 0) {
 				return 0;		/* bummer */
 			}
 		} else {
-			readbytes = strlen(scs->unprocessed);
+			buffered_bytes = strlen(scs->unprocessed);
 		}
-		while (readbytes >= prefixlen) {
+		while (buffered_bytes >= prefixlen) {
 			int linebytes;
 			linebytes =
 				getline_from_buffer(scs->unprocessed, linebuf, buflen);
 			if (linebytes == 0) {
-				readbytes = 0;
+				buffered_bytes = 0;
 			} else {
-				readbytes -= linebytes;
+				buffered_bytes -= linebytes;
 				if (strncmp(linebuf, prefix, prefixlen) == 0) {
 					TDM(DEBUG_INFO, "%s: got: %*s", scs->name,
 						linebytes, linebuf);
 					return 1;	/* got it! */
 				}
 				TDM(DEBUG_INFO, "%s: dumped(%d/%d): %.*s", scs->name,
-					linebytes, readbytes, linebytes, linebuf);
+					linebytes, buffered_bytes, linebytes, linebuf);
 			}
 		}
 	}
-	if (readbytes == -1) {
+	if (buffered_bytes == -1) {
 		TDM(DEBUG_INFO, "%s: timed out while expecting '%s'\n",
 			scs->name, prefix);
 	} else {
 		TDM(DEBUG_ERROR, "%s: expecting: '%s', saw (%d): %s%s",
-			scs->name, prefix, readbytes, linebuf,
+			scs->name, prefix, buffered_bytes, linebuf,
 			/* only print the newline if the linebuf lacks it */
 			(linebuf[strlen(linebuf) - 1] == '\n') ? "\n" : "");
 	}
@@ -314,67 +316,153 @@ bad_certificate(const struct connection_state *scs, const char *msg)
    gnutls to make this as easy as it should be, or someone
    to port Andrew McDonald's gnutls-for-mutt patch.
 */
+
+#define CERT_SEP "-----BEGIN"
+
+/* this bit is based on read_ca_file() in gnutls */
+static int tls_compare_certificates(const gnutls_datum * peercert)
+{
+	gnutls_datum cert;
+	unsigned char *ptr;
+	FILE *fd1;
+	int ret;
+	gnutls_datum b64_data;
+	unsigned char *b64_data_data;
+	struct stat filestat;
+
+	if (stat(certificate_filename, &filestat) == -1)
+		return 0;
+
+	b64_data.size = filestat.st_size + 1;
+	b64_data_data = (unsigned char *) malloc(b64_data.size);
+	b64_data_data[b64_data.size - 1] = '\0';
+	b64_data.data = b64_data_data;
+
+	fd1 = fopen(certificate_filename, "r");
+	if (fd1 == NULL) {
+		return 0;
+	}
+
+	b64_data.size = fread(b64_data.data, 1, b64_data.size, fd1);
+	fclose(fd1);
+
+	do {
+		ret = gnutls_pem_base64_decode_alloc(NULL, &b64_data, &cert);
+		if (ret != 0) {
+			free(b64_data_data);
+			return 0;
+		}
+
+		ptr = (unsigned char *) strstr(b64_data.data, CERT_SEP) + 1;
+		ptr = (unsigned char *) strstr(ptr, CERT_SEP);
+
+		b64_data.size = b64_data.size - (ptr - b64_data.data);
+		b64_data.data = ptr;
+
+		if (cert.size == peercert->size) {
+			if (memcmp(cert.data, peercert->data, cert.size) == 0) {
+				/* match found */
+				gnutls_free(cert.data);
+				free(b64_data_data);
+				return 1;
+			}
+		}
+
+		gnutls_free(cert.data);
+	} while (ptr != NULL);
+
+	/* no match found */
+	free(b64_data_data);
+	return 0;
+}
+
+
 int
 tls_check_certificate(struct connection_state *scs,
 					  const char *remote_hostname)
 {
-	GNUTLS_CertificateStatus certstat;
+	int certstat;
 	const gnutls_datum *cert_list;
 	int cert_list_size = 0;
+	gnutls_x509_crt cert;
 
 	if (gnutls_auth_get_type(scs->tls_state) != GNUTLS_CRD_CERTIFICATE) {
 		bad_certificate(scs, "Unable to get certificate from peer.\n");
 	}
 	certstat = gnutls_certificate_verify_peers(scs->tls_state);
-	if (certstat ==
-		(GNUTLS_CertificateStatus) GNUTLS_E_NO_CERTIFICATE_FOUND) {
+	if (certstat == GNUTLS_E_NO_CERTIFICATE_FOUND) {
+		bad_certificate(scs, "server presented no certificate.\n");
+#ifdef GNUTLS_CERT_CORRUPTED
 	} else if (certstat & GNUTLS_CERT_CORRUPTED) {
 		bad_certificate(scs, "server's certificate is corrupt.\n");
+#endif
 	} else if (certstat & GNUTLS_CERT_REVOKED) {
 		bad_certificate(scs, "server's certificate has been revoked.\n");
 	} else if (certstat & GNUTLS_CERT_INVALID) {
-		bad_certificate(scs, "server's certificate is invalid.\n"
-						"there may be a problem with the certificate stored in your certfile");
+		if (gnutls_certificate_type_get(scs->tls_state) == GNUTLS_CRT_X509) {
+			/* bad_certificate(scs, "server's certificate is not trusted.\n"
+			   "there may be a problem with the certificate stored in your certfile\n"); */
+		} else {
+			bad_certificate(scs,
+							"server's certificate is invalid or not X.509.\n"
+							"there may be a problem with the certificate stored in your certfile\n");
+		}
 	} else if (certstat & GNUTLS_CERT_NOT_TRUSTED) {
 		TDM(DEBUG_INFO, "server's certificate is not trusted.\n");
 		TDM(DEBUG_INFO,
 			"to verify that a certificate is trusted, use the certfile option.\n");
 	}
 
+	if (gnutls_x509_crt_init(&cert) < 0) {
+		bad_certificate(scs,
+						"Unable to initialize certificate data structure");
+	}
+
+
 	/* not checking for not-yet-valid certs... this would make sense
 	   if we weren't just comparing to stored ones */
 	cert_list =
 		gnutls_certificate_get_peers(scs->tls_state, &cert_list_size);
 
-	if (gnutls_x509_extract_certificate_expiration_time(&cert_list[0]) <
-		time(NULL)) {
+	if (gnutls_x509_crt_import(cert, &cert_list[0], GNUTLS_X509_FMT_DER) <
+		0) {
+		bad_certificate(scs, "Error processing certificate data");
+	}
+
+	if (gnutls_x509_crt_get_expiration_time(cert) < time(NULL)) {
 		bad_certificate(scs, "server's certificate has expired.\n");
-	} else
-		if (gnutls_x509_extract_certificate_activation_time(&cert_list[0])
-			> time(NULL)) {
+	} else if (gnutls_x509_crt_get_activation_time(cert)
+			   > time(NULL)) {
 		bad_certificate(scs, "server's certificate is not yet valid.\n");
 	} else {
 		TDM(DEBUG_INFO, "certificate passed time check.\n");
 	}
 
-	if (gnutls_x509_check_certificates_hostname
-		(&cert_list[0], remote_hostname) == 0) {
-		gnutls_DN dn;
-		gnutls_x509_extract_certificate_dn(&cert_list[0], &dn);
-		TDM(DEBUG_ERROR,
+	if (gnutls_x509_crt_check_hostname(cert, remote_hostname) == 0) {
+		char certificate_hostname[256];
+		int buflen = 255;
+		gnutls_x509_crt_get_dn(cert, certificate_hostname, &buflen);
+		/* gnutls_x509_extract_certificate_dn(&cert_list[0], &dn); */
+		TDM(DEBUG_INFO,
 			"server's certificate (%s) does not match its hostname (%s).\n",
-			dn.common_name, remote_hostname);
+			certificate_hostname, remote_hostname);
 		bad_certificate(scs,
 						"server's certificate does not match its hostname.\n");
 	} else {
 		if ((scs->pc)->debug >= DEBUG_INFO) {
-			gnutls_DN dn;
-			gnutls_x509_extract_certificate_dn(&cert_list[0], &dn);
+			char certificate_hostname[256];
+			int buflen = 255;
+			gnutls_x509_crt_get_dn(cert, certificate_hostname, &buflen);
+			/* gnutls_x509_extract_certificate_dn(&cert_list[0], &dn); */
 			TDM(DEBUG_INFO,
 				"server's certificate (%s) matched its hostname (%s).\n",
-				dn.common_name, remote_hostname);
+				certificate_hostname, remote_hostname);
 		}
 	}
+
+	tls_compare_certificates(&cert_list[0]);
+
+	gnutls_x509_crt_deinit(cert);
 
 	TDM(DEBUG_INFO, "certificate check ok.\n");
 	return (0);
@@ -402,7 +490,7 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc,
 		const int protocols[] = { GNUTLS_TLS1, GNUTLS_SSL3, 0 };
 		const int ciphers[] =
 			{ GNUTLS_CIPHER_RIJNDAEL_128_CBC, GNUTLS_CIPHER_3DES_CBC,
-			GNUTLS_CIPHER_RIJNDAEL_256_CBC, GNUTLS_CIPHER_TWOFISH_128_CBC,
+			GNUTLS_CIPHER_RIJNDAEL_256_CBC,
 			GNUTLS_CIPHER_ARCFOUR, 0
 		};
 		const int compress[] = { GNUTLS_COMP_ZLIB, GNUTLS_COMP_NULL, 0 };
@@ -419,7 +507,7 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc,
 		assert(gnutls_kx_set_priority(scs->tls_state, key_exch) == 0);
 		assert(gnutls_mac_set_priority(scs->tls_state, mac) == 0);
 		/* no client private key */
-		if (gnutls_certificate_allocate_sc(&scs->xcred) < 0) {
+		if (gnutls_certificate_allocate_credentials(&scs->xcred) < 0) {
 			DMA(DEBUG_ERROR, "gnutls memory error\n");
 			exit(1);
 		}
@@ -477,7 +565,7 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc,
 	} else {
 		TDM(DEBUG_INFO, "%s: Handshake was completed\n", name);
 		if (scs->pc->debug >= DEBUG_INFO)
-			print_info(scs->tls_state);
+			print_info(scs->tls_state, remote_hostname);
 		scs->sd = sd;
 		scs->name = name;
 	}

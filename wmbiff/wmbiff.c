@@ -1,4 +1,6 @@
-/* $Id: wmbiff.c,v 1.64 2004/06/18 21:29:11 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.65 2004/06/19 20:53:01 bluehal Exp $ */
+
+// typedef int gcry_error_t;
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -65,7 +67,7 @@ static const char *globalnotify = NULL;
 static const char *skin_search_path = DEFAULT_SKIN_PATH;
 /* for gnutls */
 /*@null@*/
-const char *certificate_filename = NULL;	/* not yet supported */
+const char *certificate_filename = NULL;
 
 /* it could be argued that a better default exists. */
 #define DEFAULT_FONT  "-*-fixed-*-r-*-*-10-*-*-*-*-*-*-*"
@@ -406,7 +408,7 @@ static int Read_Config_File(char *filename, int *loopinterval)
 static void init_biff(char *config_file)
 {
 #ifdef HAVE_GCRYPT_H
-	int zok;
+	gcry_error_t rc;
 #endif
 	int loopinterval = DEFAULT_LOOP;
 	unsigned int i;
@@ -429,17 +431,21 @@ static void init_biff(char *config_file)
 	}
 
 #ifdef HAVE_GCRYPT_H
+	/* recently made a requirement, section 2.4 of gcrypt manual */
+	if (gcry_check_version("1.1.42") == NULL) {
+		DMA(DEBUG_ERROR, "Error: incompatible gcrypt version.\n");
+	}
 	/* gcrypt is a little strange, in that it doesn't
 	 * seem to initialize its memory pool by itself.
 	 * I believe we *expect* "Warning: using insecure memory!"
 	 */
-	if ((zok = gcry_control(GCRYCTL_INIT_SECMEM, 16384, 0)) != 0) {
+	if ((rc = gcry_control(GCRYCTL_INIT_SECMEM, 16384, 0)) != 0) {
 		DMA(DEBUG_ERROR,
 			"Error: gcry_control() to initialize secure memory returned non-zero: %d\n"
 			" Message: %s\n"
 			" libgcrypt version: %s\n"
 			" recovering: will fail later if using CRAM-MD5 or APOP authentication.\n",
-			zok, gcry_strerror(gcry_errno()), gcry_check_version(NULL));
+			rc, gcry_strerror(rc), gcry_check_version(NULL));
 	};
 #endif
 

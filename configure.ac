@@ -6,9 +6,9 @@ dnl and configure:
 dnl  installation prefix
 dnl  version
 
-AC_INIT(WMBiff, 0.4.23, wmbiff-devel@lists.sourceforge.net, wmbiff)
+AC_INIT(WMBiff, 0.4.24, wmbiff-devel@lists.sourceforge.net, wmbiff)
 AC_CONFIG_AUX_DIR(autoconf)
-AM_INIT_AUTOMAKE(wmbiff, 0.4.23) dnl tarded syntax for automake <= 1.5
+AM_INIT_AUTOMAKE(wmbiff, 0.4.24) dnl tarded syntax for automake <= 1.5
 AM_CONFIG_HEADER(config.h)
 dnl make sure autoheader finds version, implicitly defined above.
 AH_TEMPLATE([VERSION], [wmbiff's release version])
@@ -74,7 +74,7 @@ AC_ARG_ENABLE(crypto, AC_HELP_STRING([ --disable-crypto ], [ disable gnutls/gcry
 
 GNUTLS_MAN_STATUS="This copy of WMBiff was not compiled with GNUTLS."
 if test "$gnutls" = "ok"; then
- AM_PATH_LIBGNUTLS(0.5.9, [LIBS="$LIBS $LIBGNUTLS_LIBS"
+ AM_PATH_LIBGNUTLS(1.0.4, [LIBS="$LIBS $LIBGNUTLS_LIBS"
                           CFLAGS="$CFLAGS $LIBGNUTLS_CFLAGS"
                          CPPFLAGS="$CPPFLAGS $LIBGNUTLS_CFLAGS"
                          GNUTLS_COMMON_O="gnutls-common.o"
@@ -87,7 +87,7 @@ fi
 
 GCRYPT_MAN_STATUS="This copy of WMBiff was not compiled with gcrypt."
 if test "$gcrypt" = "ok"; then
- AM_PATH_LIBGCRYPT(1.1.8, [CFLAGS="$CFLAGS $LIBGCRYPT_CFLAGS"
+ AM_PATH_LIBGCRYPT(1.1.90, [CFLAGS="$CFLAGS $LIBGCRYPT_CFLAGS"
                          CPPFLAGS="$CPPFLAGS $LIBGCRYPT_CFLAGS"
                          GCRYPT_MAN_STATUS="This copy of WMBiff was compiled with gcrypt."
                          AC_CHECK_HEADERS(gcrypt.h) ],

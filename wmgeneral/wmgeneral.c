@@ -72,7 +72,7 @@ int d_depth;
 XSizeHints mysizehints;
 XWMHints mywmhints;
 Pixel back_pix, fore_pix;
-static const char *Geometry = "";
+// static const char *Geometry = "";
 Window iconwin, win;
 GC NormalGC;
 XpmIcon wmgen_bkg;

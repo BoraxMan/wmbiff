@@ -1,4 +1,4 @@
-/* $Id: Pop3Client.c,v 1.21 2004/04/06 20:58:53 bluehal Exp $ */
+/* $Id: Pop3Client.c,v 1.22 2004/06/19 20:53:01 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -260,7 +260,8 @@ static FILE *authenticate_md5(Pop3 pc, FILE * fp, char *apop_str
 	char buf[BUF_SIZE];
 	char buf2[BUF_SIZE];
 	unsigned char *md5;
-	GCRY_MD_HD gmh;
+	gcry_md_hd_t gmh;
+	gcry_error_t rc;
 
 	/* See if MD5 is supported */
 	fprintf(fp, "AUTH CRAM-MD5\r\n");
@@ -280,7 +281,11 @@ static FILE *authenticate_md5(Pop3 pc, FILE * fp, char *apop_str
 	strcat(buf, " ");
 
 
-	gmh = gcry_md_open(GCRY_MD_MD5, GCRY_MD_FLAG_HMAC);
+	rc = gcry_md_open(&gmh, GCRY_MD_MD5, GCRY_MD_FLAG_HMAC);
+	if (rc != 0) {
+		POP_DM(pc, DEBUG_ERROR, "unable to initialize gcrypt md5.\n");
+		return NULL;
+	}
 	gcry_md_setkey(gmh, PCU.password, strlen(PCU.password));
 	gcry_md_write(gmh, (unsigned char *) buf2, strlen(buf2));
 	gcry_md_final(gmh);
@@ -311,9 +316,11 @@ static FILE *authenticate_md5(Pop3 pc, FILE * fp, char *apop_str
 
 static FILE *authenticate_apop(Pop3 pc, FILE * fp, char *apop_str)
 {
-	GCRY_MD_HD gmh;
+	gcry_md_hd_t gmh;
+	gcry_error_t rc;
 	char buf[BUF_SIZE];
 	unsigned char *md5;
+
 
 	if (apop_str[0] == '\0') {
 		/* server doesn't support apop. */
@@ -322,7 +329,11 @@ static FILE *authenticate_apop(Pop3 pc, FILE * fp, char *apop_str)
 	POP_DM(pc, DEBUG_INFO, "APOP challenge: %s\n", apop_str);
 	strcat(apop_str, PCU.password);
 
-	gmh = gcry_md_open(GCRY_MD_MD5, 0);
+	rc = gcry_md_open(&gmh, GCRY_MD_MD5, 0);
+	if (rc != 0) {
+		POP_DM(pc, DEBUG_ERROR, "unable to initialize gcrypt md5.\n");
+		return NULL;
+	}
 	gcry_md_write(gmh, (unsigned char *) apop_str, strlen(apop_str));
 	gcry_md_final(gmh);
 	md5 = gcry_md_read(gmh, 0);

@@ -642,7 +642,8 @@ authenticate_md5(Pop3 pc,
 	char buf[BUF_SIZE];
 	char buf2[BUF_SIZE];
 	unsigned char *md5;
-	GCRY_MD_HD gmh;
+	gcry_md_hd_t gmh;
+	gcry_error_t rc;
 
 	if (!strstr(capabilities, "AUTH=CRAM-MD5")) {
 		/* server doesn't support cram-md5. */
@@ -659,7 +660,11 @@ authenticate_md5(Pop3 pc,
 	strcpy(buf, PCU.userName);
 	strcat(buf, " ");
 	ask_user_for_password(pc, 0);
-	gmh = gcry_md_open(GCRY_MD_MD5, GCRY_MD_FLAG_HMAC);
+	rc = gcry_md_open(&gmh, GCRY_MD_MD5, GCRY_MD_FLAG_HMAC);
+	if (rc != 0) {
+		IMAP_DM(pc, DEBUG_INFO, "unable to initialize gcrypt md5\n");
+		return 0;
+	}
 	DEFROB(PCU.password);
 	gcry_md_setkey(gmh, PCU.password, strlen(PCU.password));
 	ENFROB(PCU.password);
