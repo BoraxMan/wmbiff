@@ -5,11 +5,22 @@ The latest changelog entry is in a different format, because it's inserted by
 CVS on commit.
 
   $Log: ChangeLog,v $
-  Revision 1.11  2001/09/24 11:58:39  oskuro
-  Added APOP support, patch from NAKAYAMA Takao <hoehoe@wakaba.jp>.
-  Fixed some bits of the manpage (Jordi)
-  Bumped version to 0.3.2.
+  Revision 1.12  2001/10/04 08:54:02  jordi
+  Backed out hoehoe's patch, preparing to apply Neil's.
 
+
+2001-09-24 Monday 11:58 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, NEWS, README, wmbiff/ApopClient.c, wmbiff/Client.h,
+	wmbiff/Makefile, wmbiff/sample.wmbiffrc, wmbiff/wmbiff.1,
+	wmbiff/wmbiff.c, wmbiff/wmbiffrc.5: Added APOP support, patch from
+	NAKAYAMA Takao <hoehoe@wakaba.jp>.  Fixed some bits of the manpage
+	(Jordi) Bumped version to 0.3.2.
+
+2001-09-24 Monday 11:56 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* maint/prerelease.sh: Removed -t to cvs2cl invocation, to make
+	cleaner ChangeLogs.
 
 2001-06-24 Sunday 18:17 UTC -- Jordi Mallach <jordi@sindominio.net>
 

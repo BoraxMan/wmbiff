@@ -1,12 +1,6 @@
 Release Notes
 ~~~~~~~~~~~~~
 
-Release 0.3.2 - Mon, 24 Sep 2001 13:41:16 +0200
-
-  * Added APOP support from NAKAYAMA Takao.
-  * Updates and fixes to documentation. (Jordi)
-
-
 Release 0.3.1 - Sun, 24 Jun 2001 20:15:41 +0200
 
   * Replaced /var/spool/mail with /var/mail, which is what the FHS mandates.

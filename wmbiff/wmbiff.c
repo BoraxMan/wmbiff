@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.5 2001/09/24 11:58:39 oskuro Exp $ */
+/* $Id: wmbiff.c,v 1.6 2001/10/04 08:54:02 jordi Exp $ */
 
 #define	USE_POLL
 
@@ -464,9 +464,7 @@ int ReadLine(FILE * fp, char *setting, char *value, int *index)
 
 void parse_mbox_path(int item)
 {
-	if (!strncasecmp(mbox[item].path, "apop:", 5)) {	/* apop account */
-		apopCreate((&mbox[item]), mbox[item].path);
-	} else if (!strncasecmp(mbox[item].path, "pop3:", 5)) {	/* pop3 account */
+	if (!strncasecmp(mbox[item].path, "pop3:", 5)) {	/* pop3 account */
 		pop3Create((&mbox[item]), mbox[item].path);
 	} else if (!strncasecmp(mbox[item].path, "licq:", 5)) {	/* licq history file */
 		licqCreate((&mbox[item]), mbox[item].path);
