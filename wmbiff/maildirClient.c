@@ -1,11 +1,11 @@
-/* $Id: maildirClient.c,v 1.9 2002/09/14 18:51:46 dwonis Exp $ */
+/* $Id: maildirClient.c,v 1.10 2002/09/18 23:43:49 bluehal Exp $ */
 /* Author : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
    Modified : Dwayne C. Litzenberger ( dlitz@dlitz.net )
  * 
  * Maildir checker.
  *
- * Last Updated : $Date: 2002/09/14 18:51:46 $
+ * Last Updated : $Date: 2002/09/18 23:43:49 $
  *
  */
 
@@ -69,12 +69,13 @@ int maildirCheckHistory(Pop3 pc)
 	strcat(path_newtmp, ".wmbiff.dircache_flush.XXXXXX");
 
 	if (pc->u.maildir.dircache_flush) {
-		/* hack to clear directory cache for network-mounted maildirs*/
+		/* hack to clear directory cache for network-mounted maildirs */
 		if (fn = mktemp(path_newtmp)) {
 			unlink(fn);
 		} else {
-			DM(pc, DEBUG_ERROR, "Can't create dircache flush file '%s': %s\n",
-		   		path_newtmp, strerror(errno));
+			DM(pc, DEBUG_ERROR,
+			   "Can't create dircache flush file '%s': %s\n", path_newtmp,
+			   strerror(errno));
 		}
 	}
 
@@ -147,7 +148,7 @@ int maildirCreate(Pop3 pc, const char *str)
 	pc->u.maildir.dircache_flush = 0;
 
 	/* special flags */
-	if (*(str + 8) == ':') { /* path is of the format maildir::flags:path */
+	if (*(str + 8) == ':') {	/* path is of the format maildir::flags:path */
 		c = ' ';
 		for (i = 1; c != ':' && c != '\0'; i++) {
 			c = *(str + 8 + i);

@@ -1,5 +1,5 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiffrc.5.in,v 1.5 2002/09/14 18:51:46 dwonis Exp $
+.\" $Id: wmbiffrc.5.in,v 1.6 2002/09/18 23:43:49 bluehal Exp $
 .\"
 .\" wmbiff.1 and wmbiffrc.5 are copyright 1999-2002 by 
 .\" Jordi Mallach <jordi@debian.org>
@@ -100,7 +100,7 @@ accepts user, optional password, host and optional path to
 mailbox and port number.  See Authentication below for a
 description of the auth field.  The password may be left
 empty: see askpass above for information on password
-prompting.
+prompting.  The mailbox field may be quoted, e.g., server/"Mail/Eggs and Spam"
 .RS
 imap:user:passwd@server[/mailbox][:port] [auth]
 .RE
@@ -109,6 +109,9 @@ imap:user:@server[/mailbox][:port] [auth]
 .RE
 .RS
 imap:user passwd server[/mailbox][ port] [auth]
+.RE
+.RS
+imap:user:passwd@server[/"mail box"][:port] [auth]
 .RE
 .TP
 .I imaps

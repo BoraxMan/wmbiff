@@ -289,8 +289,12 @@ int imap_checkmail( /*@notnull@ */ Pop3 pc)
 	tlscomm_printf(scs, "a003 STATUS %s (MESSAGES UNSEEN)\r\n", pc->path);
 	if (tlscomm_expect(scs, "* STATUS", buf, 127) != 0) {
 		/* a valid response? */
-		(void) sscanf(buf, "* STATUS %*s (MESSAGES %d UNSEEN %d)",
-					  &(pc->TotalMsgs), &(pc->UnreadMsgs));
+		// doesn't support spaces: (void) sscanf(buf, "* STATUS %*s (MESSAGES %d UNSEEN %d)",
+		const char *msg;
+		msg = strstr(buf, "(MESSAGES");
+		if (msg != NULL)
+			(void) sscanf(msg, "(MESSAGES %d UNSEEN %d)",
+						  &(pc->TotalMsgs), &(pc->UnreadMsgs));
 	} else {
 		/* something went wrong. bail. */
 		tlscomm_close(unbind(scs));
@@ -305,8 +309,8 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 	struct re_registers regs;
 	int i, matchedchars;
 	const char *regexes[] = {
-		".*imaps?:([^: ]{1,32}):([^@]{0,32})@([^/: ]+)(/[^: ]+)?(:[0-9]+)? *",
-		".*imaps?:([^: ]{1,32}) ([^ ]{1,32}) ([^/: ]+)(/[^: ]+)?( [0-9]+)? *",
+		".*imaps?:([^: ]{1,32}):([^@]{0,32})@([^/: ]+)(/(\"[^\"]+\")|([^: ]+))?(:[0-9]+)? *",
+		".*imaps?:([^: ]{1,32}) ([^ ]{1,32}) ([^/: ]+)(/(\"[^\"]+\")|([^: ]+))?( [0-9]+)? *",
 		NULL
 	};
 
@@ -345,6 +349,13 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 				matchedchars);
 		return -1;
 	}
+#ifdef why_wont_you_parse
+	for (i = 0; i < 8; i++) {
+		char buf[255];
+		copy_substring(buf, regs.start[i], regs.end[i], str);
+		IMAP_DM(pc, DEBUG_INFO, "%d: %s\n", i, buf);
+	}
+#endif
 
 	/* copy matches where they belong */
 	copy_substring(PCU.userName, regs.start[1], regs.end[1], str);
@@ -356,8 +367,9 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 		copy_substring(pc->path, regs.start[4] + 1, regs.end[4], str);
 	else
 		strcpy(pc->path, "INBOX");
-	if (regs.start[5] != -1)
-		PCU.serverPort = atoi(str + regs.start[5] + 1);
+
+	if (regs.start[7] != -1)
+		PCU.serverPort = atoi(str + regs.start[7] + 1);
 	else
 		PCU.serverPort = (PCU.dossl != 0) ? 993 : 143;
 

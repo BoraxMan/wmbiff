@@ -8,7 +8,7 @@ EXTRA_wmbiff_SOURCES = gnutls-common.c gnutls-common.h
 wmbiff_LDADD = -L../wmgeneral -lwmgeneral @LIBGCRYPT_LIBS@ @GNUTLS_COMMON_O@
 wmbiff_DEPENDENCIES = ../wmgeneral/libwmgeneral.a Makefile @GNUTLS_COMMON_O@
 test_wmbiff_SOURCES = ShellClient.c charutil.c charutil.h Client.h \
-	test_wmbiff.c passwordMgr.c
+	test_wmbiff.c passwordMgr.c Imap4Client.c 
 man_MANS = wmbiff.1 wmbiffrc.5
 skindir = $(datadir)/wmbiff/skins
 skin_DATA = wmbiff-master-led.xpm wmbiff-master-contrast.xpm 

@@ -136,10 +136,76 @@ int test_passwordMgr(void) {
     return(0);
 }
 
+#define CKSTRING(x,shouldbe) if(strcmp(x,shouldbe)) { \
+printf("Failed: expected '" #shouldbe "' but got '%s'\n", x); \
+ return 1; }
+#define CKINT(x,shouldbe) if(x != shouldbe) { \
+printf("Failed: expected '" #shouldbe "' but got '%d'\n", x); \
+ return 1; }
+int test_imap4creator(void) {
+    mbox_t m;
+    
+    if(imap4Create(&m, "imaps:foo:@bar/mybox")) {
+        return 1;
+    }
+    CKSTRING(m.path, "mybox");
+    CKSTRING(m.u.pop_imap.serverName, "bar");
+    CKINT(m.u.pop_imap.serverPort, 993);
+
+    if(imap4Create(&m, "imaps:foo:@bar/\"mybox\"")) {
+        return 1;
+    }
+    CKSTRING(m.path, "\"mybox\"");
+    CKSTRING(m.u.pop_imap.serverName, "bar");
+    CKINT(m.u.pop_imap.serverPort, 993);
+
+    if(imap4Create(&m, "imaps:foo:@bar/\"space box\"")) {
+        return 1;
+    }
+    CKSTRING(m.path, "\"space box\"");
+    CKSTRING(m.u.pop_imap.serverName, "bar");
+    CKINT(m.u.pop_imap.serverPort, 993);
+
+    if(imap4Create(&m, "imaps:user pass bar/\"space box\"")) {
+        return 1;
+    }
+    CKSTRING(m.path, "\"space box\"");
+    CKSTRING(m.u.pop_imap.serverName, "bar");
+    CKINT(m.u.pop_imap.serverPort, 993);
+
+    if(imap4Create(&m, "imaps:user pass bar/\"space box\" 12")) {
+        return 1;
+    }
+    CKSTRING(m.path, "\"space box\"");
+    CKSTRING(m.u.pop_imap.serverName, "bar");
+    CKINT(m.u.pop_imap.serverPort, 12);
+
+    if(imap4Create(&m, "imaps:foo:@bar/\"mybox\":12")) {
+        return 1;
+    }
+    CKSTRING(m.path, "\"mybox\"");
+    CKSTRING(m.u.pop_imap.serverName, "bar");
+    CKINT(m.u.pop_imap.serverPort, 12);
+
+    
+    return 0;
+}
+
+void initialize_blacklist(void) { } 
+void tlscomm_printf(int x __attribute__((unused)), const char *f __attribute__((unused)), ...) { }
+void tlscomm_expect(void) {  } 
+void tlscomm_close() {  } 
+int tlscomm_is_blacklisted(const char *x __attribute__((unused))) {  return 1; } 
+void initialize_gnutls(void) {  } 
+int sock_connect(const char *n __attribute__((unused)), 
+                 int p __attribute__((unused))) { return 1; } /* stdout */
+void initialize_unencrypted(void) {  } 
+
 int main(int argc __attribute__((unused)), 
          char *argv[] __attribute__((unused))) {
     if( test_backtickExpand() || 
-        test_passwordMgr() ) {
+        test_passwordMgr() ||
+        test_imap4creator()) {
         printf("SOME TESTS FAILED!\n");
         exit(EXIT_FAILURE);
     } else {
