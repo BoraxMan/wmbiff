@@ -1,4 +1,4 @@
-SUBDIRS = wmgeneral wmbiff autoconf
+SUBDIRS = wmgeneral wmbiff autoconf scripts
 EXTRA_DIST = ChangeLog FAQ README.licq TODO
 
 ACLOCAL_FLAGS = -I autoconf
@@ -11,7 +11,7 @@ ACLOCAL_FLAGS = -I autoconf
 # stamp-h.in appears somewhere
 # Makefile.in and configure are obviously generated.
 MAINTAINERCLEANFILES = aclocal.m4 config.h.in stamp-h.in  \
-  Makefile.in configure
+  Makefile.in configure Changelog.bak stamp-h1
 maintainer-clean-local:
 	rm -f *~
 

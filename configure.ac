@@ -114,7 +114,7 @@ AC_DEFINE_UNQUOTED(DEFAULT_SKIN_PATH,
                    "$SKINDIR:/usr/share/wmbiff/skins:/usr/local/share/wmbiff/skins:.", [Path to use when finding skins (modified pixmaps)] )
 
 dnl We're done.
-AC_CONFIG_FILES(Makefile wmbiff/Makefile wmgeneral/Makefile wmbiff/wmbiffrc.5 autoconf/Makefile)
+AC_CONFIG_FILES(Makefile wmbiff/Makefile wmgeneral/Makefile wmbiff/wmbiffrc.5 autoconf/Makefile scripts/Makefile)
 AC_OUTPUT
 dnl remind not to write the file.
 chmod 0444 wmbiff/wmbiffrc.5
