@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.28 2002/06/08 22:13:06 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.29 2002/06/08 22:20:30 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -307,10 +307,14 @@ void do_biff(int argc, char **argv)
 	openXwindow(argc, argv, skin_xpm, wmbiff_mask_bits,
 				wmbiff_mask_width, wmbiff_mask_height);
 
-	if (font != NULL && loadFont(font) < 0) {
-		DMA(DEBUG_ERROR, "unable to load font. exiting.\n");
-		exit(EXIT_FAILURE);
-	}
+	if (font != NULL) {
+        if(loadFont(font) < 0) {
+            DMA(DEBUG_ERROR, "unable to load font. exiting.\n");
+            exit(EXIT_FAILURE);
+        }
+        /* make the whole background black */
+        eraseRect(5,5,58,58);
+    }
 
 	/* Initially read mail counters and resets,
 	   and initially draw labels and counters */
