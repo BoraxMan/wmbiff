@@ -141,10 +141,6 @@ int getline_from_buffer(char *readbuffer, char *linebuffer, int linebuflen)
 	}
 
 	if (i != 0) {
-		/* grab the end of line too! */
-		i++;
-		/* advance past the newline */
-		p++;
 		/* copy a line into the linebuffer */
 		strncpy(linebuffer, readbuffer, (size_t) i);
 		/* sigh, null terminate */
