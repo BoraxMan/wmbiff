@@ -1,5 +1,5 @@
 SUBDIRS = wmgeneral wmbiff autoconf
-EXTRA_DIST = README.licq TODO FAQ
+EXTRA_DIST = ChangeLog FAQ README.licq TODO
 
 ACLOCAL_FLAGS = -I autoconf
 
@@ -27,19 +27,11 @@ indent:
 
 # manually increment version in configure.ac, which should be enough.
 ChangeLog: Makefile configure.ac
-	@if test -e maint/changelog-header; then \
-	  if test "x$(CVS2CL)" != "x"; then \
-		cat maint/changelog-header > $@; \
-		echo >> $@; \
-		echo "running $(CVS2CL)..."; \
-		$(CVS2CL) --stdout --utc --day-of-week -I TODO | sed -f maint/changelog.sed >> $@; \
-	  else \
+	@if test "x$(CVS2CL)" != "x"; then \
+		echo "Running $(CVS2CL)..."; \
+		$(CVS2CL) --stdout --utc --day-of-week -I TODO | \
+		sed -f maint/changelog.sed > $@; \
+	else \
 		echo "Unable to build ChangeLog for distribution"; \
 		exit 1; \
-	  fi; \
-	else \
-      echo "ChangeLog doesn't seem like a good target. not touching anyway."; \
-    fi
-
-
-
+	fi
