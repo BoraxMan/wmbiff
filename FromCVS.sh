@@ -26,8 +26,14 @@ if [ -x /usr/bin/autoconf2.50 ]; then
   AUTOCONF=autoconf2.50
   AUTOHEADER=autoheader2.50
 else
-  AUTOCONF=autoconf
-  AUTOHEADER=autoheader
+    if [ -x /usr/bin/autoconf-2.53 ]; then 
+        echo "Using autoconf 2.53 (redhat-hack)";
+        AUTOCONF=autoconf-2.53
+        AUTOHEADER=autoheader-2.53
+    else
+        AUTOCONF=autoconf
+        AUTOHEADER=autoheader
+    fi
 fi
 
 if [ -e /usr/share/aclocal/libgnutls.m4 ]; then
