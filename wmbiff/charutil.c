@@ -1,4 +1,8 @@
-/* $Id: charutil.c,v 1.11 2002/06/01 06:02:06 bluehal Exp $ */
+/* $Id: charutil.c,v 1.12 2002/06/21 04:31:31 bluehal Exp $ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

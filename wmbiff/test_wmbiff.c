@@ -1,3 +1,7 @@
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "Client.h"
 #include "passwordMgr.h"
 
@@ -38,6 +42,7 @@ int test_backtickExpand(void) {
 int test_passwordMgr(void) {
 	const char *b;
 	mbox_t m;
+    strcpy(m.label, "x");
 
 	/* sh is almost certainly conforming; owned by root, etc. */
 	if (!permissions_ok(NULL, "/bin/sh")) {

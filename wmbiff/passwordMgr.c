@@ -21,6 +21,11 @@
    again. This might be poor if the askpass program is
    replaced with something non-interactive. */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+
 #include "passwordMgr.h"
 #include "Client.h"
 #include "charutil.h"			/* chomp */

@@ -1,12 +1,16 @@
-/* $Id: LicqClient.c,v 1.10 2002/04/20 09:12:35 bluehal Exp $ */
+/* $Id: LicqClient.c,v 1.11 2002/06/21 04:31:31 bluehal Exp $ */
 /* Author : Yong-iL Joh ( tolkien@mizi.com )
    Modified: Jorge García ( Jorge.Garcia@uv.es )
  * 
  * LICQ checker.
  *
- * Last Updated : $Date: 2002/04/20 09:12:35 $
+ * Last Updated : $Date: 2002/06/21 04:31:31 $
  *
  */
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include "Client.h"
 #include <sys/stat.h>
@@ -18,13 +22,13 @@
 
 #define PCM     (pc->u).mbox
 
-int licqCheckHistory(Pop3 pc)
+int licqCheckHistory( /*@notnull@ */ Pop3 pc)
 {
 	struct utimbuf ut;
 
 	DM(pc, DEBUG_INFO, ">Mailbox: '%s'\n", pc->path);
 
-	if (fileHasChanged(pc->path, &ut.actime, &PCM.mtime, &PCM.size)
+	if (fileHasChanged(pc->path, &ut.actime, &PCM.mtime, &PCM.size) != 0
 		|| pc->OldMsgs < 0) {
 		FILE *F;
 		char buf[1024];
@@ -39,7 +43,7 @@ int licqCheckHistory(Pop3 pc)
 				count_status++;
 			}
 		}
-		fclose(F);
+		(void) fclose(F);
 
 		pc->TotalMsgs = count_status * 2;
 		pc->UnreadMsgs = pc->TotalMsgs - count_status;
@@ -57,7 +61,7 @@ int licqCheckHistory(Pop3 pc)
 	return 0;
 }
 
-int licqCreate(Pop3 pc, char *str)
+int licqCreate( /*@notnull@ */ Pop3 pc, const char *str)
 {
 	/* LICQ format: licq:fullpathname */
 

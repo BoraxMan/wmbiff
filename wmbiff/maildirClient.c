@@ -1,13 +1,17 @@
-/* $Id: maildirClient.c,v 1.7 2002/04/09 07:45:52 bluehal Exp $ */
+/* $Id: maildirClient.c,v 1.8 2002/06/21 04:31:31 bluehal Exp $ */
 /* Author : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
    Modified : Dwayne C. Litzenberger ( dlitz@dlitz.net )
  * 
  * Maildir checker.
  *
- * Last Updated : $Date: 2002/04/09 07:45:52 $
+ * Last Updated : $Date: 2002/06/21 04:31:31 $
  *
  */
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include "Client.h"
 #include <sys/stat.h>
@@ -115,7 +119,7 @@ int maildirCheckHistory(Pop3 pc)
 	return 0;
 }
 
-int maildirCreate(Pop3 pc, char *str)
+int maildirCreate(Pop3 pc, const char *str)
 {
 	/* Maildir format: maildir:fullpathname */
 

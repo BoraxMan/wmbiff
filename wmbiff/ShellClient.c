@@ -8,6 +8,10 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "Client.h"
 #include <errno.h>
 #include <string.h>
@@ -196,7 +200,7 @@ int shellCmdCheck(Pop3 pc)
 	return (0);
 }
 
-int shellCreate(Pop3 pc, const char *str)
+int shellCreate( /*@notnull@ */ Pop3 pc, const char *str)
 {
 	/* SHELL format: shell:::/path/to/script */
 	const char *reserved1, *reserved2, *commandline;
@@ -207,6 +211,8 @@ int shellCreate(Pop3 pc, const char *str)
 	pc->OldUnreadMsgs = -1;
 	pc->checkMail = shellCmdCheck;
 	reserved1 = str + 6;		/* shell:>:: */
+
+	assert(strncasecmp("shell:", str, 6) == 0);
 
 	reserved2 = index(reserved1, ':');
 	if (reserved2 == NULL) {
@@ -224,8 +230,8 @@ int shellCreate(Pop3 pc, const char *str)
 	commandline++;				/* shell:::> */
 
 	/* good thing strcpy handles overlapping regions */
-	strcpy(pc->path, commandline);
 	SH_DM(pc, DEBUG_INFO, "path= '%s'\n", commandline);
+	strcpy(pc->path, commandline);
 	return 0;
 }
 

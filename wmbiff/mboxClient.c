@@ -1,4 +1,4 @@
-/* $Id: mboxClient.c,v 1.14 2002/06/01 06:02:06 bluehal Exp $ */
+/* $Id: mboxClient.c,v 1.15 2002/06/21 04:31:31 bluehal Exp $ */
 /* Author:		Yong-iL Joh <tolkien@mizi.com>
    Modified:	Jorge García <Jorge.Garcia@uv.es>
    			 	Rob Funk <rfunk@funknet.net>
@@ -6,9 +6,13 @@
  * 
  * MBOX checker.
  *
- * Last Updated : $Date: 2002/06/01 06:02:06 $
+ * Last Updated : $Date: 2002/06/21 04:31:31 $
  *
  */
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include "Client.h"
 #include <sys/stat.h>
