@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.59 2003/11/08 22:17:42 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.60 2004/01/01 07:47:50 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -186,7 +186,7 @@ static int ReadLine(FILE * fp, /*@out@ */ char *setting,
 	/* strcpy(setting, p); nspring replaced with sscanf dec 2002 */
 	strcpy(value, q);
 
-	if (sscanf(p, "%[a-z.]%d", setting, mbox_index) == 2) {
+	if (sscanf(p, "%[_a-z.]%d", setting, mbox_index) == 2) {
 		/* mailbox-specific configuration, ends in a digit */
 		if (*mbox_index < 0 || *mbox_index >= MAX_NUM_MAILBOXES) {
 			DMA(DEBUG_ERROR, "invalid mailbox number %d\n", *mbox_index);
@@ -250,7 +250,7 @@ static void parse_mbox_path(unsigned int item)
 static int Read_Config_File(char *filename, int *loopinterval)
 {
 	FILE *fp;
-	char setting[17], value[BUF_SIZE];
+	char setting[BUF_SMALL], value[BUF_SIZE];
 	int mbox_index;
 	unsigned int i;
 
@@ -295,25 +295,78 @@ static int Read_Config_File(char *filename, int *loopinterval)
 			DMA(DEBUG_ERROR, "Don't have %d mailboxes.\n", mbox_index);
 			continue;
 		}
+
 		if (1U + mbox_index > num_mailboxes
 			&& mbox_index + 1 <= MAX_NUM_MAILBOXES) {
 			num_mailboxes = 1U + mbox_index;
 		}
+
 		/* now only local settings */
 		if (!strcmp(setting, "label.")) {
-			strcpy(mbox[mbox_index].label, value);
+			if (strlen(value)+1 > BUF_SMALL) {
+				DMA(DEBUG_ERROR, "Mailbox %i label string '%s' is too long.\n", mbox_index, value);
+            continue;
+			} else {
+				strncpy(mbox[mbox_index].label, value, BUF_SMALL-1);
+			}
 		} else if (!strcmp(setting, "path.")) {
-			strcpy(mbox[mbox_index].path, value);
+			if (strlen(value)+1 > BUF_BIG) {
+				DMA(DEBUG_ERROR, "Mailbox %i path string '%s' is too long.\n", mbox_index, value);
+            continue;
+			} else {
+				strncpy(mbox[mbox_index].path, value, BUF_BIG-1);
+			}
 		} else if (!strcmp(setting, "notify.")) {
-			strcpy(mbox[mbox_index].notify, value);
+			if (strlen(value)+1 > BUF_BIG) {
+				DMA(DEBUG_ERROR, "Mailbox %i notify string '%s' is too long.\n", mbox_index, value);
+            continue;
+			} else {
+				strncpy(mbox[mbox_index].notify, value, BUF_BIG-1);
+			}
 		} else if (!strcmp(setting, "action.")) {
-			strcpy(mbox[mbox_index].action, value);
+			if (strlen(value)+1 > BUF_BIG) {
+				DMA(DEBUG_ERROR, "Mailbox %i action string '%s' is too long.\n", mbox_index, value);
+            continue;
+			} else {
+				strncpy(mbox[mbox_index].action, value, BUF_BIG-1);
+			}
+		} else if (!strcmp(setting, "action_disconnected.")) {
+			if (strlen(value)+1 > BUF_BIG) {
+				DMA(DEBUG_ERROR, "Mailbox %i action_disconnected string '%s' is too long.\n", mbox_index, value);
+            continue;
+			} else {
+				strncpy(mbox[mbox_index].actiondc, value, BUF_BIG-1);
+			}
+		} else if (!strcmp(setting, "action_new_mail.")) {
+			if (strlen(value)+1 > BUF_BIG) {
+				DMA(DEBUG_ERROR, "Mailbox %i action_new_mail string '%s' is too long.\n", mbox_index, value);
+            continue;
+			} else {
+				strncpy(mbox[mbox_index].actionnew, value, BUF_BIG-1);
+			}
+		} else if (!strcmp(setting, "action_no_new_mail.")) {
+			if (strlen(value)+1 > BUF_BIG) {
+				DMA(DEBUG_ERROR, "Mailbox %i action_no_new_mail string '%s' is too long.\n", mbox_index, value);
+            continue;
+			} else {
+				strncpy(mbox[mbox_index].actionnonew, value, BUF_BIG-1);
+			}
 		} else if (!strcmp(setting, "interval.")) {
 			mbox[mbox_index].loopinterval = atoi(value);
 		} else if (!strcmp(setting, "buttontwo.")) {
-			strcpy(mbox[mbox_index].button2, value);
+			if (strlen(value)+1 > BUF_BIG) {
+				DMA(DEBUG_ERROR, "Mailbox %i buttontwo string '%s' is too long.\n", mbox_index, value);
+            continue;
+			} else {
+				strncpy(mbox[mbox_index].button2, value, BUF_BIG-1);
+			}
 		} else if (!strcmp(setting, "fetchcmd.")) {
-			strcpy(mbox[mbox_index].fetchcmd, value);
+			if (strlen(value)+1 > BUF_BIG) {
+				DMA(DEBUG_ERROR, "Mailbox %i fetchcmd string '%s' is too long.\n", mbox_index, value);
+            continue;
+			} else {
+				strncpy(mbox[mbox_index].fetchcmd, value, BUF_BIG-1);
+			}
 		} else if (!strcmp(setting, "fetchinterval.")) {
 			mbox[mbox_index].fetchinterval = atoi(value);
 		} else if (!strcmp(setting, "debug.")) {
@@ -346,12 +399,15 @@ static void init_biff(char *config_file)
 	unsigned int i;
 
 	for (i = 0; i < MAX_NUM_MAILBOXES; i++) {
-		mbox[i].label[0] = '\0';
-		mbox[i].path[0] = '\0';
-		mbox[i].notify[0] = '\0';
-		mbox[i].action[0] = '\0';
-		mbox[i].button2[0] = '\0';
-		mbox[i].fetchcmd[0] = '\0';
+		memset(mbox[i].label, 0, BUF_SMALL);
+		memset(mbox[i].path, 0, BUF_BIG);
+		memset(mbox[i].notify, 0, BUF_BIG);
+		memset(mbox[i].action, 0, BUF_BIG);
+		memset(mbox[i].actiondc, 0, BUF_BIG);
+		memset(mbox[i].actionnew, 0, BUF_BIG);
+		memset(mbox[i].actionnonew, 0, BUF_BIG);
+		memset(mbox[i].button2, 0, BUF_BIG);
+		memset(mbox[i].fetchcmd, 0, BUF_BIG);
 		mbox[i].loopinterval = 0;
 		mbox[i].getHeaders = NULL;
 		mbox[i].releaseHeaders = NULL;
@@ -380,13 +436,21 @@ static void init_biff(char *config_file)
 		/* setup defaults if there's no config */
 		if ((m = getenv("MAIL")) != NULL) {
 			/* we are using MAIL environment var. type mbox */
+			if (strlen(m)+1 > BUF_BIG) {
+				DMA(DEBUG_ERROR, "MAIL environment var '%s' is too long.\n", m);
+			} else {
 			DMA(DEBUG_INFO, "Using MAIL environment var '%s'.\n", m);
-			strcpy(mbox[0].path, m);
+				strncpy(mbox[0].path, m, BUF_BIG-1);
+			}
 		} else if ((m = getenv("USER")) != NULL) {
 			/* we are using MAIL environment var. type mbox */
+			if (strlen(m)+10+1 > BUF_BIG) {
+				DMA(DEBUG_ERROR, "USER environment var '%s' is too long.\n", m);
+			} else {
 			DMA(DEBUG_INFO, "Using /var/mail/%s.\n", m);
 			strcpy(mbox[0].path, "/var/mail/");
-			strcat(mbox[0].path, m);
+				strncat(mbox[0].path, m, BUF_BIG-1-10);
+			}
 		} else {
 			DMA(DEBUG_ERROR, "Cannot open config file '%s' nor use the "
 				"MAIL environment var.\n", config_file);
@@ -1028,7 +1092,7 @@ static void do_biff(int argc, const char **argv)
 					CheckMouseRegion(Event.xbutton.x, Event.xbutton.y);
 				if (but_released_region == but_pressed_region
 					&& but_released_region >= 0) {
-					const char *click_action;
+					const char *click_action, *extra_click_action = NULL;
 
 					switch (Event.xbutton.button) {
 					case 1:	/* Left mouse-click */
@@ -1036,6 +1100,14 @@ static void do_biff(int argc, const char **argv)
 						if ((Event.xbutton.state & ControlMask) &&
 							(Event.xbutton.state & ShiftMask)) {
 							restart_wmbiff(0);
+						}
+						/* do we need to run an extra action? */
+						if (mbox[but_released_region].UnreadMsgs == -1) {
+							extra_click_action = mbox[but_released_region].actiondc;
+						} else if (mbox[but_released_region].UnreadMsgs > 0) {
+							extra_click_action = mbox[but_released_region].actionnew;
+						} else {
+							extra_click_action = mbox[but_released_region].actionnonew;
 						}
 						click_action = mbox[but_released_region].action;
 						break;
@@ -1048,6 +1120,11 @@ static void do_biff(int argc, const char **argv)
 					default:
 						click_action = NULL;
 						break;
+					}
+					if (extra_click_action != NULL && extra_click_action[0] != 0 &&
+						strcmp(extra_click_action, "msglst")) {
+						DM(&mbox[but_released_region], DEBUG_INFO, "runing: %s", extra_click_action);
+						(void) execCommand(extra_click_action);
 					}
 					if (click_action != NULL && click_action[0] != '\0'
 						&& strcmp(click_action, "msglst")) {

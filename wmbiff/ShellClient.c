@@ -189,6 +189,8 @@ int shellCmdCheck(Pop3 pc)
 			pc->UnreadMsgs = 0;
 			pc->TotalMsgs = count_status;
 		}
+	} else if (strcasestr(commandOutput, "unable")) {
+		return -1;
 	} else if (sscanf(commandOutput, "%9s\n", pc->TextStatus) == 1) {
 		/* validate the string input */
 		int i;
@@ -287,7 +289,12 @@ int shellCreate( /*@notnull@ */ Pop3 pc, const char *str)
 	SH_DM(pc, DEBUG_INFO, "path= '%s'\n", commandline);
 	{
 		char *tmp = strdup(commandline);
+		if (strlen(tmp)+1 > BUF_BIG) {
+			SH_DM(pc, DEBUG_ERROR, "commandline '%s' is too long.\n", commandline);
+			memset(pc->path, 0, BUF_BIG);
+		} else {
 		strcpy(pc->path, tmp);
+		}
 		free(tmp);
 	}
 	return 0;

@@ -1,8 +1,10 @@
 Release Notes
 ~~~~~~~~~~~~~
-Release 0.4.20 - 
+Release 0.4.20 - January 1, 2004
   * Add --disable-crypto for source-based distributions 
     while libgcrypt is unstable.
+  * Sam Izzo's patch for changing the mouse click action
+    depending on whether a box has new mail.
 
 Release 0.4.19 - November 8, 2003
   * Fix test_tlscomm with the right signature for read()
@@ -458,4 +460,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.54 2003/12/30 19:44:02 bluehal Exp $
+$Id: NEWS,v 1.55 2004/01/01 07:47:50 bluehal Exp $

@@ -48,9 +48,9 @@
 
 typedef struct password_binding_struct {
 	struct password_binding_struct *next;
-	char user[32];
-	char server[255];
-	char password[32];			/* may be frobnicated */
+	char user[BUF_SMALL];
+	char server[BUF_BIG];
+	char password[BUF_SMALL];			/* may be frobnicated */
 	unsigned char password_len;	/* frobnicated *'s are nulls */
 } *password_binding;
 
@@ -260,8 +260,18 @@ char *passwordFor(const char *username,
 		}
 #endif
 		retval = strdup(p->password);
-		strcpy(p->user, username);
-		strcpy(p->server, servername);
+		if (strlen(username)+1 > BUF_SMALL) {
+			DM(pc, DEBUG_ERROR, "username is too long.\n");
+			memset(p->user, 0, BUF_SMALL);
+		} else {
+			strncpy(p->user, username, BUF_SMALL-1);
+		}
+		if (strlen(servername)+1 > BUF_BIG) {
+			DM(pc, DEBUG_ERROR, "servername is too long.\n");
+			memset(p->server, 0, BUF_BIG);
+		} else {
+			strncpy(p->server, servername, BUF_BIG-1);
+		}
 		ENFROB(p->password);
 		p->next = pass_list;
 		pass_list = p;

@@ -696,8 +696,13 @@ static void ask_user_for_password( /*@notnull@ */ Pop3 pc, int bFlushCache)
 			password =
 				passwordFor(PCU.userName, PCU.serverName, pc, bFlushCache);
 			if (password != NULL) {
-				strcpy(PCU.password, password);
-				PCU.password_len = strlen(password);
+				if (strlen(password)+1 > BUF_SMALL) {
+					DMA(DEBUG_ERROR, "Password is too long.\n");
+					memset(PCU.password, 0, BUF_SMALL-1);
+				} else {
+					strncpy(PCU.password, password, BUF_SMALL-1);
+					PCU.password_len = strlen(PCU.password);
+				}
 				free(password);
 				ENFROB(PCU.password);
 			}

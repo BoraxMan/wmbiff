@@ -1,4 +1,4 @@
-/* $Id: mboxClient.c,v 1.15 2002/06/21 04:31:31 bluehal Exp $ */
+/* $Id: mboxClient.c,v 1.16 2004/01/01 07:47:50 bluehal Exp $ */
 /* Author:		Yong-iL Joh <tolkien@mizi.com>
    Modified:	Jorge García <Jorge.Garcia@uv.es>
    			 	Rob Funk <rfunk@funknet.net>
@@ -6,7 +6,7 @@
  * 
  * MBOX checker.
  *
- * Last Updated : $Date: 2002/06/21 04:31:31 $
+ * Last Updated : $Date: 2004/01/01 07:47:50 $
  *
  */
 
@@ -143,8 +143,14 @@ int mboxCreate(Pop3 pc, const char *str)
 	pc->checkMail = mboxCheckHistory;
 
 	/* default boxes are mbox... cut mbox: if it exists */
-	if (!strncasecmp(pc->path, "mbox:", 5))
-		strcpy(pc->path, str + 5);	/* cut off ``mbox:'' */
+	if (!strncasecmp(pc->path, "mbox:", 5)) {
+		if (strlen(str+5)+1 > BUF_BIG) {
+			DM(pc, DEBUG_ERROR, "mbox '%s' is too long.\n", str+5);
+			memset(pc->path, 0, BUF_BIG);
+		} else {
+			strncpy(pc->path, str + 5, BUF_BIG-1);	/* cut off ``mbox:'' */
+		}
+	}
 
 	DM(pc, DEBUG_INFO, "mbox: str = '%s'\n", str);
 	DM(pc, DEBUG_INFO, "mbox: path= '%s'\n", pc->path);

@@ -1,11 +1,11 @@
-/* $Id: Client.h,v 1.37 2003/11/08 23:46:02 bluehal Exp $ */
+/* $Id: Client.h,v 1.38 2004/01/01 07:47:50 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
  *
  * Email Checker Pop3/Imap4/Licq/Gicu/mbox/maildir/finger
  *
- * Last Updated : $Date: 2003/11/08 23:46:02 $
+ * Last Updated : $Date: 2004/01/01 07:47:50 $
  *
  */
 
@@ -28,15 +28,25 @@
 typedef unsigned int off_t;
 #endif
 
+#define BUF_BIG 256
+#define BUF_SMALL 32
+#define BUF_SIZE 1024
+
 struct msglst;
 typedef struct _mbox_t *Pop3;
 typedef struct _mbox_t {
-	char label[32];				/* Printed at left; max 5 chars */
-	char path[256];				/* Path to mailbox */
-	char notify[256];			/* Program to notify mail arrivation */
-	char action[256];			/* Action to execute on mouse click, reduces to what happens on button1 */
-	char button2[256];			/* What to run on button2. (middle) */
-	char fetchcmd[256];			/* Action for mail fetching for pop3/imap, reduces to what happens on button3 */
+	char label[BUF_SMALL];		/* Printed at left; max 5 chars */
+	char path[BUF_BIG];			/* Path to mailbox */
+	char notify[BUF_BIG];		/* Program to notify mail arrivation */
+	char action[BUF_BIG];		/* Action to execute on mouse click, reduces to
+										 *	what happens on button1. this is executed after
+										 *	either actionnew or actionnonew (if they are
+										 *	defined in the config file) */
+	char actionnew[BUF_BIG];	/* Action to execute on mouse click when new mail */
+	char actionnonew[BUF_BIG];	/* Action to execute on mouse click when no new mail */
+	char actiondc[BUF_BIG];		/* Action to execute when icq is disconnected */
+	char button2[BUF_BIG];		/* What to run on button2. (middle) */
+	char fetchcmd[BUF_BIG];		/* Action for mail fetching for pop3/imap, reduces to what happens on button3 */
 	int fetchinterval;
 	int TotalMsgs;				/* Total messages in mailbox */
 	int UnreadMsgs;				/* New (unread) messages in mailbox */
@@ -65,9 +75,9 @@ typedef struct _mbox_t {
 			unsigned int dircache_flush:1;	/* hack to flush directory caches */
 		} maildir;
 		struct {
-			char password[32];
-			char userName[32];
-			char serverName[256];
+			char password[BUF_SMALL];
+			char userName[BUF_SMALL];
+			char serverName[BUF_BIG];
 			int serverPort;
 			int localPort;
 			char authList[100];
@@ -92,8 +102,6 @@ typedef struct _mbox_t {
 	/* command to execute to get a password, if needed */
 	const char *askpass;
 } mbox_t;
-
-#define BUF_SIZE 1024
 
 /* creation calls must have this prototype */
 int pop3Create( /*@notnull@ */ Pop3 pc, const char *str);

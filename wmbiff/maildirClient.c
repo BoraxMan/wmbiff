@@ -1,11 +1,11 @@
-/* $Id: maildirClient.c,v 1.13 2003/10/26 07:42:28 bluehal Exp $ */
+/* $Id: maildirClient.c,v 1.14 2004/01/01 07:47:50 bluehal Exp $ */
 /* Author : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
    Modified : Dwayne C. Litzenberger ( dlitz@dlitz.net )
  * 
  * Maildir checker.
  *
- * Last Updated : $Date: 2003/10/26 07:42:28 $
+ * Last Updated : $Date: 2004/01/01 07:47:50 $
  *
  */
 
@@ -55,7 +55,7 @@ int maildirCheckHistory(Pop3 pc)
 	struct stat st_new;
 	struct stat st_cur;
 	struct utimbuf ut;
-	char path_new[256], path_cur[256];
+	char path_new[BUF_BIG*2], path_cur[BUF_BIG*2];
 
 	int count_new = 0, count_cur = 0;
 
@@ -69,7 +69,7 @@ int maildirCheckHistory(Pop3 pc)
 	if (pc->u.maildir.dircache_flush) {
 		/* hack to clear directory cache for network-mounted maildirs */
 		int fd;
-		char path_newtmp[512];
+		char path_newtmp[BUF_BIG*2+32];
 		strcpy(path_newtmp, path_new);
 		strcat(path_newtmp, ".wmbiff.dircache_flush.XXXXXX");
 		if ((fd = mkstemp(path_newtmp)) >= 0) {
@@ -164,7 +164,12 @@ int maildirCreate(Pop3 pc, const char *str)
 	} else {
 		i = 0;
 	}
-	strcpy(pc->path, str + 8 + i);	/* cut off ``maildir:'' */
+	if (strlen(str+8+i)+1 > BUF_BIG) {
+		DM(pc, DEBUG_ERROR, "maildir '%s' is too long.\n", str+8+i);
+		memset(pc->path, 0, BUF_BIG);
+	} else {
+		strncpy(pc->path, str + 8 + i, BUF_BIG-1);	/* cut off ``maildir:'' */
+	}
 
 	DM(pc, DEBUG_INFO, "maildir: str = '%s'\n", str);
 	DM(pc, DEBUG_INFO, "maildir: path= '%s'\n", pc->path);
