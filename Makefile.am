@@ -19,6 +19,10 @@ DISTCLEANFILES = conf.libgnutlstest build-stamp install-stamp
 
 dist-hook-local: ChangeLog
 
+indent:
+	cd wmbiff && make indent	
+	cd wmgeneral && make indent	
+
 # manually increment version in configure.ac, which should be enough.
 ChangeLog: Makefile configure.ac
 	@if test -e maint/changelog-header; then \
@@ -34,5 +38,6 @@ ChangeLog: Makefile configure.ac
 	else \
       echo "ChangeLog doesn't seem like a good target. not touching anyway."; \
     fi
+
 
 
