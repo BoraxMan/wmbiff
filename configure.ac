@@ -6,9 +6,9 @@ dnl and configure:
 dnl  installation prefix
 dnl  version
 
-AC_INIT(WMBiff, 0.4.16, wmbiff-devel@lists.sourceforge.net, wmbiff)
+AC_INIT(WMBiff, 0.4.17, wmbiff-devel@lists.sourceforge.net, wmbiff)
 AC_CONFIG_AUX_DIR(autoconf)
-AM_INIT_AUTOMAKE(wmbiff, 0.4.16) dnl tarded syntax for automake <= 1.5
+AM_INIT_AUTOMAKE(wmbiff, 0.4.17) dnl tarded syntax for automake <= 1.5
 AM_CONFIG_HEADER(config.h)
 dnl make sure autoheader finds version, implicitly defined above.
 AH_TEMPLATE([VERSION], [wmbiff's release version])
