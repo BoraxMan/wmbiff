@@ -13,6 +13,8 @@ Release 0.4.16 -
     and program output for shell methods.  This is 
     intended to be faster than starting up a new 
     mail program or re-executing a script.
+  * Avoid repetitive error messages.
+  * Use conventional -geometry option handling.
 
 Release 0.4.15 - Mar 30, 2003
   * Frobnicate internally stored passwords, partially 
@@ -427,4 +429,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.44 2003/07/03 01:03:27 bluehal Exp $
+$Id: NEWS,v 1.45 2003/07/03 05:43:41 bluehal Exp $
