@@ -270,7 +270,7 @@ void tlscomm_printf(struct connection_state *scs, const char *format, ...)
 #ifdef USE_GNUTLS
 #include "gnutls-common.h"
 
-static int
+static void
 bad_certificate(const struct connection_state *scs, const char *msg)
 {
 	TDM(DEBUG_ERROR, "%s", msg);
