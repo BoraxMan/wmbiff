@@ -2,6 +2,8 @@
 
 # Copyright 2002 Neil Spring <nspring@cs.washington.edu> 
 # GPL
+# report bugs to wmbiff-devel@lists.sourceforge.net
+# or (preferred) use the debian BTS via 'reportbug'
 
 # Based on security-update-check.py by Rob Bradford
 
@@ -17,7 +19,8 @@ require 'net/http'
 # this still doesn't mean we grab the whole file.  we get
 # if-modified-since.  it just means we don't connect to the
 # server more often than this.
-Refetch_Interval_Sec = 60 * 60
+# 6 hours * 60 min/hour * 60 sec/min
+Refetch_Interval_Sec = 6 * 60 * 60
 
 # as an ordinary user, we store Packages in the home directory.
 Cachedir = ENV['HOME'] + '/.wmbiff-sdr'
