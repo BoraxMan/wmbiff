@@ -1,4 +1,4 @@
-# $Id: sample.wmbiffrc,v 1.17 2003/07/03 00:52:51 bluehal Exp $
+# $Id: sample.wmbiffrc,v 1.18 2003/11/09 07:01:15 bluehal Exp $
 #
 # See wmbiffrc(5) for more info.
 #
@@ -140,4 +140,4 @@ path.4=shell:::/usr/lib/wmbiff/security.debian.rb
 
 # Ways wmbiff can drive MAC OS X Mail using AppleScript.
 # action.0 = osascript -e 'tell application "Mail"' -e 'set selected mailboxes of first message viewer to {mailbox "in-grads" of imap account "me@myaccount.org"}' -e 'activate' -e 'end tell'
-# action.1 = osascript -e 'tell application "Mail"' -e 'set selected mailboxes of first message viewer to {in mailbox}' -e 'activate' -e 'end tell'
+# action.1 = osascript -e 'tell application "Mail"' -e 'set selected mailboxes of first message viewer to {inbox}' -e 'activate' -e 'end tell'
