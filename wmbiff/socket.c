@@ -1,4 +1,4 @@
-/* $Id: socket.c,v 1.12 2004/04/28 00:19:03 bluehal Exp $ */
+/* $Id: socket.c,v 1.13 2004/07/03 23:43:36 bluehal Exp $ */
 /* Copyright (C) 1998 Trent Piepho  <xyzzy@u.washington.edu>
  *           (C) 1999 Trent Piepho  <xyzzy@speakeasy.org>
  *
@@ -131,7 +131,8 @@ int sock_connect(const char *hostname, int port)
 	}
 	freeaddrinfo(res0);
 	if (fd < 0) {
-		perror("Error connecting");
+		fprintf(stderr, "Error connecting to %s:%d: %s\n",
+				hostname, port, strerror(errno));
 		printf("socket/connect to %s failed: %s\n", hostname,
 			   strerror(errno));
 		return -1;
