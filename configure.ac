@@ -7,9 +7,9 @@ dnl and configure:
 dnl  installation prefix
 dnl  version
 
-AC_INIT(wmbiff, 0.4.9pre, wmbiff-devel@lists.sourceforge.net)
+AC_INIT(wmbiff, 0.4.9, wmbiff-devel@lists.sourceforge.net)
 AC_CONFIG_AUX_DIR(autoconf)
-AM_INIT_AUTOMAKE(wmbiff, 0.4.9pre)
+AM_INIT_AUTOMAKE(wmbiff, 0.4.9)
 AM_CONFIG_HEADER(config.h)
 dnl make sure autoheader finds version, implicitly defined above.
 AH_TEMPLATE([VERSION], [wmbiff's release version])
@@ -42,7 +42,7 @@ dnl between them makes this turn redundant
 
 GNUTLS_MAN_STATUS="This copy of WMBiff was not compiled with GNUTLS."
 if test "$gnutls" = "ok"; then
- AM_PATH_LIBGNUTLS(0.5.1, [LIBS="$LIBS $LIBGNUTLS_LIBS"
+ AM_PATH_LIBGNUTLS(0.5.9, [LIBS="$LIBS $LIBGNUTLS_LIBS"
                           CFLAGS="$CFLAGS $LIBGNUTLS_CFLAGS"
                          CPPFLAGS="$CPPFLAGS $LIBGNUTLS_CFLAGS"
                          GNUTLS_COMMON_O="gnutls-common.o"
