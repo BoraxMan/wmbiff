@@ -1,5 +1,9 @@
 Release Notes
 ~~~~~~~~~~~~~
+Release 0.4.12 - Jan 3, 2003
+  * Fix a bug introduced in 0.4.9 that interfered with
+    -geometry handling. (Debian #173813)
+
 Release 0.4.11 - Dec 28, 2002
   * security.debian.rb script to check for updates on 
     security.debian.org, installed in $prefix/lib/wmbiff/
@@ -384,4 +388,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.35 2002/12/29 05:28:29 bluehal Exp $
+$Id: NEWS,v 1.36 2003/01/04 03:39:35 bluehal Exp $

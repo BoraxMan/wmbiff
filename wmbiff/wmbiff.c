@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.43 2003/01/03 20:37:38 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.44 2003/01/04 03:39:35 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -1056,6 +1056,10 @@ static void parse_cmd(int argc, char **argv, /*@out@ */ char *config_file)
 					exit(EXIT_FAILURE);
 				} else {
 					i++;		/* gobble the argument */
+					if (i >= argc) {	/* fail if there's nothing to gobble */
+						usage();
+						exit(EXIT_FAILURE);
+					}
 				}
 				break;
 			case 'h':
