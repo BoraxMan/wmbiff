@@ -84,7 +84,8 @@ void tlscomm_close(struct connection_state *scs)
 	/* not ok to call this more than once */
 	if (scs->tls_state) {
 #ifdef USE_GNUTLS
-		gnutls_bye(scs->tls_state, GNUTLS_SHUT_RDWR);
+		// gnutls_bye(scs->tls_state, GNUTLS_SHUT_RDWR);
+		gnutls_bye(scs->tls_state, GNUTLS_SHUT_WR);
 		gnutls_certificate_free_credentials(scs->xcred);
 		gnutls_deinit(scs->tls_state);
 		scs->xcred = NULL;
@@ -388,6 +389,7 @@ tls_check_certificate(struct connection_state *scs,
 
 	if (gnutls_auth_get_type(scs->tls_state) != GNUTLS_CRD_CERTIFICATE) {
 		bad_certificate(scs, "Unable to get certificate from peer.\n");
+		return;					/* bad_cert will exit if -skip-certificate-check was not given */
 	}
 	certstat = gnutls_certificate_verify_peers(scs->tls_state);
 	if (certstat == GNUTLS_E_NO_CERTIFICATE_FOUND) {
@@ -460,11 +462,11 @@ tls_check_certificate(struct connection_state *scs,
 		}
 	}
 
-	if ( certificate_filename != NULL && 
-         tls_compare_certificates(&cert_list[0]) == 0 ) {
+	if (certificate_filename != NULL &&
+		tls_compare_certificates(&cert_list[0]) == 0) {
 		bad_certificate(scs,
 						"server's certificate was not found in the certificate file.\n");
-    }
+	}
 
 	gnutls_x509_crt_deinit(cert);
 
