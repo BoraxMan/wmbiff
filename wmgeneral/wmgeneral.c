@@ -464,6 +464,7 @@ void openXwindow(int argc, const char *argv[],
 	unsigned long gcm;
 
 	const char *geometry = NULL;
+	char default_geometry[128];
 
 	int dummy = 0;
 	int i;
@@ -478,6 +479,8 @@ void openXwindow(int argc, const char *argv[],
 			i++;
 		}
 	}
+
+	sprintf(default_geometry, "%dx%d+0+0", pixmask_width, pixmask_height);
 
 	if (!(display = XOpenDisplay(display_name))) {
 		fprintf(stderr, "%s: can't open display %s\n",
@@ -501,9 +504,9 @@ void openXwindow(int argc, const char *argv[],
 	back_pix = GetColor("black");
 	fore_pix = GetColor("cyan");
 
-	XWMGeometry(display, screen, Geometry, NULL, borderwidth, &mysizehints,
-				&mysizehints.x, &mysizehints.y, &mysizehints.width,
-				&mysizehints.height, &dummy);
+	XWMGeometry(display, screen, geometry, default_geometry, borderwidth,
+				&mysizehints, &mysizehints.x, &mysizehints.y,
+				&mysizehints.width, &mysizehints.height, &dummy);
 
 	mysizehints.width = pixmask_width;	/* changed 11/2002 for wmbiff non 64x64-ness */
 	mysizehints.height = pixmask_height;	/* was statically 64. */
@@ -574,15 +577,32 @@ void openXwindow(int argc, const char *argv[],
 	XMapWindow(display, win);
 
 	if (geometry) {
+		/* we'll silently drop width and height as well as negative positions */
+		/* mostly because I don't know how to deal with them */
 		int wx, wy, x, y;
-		if (sscanf(geometry, "+%d+%d", &wx, &wy) == 2) {
-			XMoveWindow(display, win, wx, wy);
-		} else if (sscanf(geometry, "%dx%d+%d+%d", &x, &y, &wx, &wy) == 4) {
-			XMoveWindow(display, win, wx, wy);
-		} else {
-			fprintf(stderr, "Unsupported geometry string '%s'\n",
-					geometry);
-			exit(1);
-		}
+		int specified = XParseGeometry(geometry, &x, &y, &wx, &wy);
+		printf("%d %d %d %d\n", x, y, wx, wy);
+		/* if( specified & XNegative ) {
+		   x = DisplayWidth(display, DefaultScreen(display)) - x - pixmask_width;
+		   }
+		   if( specified & YNegative ) {
+		   y = DisplayHeight(display, DefaultScreen(display)) - y - pixmask_height;
+		   }
+		   if( specified & XValue || specified & YValue ) { 
+		   XMoveWindow(display, win, x, y);
+		   } */
+
+		/*
+		   if (sscanf(geometry, "+%d+%d", &wx, &wy) == 2) {
+		   XMoveWindow(display, win, wx, wy);
+		   } else if (sscanf(geometry, "%dx%d+%d+%d", &x, &y, &wx, &wy) == 4) {
+		   XMoveWindow(display, win, wx, wy);
+		   } else if (sscanf(geometry, "+%d-%d", &wx, &wy) == 2) {
+		   XMoveWindow(display, win, wx, 0 - wy);
+		   }  else {
+		   fprintf(stderr, "Unsupported geometry string '%s'\n",
+		   geometry);
+		   exit(1);
+		   } */
 	}
 }
