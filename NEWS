@@ -1,6 +1,6 @@
 Release Notes
 ~~~~~~~~~~~~~
-Release 0.4.0 - unreleased
+Release 0.4.0 - May 3, 2002
 
   * This release is by Neil Spring <nspring@cs.washington.edu>.
   * GNUTLS version 0.3.5 is expected; earlier and later versions
@@ -307,4 +307,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.20 2002/04/25 21:35:25 bluehal Exp $
+$Id: NEWS,v 1.21 2002/05/03 05:57:10 bluehal Exp $
