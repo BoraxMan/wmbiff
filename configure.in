@@ -44,9 +44,9 @@ if test "$gnutls" = "ok"; then
  AM_PATH_LIBGNUTLS(0.4.3, [LIBS="$LIBS $LIBGNUTLS_LIBS"
                           CFLAGS="$CFLAGS $LIBGNUTLS_CFLAGS"
                          CPPFLAGS="$CPPFLAGS $LIBGNUTLS_CFLAGS"
-                         GNUTLS_COMMON="gnutls-common.c gnutls-common.h"
-                         GNUTLS_MAN_STATUS="This copy of WMBiff was compiled with GNUTLS." ])
- AC_CHECK_HEADERS(gnutls.h) 
+                         GNUTLS_COMMON_O="gnutls-common.o"
+                         GNUTLS_MAN_STATUS="This copy of WMBiff was compiled with GNUTLS." 
+                         AC_CHECK_HEADERS(gnutls.h) ])
 else
  AC_MSG_RESULT(GNUTLS support requires libz.a and libgdbm.a, so will be disabled)
 fi
@@ -60,7 +60,7 @@ AM_PATH_LIBGCRYPT(1.1.7, [CFLAGS="$CFLAGS $LIBGCRYPT_CFLAGS"
 AC_SUBST(LIBGCRYPT_LIBS)
 AC_SUBST(GNUTLS_MAN_STATUS)
 AC_SUBST(GCRYPT_MAN_STATUS)
-AC_SUBST(GNUTLS_COMMON)
+AC_SUBST(GNUTLS_COMMON_O)
 
 dnl regex stuff.
 AC_CHECK_HEADERS(regex.h gnuregex.h) dnl linux has regex.h, BSD gnuregex
