@@ -38,7 +38,7 @@ indent:
 	indent -npro -kr -i4 -ts4 $(wmbiff_SOURCES) || true
 
 # to perform surgery on a few changed files.
-%.indent: %.c
+.c.indent:
 	indent -npro -kr -i4 -ts4 $< || true
 
 dist-hook-local: indent config-h-check
