@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.32 2002/07/04 01:07:28 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.33 2002/07/18 02:55:24 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -854,6 +854,7 @@ int main(int argc, char *argv[])
 	}
 	init_biff(uconfig_file);
 	signal(SIGCHLD, sigchld_handler);
+	signal(SIGPIPE, SIG_IGN);	/* added for gnutls */
 	do_biff(argc, argv);
 	return 0;
 }
