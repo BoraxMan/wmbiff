@@ -131,6 +131,7 @@ packagelists.each { |urlpath, sc, uc|
       if head.code != "304"
         raise "unexpected error occurred: " + detail
       end
+      test(?e, Cachedir) or Dir.mkdir(Cachedir)
       if(test(?e, uc)) then
         touch(uc)
       else
