@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.63 2004/04/28 00:19:03 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.64 2004/06/18 21:29:11 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -457,7 +457,7 @@ static void init_biff(char *config_file)
 				strncpy(mbox[0].path, m, BUF_BIG - 1);
 			}
 		} else if ((m = getenv("USER")) != NULL) {
-			/* we are using MAIL environment var. type mbox */
+			/* we will use the USER env var to find an mbox name */
 			if (strlen(m) + 10 + 1 > BUF_BIG) {
 				DMA(DEBUG_ERROR,
 					"USER environment var '%s' is too long.\n", m);
@@ -465,6 +465,11 @@ static void init_biff(char *config_file)
 				DMA(DEBUG_INFO, "Using /var/mail/%s.\n", m);
 				strcpy(mbox[0].path, "/var/mail/");
 				strncat(mbox[0].path, m, BUF_BIG - 1 - 10);
+				if (mbox[0].path[9] != '/') {
+					DMA(DEBUG_ERROR,
+						"Unexpected failure to construct /var/mail/username, please "
+						"report this with your operating system info and the version of wmbiff.");
+				}
 			}
 		} else {
 			DMA(DEBUG_ERROR, "Cannot open config file '%s' nor use the "
