@@ -1,5 +1,8 @@
+Makefile
+Makefile.in
 *~
 *.o
 wmbiff
+wmbiffrc.5
 wmbiff-master.xpm
-Makefile.in
+.deps
