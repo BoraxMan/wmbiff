@@ -2,15 +2,27 @@ Release Notes
 ~~~~~~~~~~~~~
 Release 0.4.0 - unreleased
 
-  * Can leave IMAP password empty in .wmbiffrc: ssh-askpass
+  * This release is by Neil Spring <nspring@cs.washington.edu>.
+  * Passwords can be left empty for IMAP: ssh-askpass
     will be used to prompt the user.  See sample.wmbiffrc 
     and wmbiffrc(5).
-  * A different background pixmap can be specified in .wmbiffrc.
+  * Background pixmaps can be specified in .wmbiffrc.
     This has the effect of "skins."  See wmbiffrc(5).
+    Add "skinfile=wmbiff-master-contrast.xpm" to .wmbiffrc 
+    for a more readable wmbiff.
+  * Permissions on .wmbiffrc are checked to protect security.
+    Only a warning is printed now.  This will degenerate in 
+    later releases for .wmbiffrc's that store passwords.
+  * Finger client added - finger a user's mailbox to get its
+    status.  Requires perl and finger commands. See wmbiffrc(5).
+    Thanks to Andelko Horvat.
+  * Improvements to ShellClient - now allows three character 
+    text to be printed as status.  If "new" is on the output
+    line, the text will be in yellow. Thanks to Andelko Horvat.
   * Migrated to automake / autoconf to detect defaults for
     ssh-askpass and prepare for future changes.
-  * [unfinished] Permissions on .wmbiffrc are checked to protect
-    security.
+  * Bugfix to handle -geometry tags with dimension as generated
+    by fvwmSaveDesk. The size is ignored. (in Debian 0.3.8-3)
 
 Release 0.3.8 - Tue, 26 Mar 2002 17:17:07 +0100
 
@@ -290,4 +302,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.17 2002/04/07 05:08:23 bluehal Exp $
+$Id: NEWS,v 1.18 2002/04/16 08:10:16 bluehal Exp $

@@ -1,3 +1,6 @@
+This is not a prioritized list.  Patches that accomplish
+these todo items are welcome.
+
 * Store and verify server certificates. 
   I don't know whether gnutls supports this.  A pointer to
   documentation that describes what to do, or a way to leech
@@ -26,15 +29,20 @@
   For example, an IMAP status query has a good response (*
   STATUS) and a bad response (a003 NO STATUS).  As soon as
   one of them is received, we're done.
-
-
+* Reload .wmbiffrc when it changes
+  This is straightforward, except for IMAP mailboxes that
+  keep a connection to the server open.  A close function 
+  will have to be implemented to shut those down gracefully.
+  Do not involve sighup or any other signals.
+* Support GSSAPI or SASL authentication
+  Authentication using krb5 would be sweet.
 * Unlikely to get done, unless someone volunteers:
-* Support pops
+* Support POP over TLS.
   tlsComm.c should make it easy to provide TLS support
   for POP.  Unfortunately, this would only be useful for
   someone who has such a server that doesn't support IMAPS.
 
-$Id: TODO,v 1.8 2002/04/16 07:37:37 bluehal Exp $
+$Id: TODO,v 1.9 2002/04/16 08:10:16 bluehal Exp $
 
 Local Variables:
 mode: outline
