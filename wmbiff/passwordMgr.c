@@ -107,95 +107,98 @@ int permissions_ok(Pop3 pc, const char *askpass_fname)
 #include<Security/Security.h>
 
 static void get_password_from_keychain(Pop3 pc, const char *username,
-                                       const char *servername,
-                                       /*@out@*/ char *password, 
-                                       /*@out@*/ unsigned char *password_len) {
-    SecKeychainRef kc;
-    OSStatus rc;
-    char *secpwd;
-    UInt32 pwdlen;
-    rc = SecKeychainCopyDefault(&kc);
-    if(rc != noErr) {
-        DM(pc, DEBUG_ERROR, "passmgr: unable to open keychain, exiting\n");
-        exit(EXIT_FAILURE);
-    }
-    rc = SecKeychainFindInternetPassword(kc, strlen(servername), servername, 
-                                         0, NULL, 
-                                         strlen(username), username, 
-                                         0, NULL, 0, NULL,
-                                         kSecAuthenticationTypeDefault, 
-                                         &pwdlen, (void **)&secpwd, NULL);
-    if(rc != noErr) {
-        DM(pc, DEBUG_ERROR,
-           "passmgr: keychain password grab failed, exiting\n");
-        DM(pc, DEBUG_ERROR,
-           "passmgr: (perhaps you pressed 'deny')\n");
-        /* this seems like the sanest thing to do, for now */
-        exit(EXIT_FAILURE);
-    }
+									   const char *servername,
+									   /*@out@ */ char *password,
+									   /*@out@ */
+									   unsigned char *password_len)
+{
+	SecKeychainRef kc;
+	OSStatus rc;
+	char *secpwd;
+	UInt32 pwdlen;
+	rc = SecKeychainCopyDefault(&kc);
+	if (rc != noErr) {
+		DM(pc, DEBUG_ERROR, "passmgr: unable to open keychain, exiting\n");
+		exit(EXIT_FAILURE);
+	}
+	rc = SecKeychainFindInternetPassword(kc, strlen(servername),
+										 servername, 0, NULL,
+										 strlen(username), username, 0,
+										 NULL, 0, NULL,
+										 kSecAuthenticationTypeDefault,
+										 &pwdlen, (void **) &secpwd, NULL);
+	if (rc != noErr) {
+		DM(pc, DEBUG_ERROR,
+		   "passmgr: keychain password grab failed, exiting\n");
+		DM(pc, DEBUG_ERROR, "passmgr: (perhaps you pressed 'deny')\n");
+		/* this seems like the sanest thing to do, for now */
+		exit(EXIT_FAILURE);
+	}
 
-    if(pwdlen < *password_len) {
-        strcpy(password, secpwd);
-        *password_len = strlen(password);
-    } else {
-        DM(pc, DEBUG_ERROR,
-           "passmgr: warning: your password appears longer (%d) than expected (%d)\n", 
-           strlen(secpwd), *password_len - 1);
-    }
-    rc = SecKeychainItemFreeContent(NULL, secpwd);
-    return;
+	if (pwdlen < *password_len) {
+		strcpy(password, secpwd);
+		*password_len = strlen(password);
+	} else {
+		DM(pc, DEBUG_ERROR,
+		   "passmgr: warning: your password appears longer (%d) than expected (%d)\n",
+		   strlen(secpwd), *password_len - 1);
+	}
+	rc = SecKeychainItemFreeContent(NULL, secpwd);
+	return;
 }
-#endif /* apple keychain */
+#endif							/* apple keychain */
 
 
 static void get_password_from_command(Pop3 pc, const char *username,
-                                      const char *servername,
-                                      /*@out@*/ char *password, 
-                                      /*@out@*/ unsigned char *password_len) {
-    password[*password_len-1] = '\0';
-    password[0] = '\0';
-    /* check that the executed file is a good one. */
-    if (permissions_ok(pc, pc->askpass)) {
-        char *command;
-        char *password_ptr;
-        int len =
-            strlen(pc->askpass) + strlen(username) +
-            strlen(servername) + 40;
-        command = malloc(len);
-        snprintf(command, len, "%s 'password for wmbiff: %s@%s'",
-                 pc->askpass, username, servername);
-        
-        (void) grabCommandOutput(pc, command, &password_ptr, NULL);
-        /* it's not clear what to do with the exit
-           status, though we can get it from
-           grabCommandOutput if needed to deal with some
-           programs that will print a message but exit
-           non-zero on error */
-        free(command);
-        
-        if (password_ptr == NULL) {
-            /* this likely means that the user cancelled, and doesn't
-               want us to keep asking about the password. */
-            DM(pc, DEBUG_ERROR,
-               "passmgr: fgets password failed, exiting\n");
-            DM(pc, DEBUG_ERROR,
-               "passmgr: (it looks like you pressed 'cancel')\n");
-            /* this seems like the sanest thing to do, for now */
-            exit(EXIT_FAILURE);
-        }
-        strncpy(password, password_ptr, *password_len);
-        if( password[*password_len-1] != '\0' ) {
-            DM(pc, DEBUG_ERROR,
-               "passmgr: warning: your password appears longer (%d) than expected (%d)\n", 
-               strlen(password_ptr), *password_len - 1);
-        }
-        free(password_ptr);
-        password[*password_len-1] = '\0';
-        *password_len = strlen(password);
-    } else {
-        DM(pc, DEBUG_ERROR,
-           "passmgr: permissions check of '%s' failed.", pc->askpass);
-    }
+									  const char *servername,
+									  /*@out@ */ char *password,
+									  /*@out@ */
+									  unsigned char *password_len)
+{
+	password[*password_len - 1] = '\0';
+	password[0] = '\0';
+	/* check that the executed file is a good one. */
+	if (permissions_ok(pc, pc->askpass)) {
+		char *command;
+		char *password_ptr;
+		int len =
+			strlen(pc->askpass) + strlen(username) +
+			strlen(servername) + 40;
+		command = malloc(len);
+		snprintf(command, len, "%s 'password for wmbiff: %s@%s'",
+				 pc->askpass, username, servername);
+
+		(void) grabCommandOutput(pc, command, &password_ptr, NULL);
+		/* it's not clear what to do with the exit
+		   status, though we can get it from
+		   grabCommandOutput if needed to deal with some
+		   programs that will print a message but exit
+		   non-zero on error */
+		free(command);
+
+		if (password_ptr == NULL) {
+			/* this likely means that the user cancelled, and doesn't
+			   want us to keep asking about the password. */
+			DM(pc, DEBUG_ERROR,
+			   "passmgr: fgets password failed, exiting\n");
+			DM(pc, DEBUG_ERROR,
+			   "passmgr: (it looks like you pressed 'cancel')\n");
+			/* this seems like the sanest thing to do, for now */
+			exit(EXIT_FAILURE);
+		}
+		strncpy(password, password_ptr, *password_len);
+		if (password[*password_len - 1] != '\0') {
+			DM(pc, DEBUG_ERROR,
+			   "passmgr: warning: your password appears longer (%d) than expected (%d)\n",
+			   strlen(password_ptr), *password_len - 1);
+		}
+		free(password_ptr);
+		password[*password_len - 1] = '\0';
+		*password_len = strlen(password);
+	} else {
+		DM(pc, DEBUG_ERROR,
+		   "passmgr: permissions check of '%s' failed.", pc->askpass);
+	}
 }
 
 char *passwordFor(const char *username,
@@ -237,31 +240,31 @@ char *passwordFor(const char *username,
 
 	/* else, try to get it. */
 	if (pc->askpass != NULL) {
-        char *retval;
+		char *retval;
 
-        p->password_len = 32;
+		p->password_len = 32;
 #ifdef HAVE_APPLE_KEYCHAIN
-        if(strcmp(pc->askpass, "internal:apple:keychain") == 0) {
-            get_password_from_keychain(pc, username, servername, 
-                                       p->password, &p->password_len);
-        } else {
-            DM(pc, DEBUG_ERROR, 
-               "you could change your askpass line to:\n"
-               "    askpass = internal:apple:keychain\n" 
-               "to use the OS X keychain instead of running a command\n");
-#endif 
-            get_password_from_command(pc, username, servername, 
-                                      p->password, &p->password_len);
-#ifdef HAVE_APPLE_KEYCHAIN
-        }
+		if (strcmp(pc->askpass, "internal:apple:keychain") == 0) {
+			get_password_from_keychain(pc, username, servername,
+									   p->password, &p->password_len);
+		} else {
+			DM(pc, DEBUG_ERROR,
+			   "you could change your askpass line to:\n"
+			   "    askpass = internal:apple:keychain\n"
+			   "to use the OS X keychain instead of running a command\n");
 #endif
-        retval = strdup(p->password);
-        strcpy(p->user, username);
-        strcpy(p->server, servername);
-        ENFROB(p->password);
-        p->next = pass_list;
-        pass_list = p;
-        return (retval);
+			get_password_from_command(pc, username, servername,
+									  p->password, &p->password_len);
+#ifdef HAVE_APPLE_KEYCHAIN
+		}
+#endif
+		retval = strdup(p->password);
+		strcpy(p->user, username);
+		strcpy(p->server, servername);
+		ENFROB(p->password);
+		p->next = pass_list;
+		pass_list = p;
+		return (retval);
 	}
 
 	return (NULL);

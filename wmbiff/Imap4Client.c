@@ -429,7 +429,7 @@ void imap_cacheHeaders( /*@notnull@ */ Pop3 pc)
 						m->subj);
 				m->next = pc->headerCache;
 				pc->headerCache = m;
-				pc->headerCache->in_use = 0; /* initialize that it isn't locked */
+				pc->headerCache->in_use = 0;	/* initialize that it isn't locked */
 			} else {
 				IMAP_DM(pc, DEBUG_ERROR, "error fetching: %s", hdrbuf);
 			}
