@@ -1,2 +1,2 @@
 
-EXTRA_DIST = acconfig.h
+EXTRA_DIST = 

@@ -19,8 +19,8 @@ DISTCLEANFILES = conf.libgnutlstest build-stamp install-stamp
 
 dist-hook-local: ChangeLog
 
-# manually increment version in configure.in, which should be enough.
-ChangeLog: Makefile configure.in
+# manually increment version in configure.ac, which should be enough.
+ChangeLog: Makefile configure.ac
 	@if test -e maint/changelog-header; then \
 	  if test "x$(CVS2CL)" != "x"; then \
 		cat maint/changelog-header > $@; \
