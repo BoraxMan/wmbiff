@@ -1,21 +1,32 @@
 #!/usr/bin/ruby
 
-# some OSes are finicky about the order of included header
-# files.  this script looks through the .c files in wmbiff
-# to verify that some headers (like sys/types) are included
-# before others.
+puts "Running check-includes..."
 
 $failed = 0
-FILES = 'wmgeneral/*.[ch] wmbiff/*.[ch]'
+FILES = Dir.glob('wmgeneral/*.[ch] wmbiff/*.[ch]').join(" ")
+
+if FILES.empty? then
+  puts "no files to check?"
+  exit(0)
+elsif FILES.length == 1 then
+  puts "only one file to check; you may be in a VPATH build where this will not help you."
+  exit(0)
+end
+
+$testnumber = 0;
 
 def include_a_before_b(first, second) 
-    typeincl = Hash.new(9000)
-    IO.popen('egrep -n "include *[<\"]' + first + '[>.]" ' + FILES, 'r').readlines.each { |l|
+  puts "Testing \##{$testnumber+=1}: #{first} before #{second}..."
+  typeincl = Hash.new(9000)
+  IO.popen('egrep -n "include *[<\"]' + first + '[>.]" ' + FILES, 'r') { |gout|
+    gout.readlines.each { |l|
         file,line,text = l.split(':');
         typeincl[file] = line;
     }
+  }
     
-    IO.popen('grep -n "include *[<\"]' + second + '[>.]" ' + FILES, 'r').readlines.each { |l|
+  IO.popen('grep -n "include *[<\"]' + second + '[>.]" ' + FILES, 'r') { |gout|
+    gout.readlines.each { |l|
         file,line,text = l.split(':');
         if(typeincl[file].to_i > line.to_i) then
             $failed = 1;
@@ -26,14 +37,18 @@ def include_a_before_b(first, second)
             end
         end
     }
+  }
 end
 
 def unportable_function(fn)
+  puts "Testing \##{$testnumber+=1}: #{fn}() is not used..."
   typeincl = Hash.new(9000)
-  IO.popen("egrep -n \"#{fn} *\\(\" " + FILES, 'r').readlines.each { |l|
-    file,line,text = l.split(':');
-    typeincl[file] = line;
-    $failed = 1
+  IO.popen("egrep -n \"#{fn} *\\(\" " + FILES, 'r') { |gout|
+    gout.readlines.each { |l|
+      file,line,text = l.split(':');
+      typeincl[file] = line;
+      $failed = 1
+    }
   }
   typeincl.each { |f,l| 
     puts "#{f}:#{l} references unportable function #{fn}"
@@ -41,11 +56,20 @@ def unportable_function(fn)
 end
 
 def unportable_constant(cn)
+  puts "Testing \##{$testnumber+=1}: #{cn} is not used..."
   typeincl = Hash.new(9000)
-  IO.popen("egrep -n #{cn} " + FILES, 'r').readlines.each { |l|
-    file,line,text = l.split(':');
-    typeincl[file] = line;
-    $failed = 1
+  IO.popen("egrep -n #{cn} " + FILES, 'r') { |gout| 
+    gout.readlines.each { |l|
+      file,line,text = l.split(':');
+      if file =~ /^\d+$/ then
+        puts "internal error parsing grep output line: #{l.chomp}"
+      elsif text !~ Regexp.new("/\\*.*#{cn}.*\\*/") && file !~ /config.h/ then
+        # okay if the constant appears in a comment saying we're not supposed
+        # to use it, or if it's in config.h (assume it's a portability fix)
+        typeincl[file] = line;
+        $failed = 1
+      end
+    }
   }
   typeincl.each { |f,l| 
     puts "#{f}:#{l} references unportable constant #{cn}"
