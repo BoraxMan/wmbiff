@@ -1,5 +1,9 @@
 Release Notes
 ~~~~~~~~~~~~~
+Release 0.4.25 - June 23, 2004
+  * Fix a build error in the new gnutls certificate
+    verification code on s390.
+
 Release 0.4.24 - June 22, 2004
   * Use GNUTLS 1.0.4 and GCRYPT 1.1.90, current Debian
     unstable package libgnutls10-dev.
@@ -475,4 +479,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.59 2004/06/23 03:16:51 bluehal Exp $
+$Id: NEWS,v 1.60 2004/06/23 21:51:40 bluehal Exp $
