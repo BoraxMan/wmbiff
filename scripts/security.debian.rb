@@ -1,4 +1,4 @@
-#! /usr/bin/ruby -w
+#! /usr/bin/ruby
 
 # Copyright 2002 Neil Spring <nspring@cs.washington.edu> 
 # GPL
@@ -41,7 +41,7 @@ class Array
 end
 
 def debugmsg(str)
-  # $stderr.puts str
+  $stderr.puts str if($VERBOSE)
 end
 
 # to be reimplemented without execing touch.
@@ -55,11 +55,7 @@ end
 def version_a_gt_b(a, b)
   cmd = "/usr/bin/dpkg --compare-versions %s le %s" % [ a, b ]
   # $stderr.puts cmd
-  if(!Kernel.system(cmd)) then
-    return true
-  else
-    return false
-  end
+  return (!Kernel.system(cmd)) 
 end
 
 # figure out which lists to check
@@ -71,10 +67,10 @@ end
 # file, the url, the system's cache of the file, and a
 # per-user cache of the file.
 packagelists = Dir.glob("/var/lib/apt/lists/#{Server}*Packages").map { |pkgfile|
-  [ pkgfile.gsub(".*#{Server}", '').tr('_','/'), # the url path 
+  [ pkgfile.gsub(/.*#{Server}/, '').tr('_','/'), # the url path 
     pkgfile,  # the system cache of the packages file.  probably up-to-date.
     # and finally, a user's cache of the page, if needed.
-    "%s/%s" % [ Cachedir, pkgfile.gsub(".*#{Server}_",'') ] 
+    "%s/%s" % [ Cachedir, pkgfile.gsub(/.*#{Server}_/,'') ] 
   ]
 }
 
@@ -111,6 +107,12 @@ packagelists.each { |urlpath, sc, uc|
         # session.set_pipe($stderr); 
       end
       begin 
+        # the warning with ruby1.8 on the following line 
+        # has to do with the resp, data bit, which should
+        # eventually be replaced with (copied from the 
+        # docs with the 1.8 net/http.rb)
+        #         response = http.get('/index.html')
+        #         puts response.body
         resp, data = session.get(urlpath, 
                                  { 'If-Modified-Since' => 
                                    cached_time.strftime( "%a, %d %b %Y %H:%M:%S GMT" ) })
