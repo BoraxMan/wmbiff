@@ -1,10 +1,6 @@
-# $Id: Makefile,v 1.10 2001/10/04 09:50:59 jordi Exp $
+# $Id: Makefile,v 1.11 2001/10/05 16:10:01 jordi Exp $
 
-WMBIFF_VERSION="0.3.1ssl"
-EXTRAFLAGS = -DWITH_TLS -DWITH_GCRYPT
-LIBS   = -lgnutls -lgcrypt
 WMBIFF_VERSION = "0.3.1ssl"
-
 
 DESTDIR=
 prefix=/usr/local
@@ -14,11 +10,15 @@ CONF=/etc
 
 CC     = gcc
 LIBDIR = -L/usr/X11R6/lib
-LIBS   += -lXpm -lXext -lX11 
+LIBS   = -lXpm -lXext -lX11 
 CFLAGS = -O2 -Wall -Wpointer-arith
 #CFLAGS = -g -Wall -pedantic 
 
-EXTRAFLAGS += -DWMBIFF_VERSION='$(WMBIFF_VERSION)' 
+EXTRAFLAGS = -DWMBIFF_VERSION='$(WMBIFF_VERSION)' 
+
+# Comment these out if you don't want cryto support.
+EXTRAFLAGS += -DWITH_TLS -DWITH_GCRYPT
+LIBS   += -lgnutls -lgcrypt
 
 #EXTRAFLAGS += -DDEBUG_POP3 -DDEBUG_IMAP4 -DDEBUG_LICQ \
 #	-DDEBUG_MBOX -DDEBUG_MAILDIR -DDEBUG -DDEBUG_MAIL_COUNT \
