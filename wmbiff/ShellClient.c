@@ -81,7 +81,7 @@ static int kind_pclose( /*@only@ */ FILE * F,
 	return (exit_status);
 }
 
-int grabCommandOutput(Pop3 pc, const char *command, /*@out@ */
+int grabCommandOutput(Pop3 pc, const char *command,	/*@out@ */
 					  char **output)
 {
 	FILE *F;

@@ -72,7 +72,8 @@ static struct imap_authentication_method {
 
 
 /* recover a socket from the connection cache */
-/*@null@*//*@dependent@ */
+/*@null@*/
+/*@dependent@*/
 static struct connection_state *state_for_pcu(Pop3 pc)
 {
 	char *connection_id;
@@ -114,9 +115,11 @@ static void bind_state_to_pcu(Pop3 pc,
 
 /* remove from the connection cache */
 static
-/*@owned@*//*@null@ */
-struct connection_state *unbind( /*@returned@ */ struct connection_state
-								*scs)
+/*@owned@*/
+/*@null@*/
+struct connection_state *unbind(
+/*@returned@*/ struct connection_state
+								   *scs)
 {
 	int i;
 	struct connection_state *retval = NULL;
