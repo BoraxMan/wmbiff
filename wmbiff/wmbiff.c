@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.46 2003/01/28 11:12:25 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.47 2003/02/08 03:45:44 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -859,7 +859,7 @@ static void XSleep(int millisec)
 }
 
 
-static void do_biff(int argc, char **argv)
+static void do_biff(int argc, const char **argv)
 {
 	unsigned int i;
 	int but_pressed_region = -1;
@@ -980,6 +980,22 @@ static void sigchld_handler(int sig
 	signal(SIGCHLD, sigchld_handler);
 }
 
+const char **restart_args;
+
+static void sigusr1_handler(int sig
+#ifdef HAVE___ATTRIBUTE__
+							__attribute__ ((unused))
+#endif
+	)
+{
+	DMA(DEBUG_ERROR, "exec()'ing %s\n", restart_args[0]);
+	sleep(1);
+	execvp(restart_args[0], (char *const *) restart_args);
+	DMA(DEBUG_ERROR, "exec of %s failed: %s\n",
+		restart_args[0], strerror(errno));
+	exit(EXIT_FAILURE);
+}
+
 static void usage(void)
 {
 	printf("\nwmBiff v%s"
@@ -1011,7 +1027,8 @@ static void printversion(void)
 }
 
 
-static void parse_cmd(int argc, char **argv, /*@out@ */ char *config_file)
+static void parse_cmd(int argc, const char **argv, /*@out@ */
+					  char *config_file)
 {
 	int i;
 
@@ -1020,7 +1037,7 @@ static void parse_cmd(int argc, char **argv, /*@out@ */ char *config_file)
 	/* Parse Command Line */
 
 	for (i = 1; i < argc; i++) {
-		char *arg = argv[i];
+		const char *arg = argv[i];
 
 		if (*arg == '-') {
 			switch (arg[1]) {
@@ -1127,9 +1144,16 @@ static void parse_cmd(int argc, char **argv, /*@out@ */ char *config_file)
 	}
 }
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
 	char uconfig_file[256];
+
+	/* hold on to the arguments we were started with; we
+	   will need them if we have to restart on sigusr1 */
+	restart_args =
+		(const char **) malloc((argc + 1) * sizeof(const char *));
+	memcpy(restart_args, argv, (argc) * sizeof(const char *));
+	restart_args[argc] = NULL;
 
 	parse_cmd(argc, argv, uconfig_file);
 
@@ -1154,7 +1178,8 @@ int main(int argc, char *argv[])
 	}
 	init_biff(uconfig_file);
 	signal(SIGCHLD, sigchld_handler);
-	signal(SIGPIPE, SIG_IGN);	/* added for gnutls */
+	signal(SIGUSR1, sigusr1_handler);
+	signal(SIGPIPE, SIG_IGN);	/* write() may fail */
 	do_biff(argc, argv);
 	return 0;
 }
