@@ -30,7 +30,7 @@ const char *sequence[][4] = {
 };
 
 /* trick tlscomm into believing it can read. */
-int read(int s, void *buf, size_t buflen)
+ssize_t read(int s, void *buf, size_t buflen)
 {
 	int val = indices[s]++;
 
