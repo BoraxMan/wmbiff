@@ -1,5 +1,13 @@
 Release Notes
 ~~~~~~~~~~~~~
+Release 0.4.13 - Jan 20, 2003
+  * Fix a potential file descriptor leak when using 
+    both Shell and IMAP clients.
+  * Portability to Mac OS X, Solaris, and probably BSD
+    restored (thanks sourceforge compile farm!) with a
+    partial rewrite of regular expression handling for
+    IMAP and POP mailboxes.
+
 Release 0.4.12 - Jan 3, 2003
   * Fix a bug introduced in 0.4.9 that interfered with
     -geometry handling. (Debian #173813)
@@ -388,4 +396,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.36 2003/01/04 03:39:35 bluehal Exp $
+$Id: NEWS,v 1.37 2003/01/19 13:13:18 bluehal Exp $
