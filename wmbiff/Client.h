@@ -1,11 +1,11 @@
-/* $Id: Client.h,v 1.28 2002/09/18 23:43:49 bluehal Exp $ */
+/* $Id: Client.h,v 1.29 2002/10/13 21:27:45 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
  *
  * Email Checker Pop3/Imap4/Licq/Gicu/mbox/maildir/finger
  *
- * Last Updated : $Date: 2002/09/18 23:43:49 $
+ * Last Updated : $Date: 2002/10/13 21:27:45 $
  *
  */
 
@@ -88,7 +88,9 @@ int maildirCreate( /*@notnull@ */ Pop3 pc, const char *str);
 
 int sock_connect(const char *hostname, int port);
 FILE *openMailbox(Pop3 pc, const char *mbox_filename);
-/* backtickExpand returns null on failure *//*@null@ */
+
+/* backtickExpand returns null on failure */
+/*@null@ */
 char *backtickExpand(Pop3 pc, const char *path);
 int fileHasChanged(const char *mbox_filename, time_t * atime,
 				   time_t * mtime, off_t * size);
