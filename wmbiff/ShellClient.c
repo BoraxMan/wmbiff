@@ -1,6 +1,6 @@
-/* Author : Yong-iL Joh ( tolkien@mizi.com )
-   Modified: Jorge García ( Jorge.Garcia@uv.es )
-   shellcmd support : Benoît Rouits ( brouits@free.fr ) thanks to Neil Spring.
+/* Author: Benoît Rouits ( brouits@free.fr ) thanks to Neil Spring.
+   from LicqClient by Yong-iL Joh ( tolkien@mizi.com ) 
+   and Jorge García ( Jorge.Garcia@uv.es )
  * 
  * generic Shell command support
  *
