@@ -459,12 +459,11 @@ void handle_gnutls_read_error(int readbytes, struct connection_state *scs)
 
 #else
 /* declare stubs when tls isn't compiled in */
-struct connection_state *initialize_gnutls( /*@unused@ */ int sd
-										   __attribute__ ((unused)),
-										   /*@unused@ */ char *name
-										   __attribute__ ((unused)),
-										   /*@unused@ */ Pop3 pc
-										   __attribute__ ((unused)))
+struct connection_state *
+initialize_gnutls( /*@unused@ */ int sd __attribute__ ((unused)),
+                   /*@unused@ */ char *name __attribute__ ((unused)),
+                   /*@unused@ */ Pop3 pc __attribute__ ((unused)),
+                   /*@unused@ */ const char *remote_hostname __attribute__ ((unused)))
 {
 	DM(pc, DEBUG_ERROR,
 	   "FATAL: tried to initialize ssl when ssl wasn't compiled in.\n");
