@@ -3,4 +3,5 @@ Makefile.in
 mkinstalldirs
 missing
 install-sh
+depcomp
 
