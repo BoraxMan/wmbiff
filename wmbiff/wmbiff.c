@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.57 2003/07/03 01:03:27 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.58 2003/07/04 21:42:35 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -160,10 +160,13 @@ static int ReadLine(FILE * fp, /*@out@ */ char *setting,
 	if (buf[len - 1] == '\n') {
 		buf[len - 1] = '\0';	/* strip linefeed */
 	}
-	for (p = (char *) buf; *p != '#' && *p; p++);
-	if (p == buf || isspace(*(p - 1))) {
-		/* Strip comments at beginning of line, or after whitespace.  
-		   a kludgy way of avoiding problems with #'s in passwords. */
+	/* Strip comments at beginning of line, or after whitespace.  
+	   a kludgy way of avoiding problems with #'s in passwords. */
+	if (buf[0] == '#')
+		buf[0] = '\0';
+	for (p = (char *) buf + 1; *p && !(*p == '#' && isspace(*(p - 1)));
+		 p++);
+	if (*p) {
 		*p = '\0';
 	}
 	if (!(p = strtok(buf, "=")))
