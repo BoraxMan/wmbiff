@@ -1,8 +1,16 @@
 Release Notes
 ~~~~~~~~~~~~~
+Release 0.4.17 - 
+    
 Release 0.4.16 - July 7, 2003
-  * Check TLS certificates.  See wmbiffrc(5) for 
-    details on the certfile option.  
+  * Checks TLS certificates.  See wmbiffrc(5) for 
+    details on the certfile option.  Designed to work
+    with mutt.
+  * Show a busy mouse cursor while talking to remote
+    servers, to show that wmbiff won't be responsive 
+    to mouse clicks for a little bit.
+  * New buttontwo (middle click) action to complement 
+    action (left mouse click) and fetchcmd (right mouse).
   * #'s are now only comments in .wmbiffrc at the 
     beginning of lines or following whitespace, 
     allowing #'s in (most) passwords.
@@ -430,4 +438,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.46 2003/07/07 08:57:12 bluehal Exp $
+$Id: NEWS,v 1.47 2003/07/15 08:41:45 bluehal Exp $
