@@ -105,18 +105,19 @@ const char *passwordFor(const char *username,
 	if (pc->askpass != NULL) {
 		/* check that the executed file is a good one. */
 		if (permissions_ok(pc, pc->askpass)) {
-			char buf[255];
-			FILE *fp;
-			int exit_status;
-			strcpy(p->user, username);
-			strcpy(p->server, servername);
-			sprintf(buf, "%s 'password for wmbiff: %s@%s'",
+			char command[255];
+			char *password_ptr;
+			sprintf(command, "%s 'password for wmbiff: %s@%s'",
 					pc->askpass, username, servername);
 
-			DM(pc, DEBUG_INFO, "passmgr: invoking %s\n", buf);
-			fp = popen(buf, "r");
+			(void) grabCommandOutput(pc, command, &password_ptr);
+			/* it's not clear what to do with the exit
+			   status, though we can get it from
+			   grabCommandOutput if needed to deal with some
+			   programs that will print a message but exit
+			   non-zero on error */
 
-			if (fgets(p->password, 32, fp) == NULL) {
+			if (password_ptr == NULL) {
 				/* this likely means that the user cancelled, and doesn't
 				   want us to keep asking about the password. */
 				DM(pc, DEBUG_ERROR,
@@ -127,21 +128,12 @@ const char *passwordFor(const char *username,
 				exit(EXIT_FAILURE);
 			}
 
-			exit_status = pclose(fp);
-			if (exit_status != 0) {
-				if (exit_status == -1) {
-					/* an expected case with the signal handler */
-					DM(pc, DEBUG_INFO,
-					   "passmgr: pclose from '%s' failed: %s\n", buf,
-					   strerror(errno));
-				} else {
-					DM(pc, DEBUG_ERROR,
-					   "passmgr: '%s' returned non-zero exit status %d\n",
-					   buf, exit_status);
-				}
-			}
+			strcpy(p->user, username);
+			strcpy(p->server, servername);
+			strncpy(p->password, password_ptr, 31);
+			p->password[31] = '\0';	/* force a null termination */
+			free(password_ptr);
 
-			chomp(p->password);
 			p->next = pass_list;
 			pass_list = p;
 			return (p->password);
@@ -150,4 +142,3 @@ const char *passwordFor(const char *username,
 
 	return (NULL);
 }
-

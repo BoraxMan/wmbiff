@@ -65,35 +65,33 @@ static int kind_pclose(FILE * F, const char *command, Pop3 pc)
 			   to fail */
 			SH_DM(pc, DEBUG_ERROR, "pclose '%s' failed: %s\n",
 				  command, strerror(errno));
-			return (-1);
 		} else {
 			SH_DM(pc, DEBUG_ERROR,
 				  "'%s' exited with non-zero status %d\n", command,
 				  exit_status);
-			return (-1);
 		}
 	}
-	return (0);
+	return (exit_status);
 }
 
-char *grabCommandOutput(Pop3 pc, const char *command)
+int grabCommandOutput(Pop3 pc, const char *command, char **output)
 {
 	FILE *F;
 	char linebuf[512];
 	SH_DM(pc, DEBUG_INFO, "Executing '%s'\n", command);
+	*output = NULL;
 	if ((F = kind_popen(command, "r")) == NULL) {
-		return NULL;
+		return -1;
 	}
 	if (fgets(linebuf, 512, F) == NULL) {
 		SH_DM(pc, DEBUG_ERROR,
 			  "fgets: unable to read the output of '%s': %s\n", command,
 			  strerror(errno));
-		kind_pclose(F, command, pc);
-		return NULL;
+	} else {
+		chomp(linebuf);
+		*output = strdup(linebuf);
 	}
-	chomp(linebuf);
-	kind_pclose(F, command, pc);
-	return (strdup(linebuf));
+	return (kind_pclose(F, command, pc));
 }
 
 char *backtickExpand(Pop3 pc, const char *path)
@@ -113,7 +111,7 @@ char *backtickExpand(Pop3 pc, const char *path)
 		strncat(bigbuffer, path, tickstart - path);
 		command = strdup(tickstart + 1);
 		command[tickend - tickstart - 1] = '\0';
-		commandoutput = grabCommandOutput(pc, command);
+		(void) grabCommandOutput(pc, command, &commandoutput);
 		free(command);
 		if (commandoutput != NULL) {
 			strcat(bigbuffer, commandoutput);
@@ -138,7 +136,8 @@ int shellCmdCheck(Pop3 pc)
 
 	/* fetch the first line of input */
 	pc->TextStatus[0] = '\0';
-	if ((commandOutput = grabCommandOutput(pc, pc->path)) == NULL) {
+	(void) grabCommandOutput(pc, pc->path, &commandOutput);
+	if (commandOutput == NULL) {
 		return -1;
 	}
 	SH_DM(pc, DEBUG_INFO, "'%s' returned '%s'\n", pc->path, commandOutput);
