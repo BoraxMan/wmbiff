@@ -1,4 +1,4 @@
-/* $Id: socket.c,v 1.13 2004/07/03 23:43:36 bluehal Exp $ */
+/* $Id: socket.c,v 1.14 2004/10/01 21:05:36 bluehal Exp $ */
 /* Copyright (C) 1998 Trent Piepho  <xyzzy@u.washington.edu>
  *           (C) 1999 Trent Piepho  <xyzzy@speakeasy.org>
  *
@@ -131,10 +131,18 @@ int sock_connect(const char *hostname, int port)
 	}
 	freeaddrinfo(res0);
 	if (fd < 0) {
-		fprintf(stderr, "Error connecting to %s:%d: %s\n",
-				hostname, port, strerror(errno));
-		printf("socket/connect to %s failed: %s\n", hostname,
-			   strerror(errno));
+		static int last_connecterr;
+		if (errno != last_connecterr) {
+			/* only report a problem if it's new.
+			   EHOSTUNREACH is common when the net is down,
+			   for example; again, this is an approximation 
+			   to minimize kept state. */
+			last_connecterr = errno;
+			fprintf(stderr, "Error connecting to %s:%d: %s\n",
+					hostname, port, strerror(errno));
+			printf("socket/connect to %s failed: %s (%d)\n", hostname,
+				   strerror(errno), errno);
+		}
 		return -1;
 	}
 	return fd;
