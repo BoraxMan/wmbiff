@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.29 2002/06/08 22:20:30 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.30 2002/06/21 04:34:14 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -85,23 +85,28 @@ int debug_default = DEBUG_ERROR;
 
 /* color from wmbiff's xpm, down to 24 bits. */
 const char *foreground = "#21B3AF";
+const char *highlight = "yellow";
+
+const int num_mailboxes = 5;
+const int x_origin = 5;
+const int y_origin = 5;
 
 /* where vertically the mailbox sits for blitting characters. */
 static int mbox_y(int mboxnum)
 {
-	return ((11 * mboxnum) + 5);
+	return ((11 * mboxnum) + y_origin);
 }
 
 void init_biff(char *config_file)
 {
 	int i, loopinterval = DEFAULT_LOOP;
 
-	for (i = 0; i < 5; i++) {
-		mbox[i].label[0] = 0;
-		mbox[i].path[0] = 0;
-		mbox[i].notify[0] = 0;
-		mbox[i].action[0] = 0;
-		mbox[i].fetchcmd[0] = 0;
+	for (i = 0; i < num_mailboxes; i++) {
+		mbox[i].label[0] = '\0';
+		mbox[i].path[0] = '\0';
+		mbox[i].notify[0] = '\0';
+		mbox[i].action[0] = '\0';
+		mbox[i].fetchcmd[0] = '\0';
 		mbox[i].loopinterval = 0;
 		mbox[i].debug = debug_default;
 		mbox[i].askpass = DEFAULT_ASKPASS;
@@ -150,7 +155,7 @@ void init_biff(char *config_file)
 	}
 
 	/* Make labels look right */
-	for (i = 0; i < 5; i++) {
+	for (i = 0; i < num_mailboxes; i++) {
 		if (mbox[i].label[0] != 0) {
 			/* append a colon, but skip if we're using fonts. */
 			if (font == NULL) {
@@ -308,23 +313,23 @@ void do_biff(int argc, char **argv)
 				wmbiff_mask_width, wmbiff_mask_height);
 
 	if (font != NULL) {
-        if(loadFont(font) < 0) {
-            DMA(DEBUG_ERROR, "unable to load font. exiting.\n");
-            exit(EXIT_FAILURE);
-        }
-        /* make the whole background black */
-        eraseRect(5,5,58,58);
-    }
+		if (loadFont(font) < 0) {
+			DMA(DEBUG_ERROR, "unable to load font. exiting.\n");
+			exit(EXIT_FAILURE);
+		}
+		/* make the whole background black */
+		eraseRect(x_origin, y_origin, 58, 58);
+	}
 
 	/* Initially read mail counters and resets,
 	   and initially draw labels and counters */
 	curtime = time(0);
-	for (i = 0; i < 5; i++) {
+	for (i = 0; i < num_mailboxes; i++) {
 		/* make it easy to recover the mbox index from a mouse click */
-		AddMouseRegion(i, 5, mbox_y(i), 58, mbox_y(i + 1) - 1);
+		AddMouseRegion(i, x_origin, mbox_y(i), 58, mbox_y(i + 1) - 1);
 		if (mbox[i].label[0] != 0) {
 			mbox[i].prevtime = mbox[i].prevfetch_time = curtime;
-			BlitString(mbox[i].label, 5, mbox_y(i), 0);
+			BlitString(mbox[i].label, x_origin, mbox_y(i), 0);
 			DM(&mbox[i], DEBUG_INFO,
 			   "working on [%d].label=>%s< [%d].path=>%s<\n", i,
 			   mbox[i].label, i, mbox[i].path);
@@ -339,7 +344,7 @@ void do_biff(int argc, char **argv)
 	while (1) {
 		/* waitpid(0, NULL, WNOHANG); */
 
-		for (i = 0; i < 5; i++) {
+		for (i = 0; i < num_mailboxes; i++) {
 			if (mbox[i].label[0] != 0) {
 				curtime = time(0);
 				if (curtime >= mbox[i].prevtime + mbox[i].loopinterval) {
@@ -524,7 +529,7 @@ static void BlitString(const char *name, int x, int y, int new)
 	if (font != NULL) {
 		/* an alternate behavior - draw the string using a font
 		   instead of the pixmap.  should allow pretty colors */
-		drawString(x, y + CHAR_HEIGHT, name, new ? "yellow" : foreground,
+		drawString(x, y + CHAR_HEIGHT, name, new ? highlight : foreground,
 				   0);
 	} else {
 		/* normal, LED-like behavior. */
@@ -559,7 +564,7 @@ void BlitNum(int num, int x, int y, int new)
 	sprintf(buf, "%02i", num);
 
 	if (font != NULL) {
-		const char *color = (new) ? "yellow" : foreground;
+		const char *color = (new) ? highlight : foreground;
 		drawString(x + (CHAR_WIDTH * 2 + 4), y + CHAR_HEIGHT, buf,
 				   color, 1);
 	} else {
@@ -579,8 +584,10 @@ void ClearDigits(int i)
 	if (font) {
 		eraseRect(39, mbox_y(i), 58, mbox_y(i + 1) - 1);
 	} else {
+		/* overwrite the colon */
 		copyXPMArea((10 * (CHAR_WIDTH + 1)), 64, (CHAR_WIDTH + 1),
 					(CHAR_HEIGHT + 1), 35, mbox_y(i));
+		/* blank out the number fields. */
 		copyXPMArea(39, 84, (3 * (CHAR_WIDTH + 1)), (CHAR_HEIGHT + 1), 39,
 					mbox_y(i));
 	}
@@ -632,7 +639,7 @@ int ReadLine(FILE * fp, char *setting, char *value, int *mbox_index)
 	len = strlen(setting) - 1;
 	if (len > 0) {
 		aux = setting[len] - 48;
-		if (aux > -1 && aux < 5) {
+		if (aux > -1 && aux < num_mailboxes) {
 			setting[len] = 0;
 			*mbox_index = aux;
 		}
@@ -643,40 +650,68 @@ int ReadLine(FILE * fp, char *setting, char *value, int *mbox_index)
 	return 1;
 }
 
+/* special shortcuts for longer shell client commands */
+int gicuCreate(Pop3 pc, const char *path)
+{
+	char buf[255];
+	if (isdigit(path[5])) {
+		sprintf(buf,
+				"shell:::echo `gnomeicu-client -u%s msgcount` new",
+				path + 5);
+	} else {
+		sprintf(buf, "shell:::echo `gnomeicu-client msgcount` new");
+	}
+	return (shellCreate(pc, buf));
+}
+
+int fingerCreate(Pop3 pc, const char *path)
+{
+	char buf[255];
+	sprintf(buf, "shell:::finger -lm %s | "
+			"perl -ne '(/^new mail/i && print \"new\");' "
+			"-e '(/^mail last read/i && print \"old\");' "
+			"-e '(/^no( unread)? mail/i && print \"no\");'", path + 7);
+	return (shellCreate(pc, buf));
+}
+
+struct path_demultiplexer {
+	const char *id;				/* followed by a colon */
+	int (*creator) (Pop3 pc, const char *path);
+};
+
+static struct path_demultiplexer paths[] = {
+	{"pop3:", pop3Create},
+	{"shell:", shellCreate},
+	{"gicu:", gicuCreate},
+	{"licq:", licqCreate},
+	{"finger:", fingerCreate},
+	{"imap:", imap4Create},
+	{"imaps:", imap4Create},
+	{"sslimap:", imap4Create},
+	{"pop3:", pop3Create},
+	{"maildir:", maildirCreate},
+	{"mbox:", mboxCreate},
+	{NULL, NULL}
+};
+
 void parse_mbox_path(int item)
 {
-	if (!strncasecmp(mbox[item].path, "pop3:", 5)) {	/* pop3 account */
-		pop3Create((&mbox[item]), mbox[item].path);
-	} else if (!strncasecmp(mbox[item].path, "shell:", 6)) {	/* generic cmd */
-		shellCreate((&mbox[item]), mbox[item].path);
-	} else if (!strncasecmp(mbox[item].path, "gicu:", 5)) {	/* gnomeicu check */
-		char buf[255];
-		if (isdigit(mbox[item].path[5])) {
-			sprintf(buf,
-					"shell:::echo `gnomeicu-client -u%s msgcount` new",
-					mbox[item].path + 5);
-		} else {
-			sprintf(buf, "shell:::echo `gnomeicu-client msgcount` new");
+	int i;
+	/* find the creator */
+	for (i = 0;
+		 paths[i].id != NULL
+		 && strncasecmp(mbox[item].path, paths[i].id, strlen(paths[i].id));
+		 i++);
+	/* if found, execute */
+	if (paths[i].id != NULL) {
+		if (paths[i].creator((&mbox[item]), mbox[item].path) != 0) {
+			DMA(DEBUG_ERROR, "creator for mailbox %d returned failure",
+				item);
 		}
-		shellCreate((&mbox[item]), buf);
-	} else if (!strncasecmp(mbox[item].path, "finger:", 7)) {
-		char buf[255];
-		sprintf(buf, "shell:::finger -lm %s | "
-				"perl -ne '(/^new mail/i && print \"new\");' "
-				"-e '(/^mail last read/i && print \"old\");' "
-				"-e '(/^no( unread)? mail/i && print \"no\");'",
-				mbox[item].path + 7);
-		shellCreate((&mbox[item]), buf);
-	} else if (!strncasecmp(mbox[item].path, "licq:", 5)) {	/* licq history file */
-		licqCreate((&mbox[item]), mbox[item].path);
-	} else if (!strncasecmp(mbox[item].path, "imap:", 5) ||	/* imap4 account */
-			   !strncasecmp(mbox[item].path, "sslimap:", 8) ||	/* sslimap4 account */
-			   !strncasecmp(mbox[item].path, "imaps:", 6)) {	/* sslimap4 account */
-		imap4Create((&mbox[item]), mbox[item].path);
-	} else if (!strncasecmp(mbox[item].path, "maildir:", 8)) {	/* maildir */
-		maildirCreate((&mbox[item]), mbox[item].path);
-	} else
-		mboxCreate((&mbox[item]), mbox[item].path);	/* default are mbox */
+	} else {
+		/* default are mbox */
+		mboxCreate((&mbox[item]), mbox[item].path);
+	}
 }
 
 int Read_Config_File(char *filename, int *loopinterval)
@@ -700,7 +735,8 @@ int Read_Config_File(char *filename, int *loopinterval)
 			const char *askpass = strdup(value);
 			if (mbox_index == -1) {
 				DMA(DEBUG_INFO, "setting all to askpass %s\n", askpass);
-				for (mbox_index = 0; mbox_index < 5; mbox_index++)
+				for (mbox_index = 0; mbox_index < num_mailboxes;
+					 mbox_index++)
 					mbox[mbox_index].askpass = askpass;
 			} else {
 				mbox[mbox_index].askpass = askpass;
@@ -738,7 +774,7 @@ int Read_Config_File(char *filename, int *loopinterval)
 		}
 	}
 	fclose(fp);
-	for (mbox_index = 0; mbox_index < 5; mbox_index++)
+	for (mbox_index = 0; mbox_index < num_mailboxes; mbox_index++)
 		if (mbox[mbox_index].label[0] != 0)
 			parse_mbox_path(mbox_index);
 	return 1;
@@ -859,6 +895,20 @@ void parse_cmd(int argc, char **argv, /*@out@ */ char *config_file)
 					exit(EXIT_FAILURE);
 				}
 				break;
+			case 'h':
+				if (strcmp(arg + 1, "hi") == 0) {
+					if (argc > (i + 1)) {
+						highlight = strdup(argv[i + 1]);
+						DMA(DEBUG_INFO, "new highlight: %s", highlight);
+						i++;
+						if (font == NULL)
+							font = DEFAULT_FONT;
+					}
+				} else if (strcmp(arg + 1, "h") == 0) {
+					usage();
+					exit(EXIT_SUCCESS);
+				}
+				break;
 			case 'v':
 				printversion();
 				exit(EXIT_SUCCESS);
@@ -893,6 +943,7 @@ void usage(void)
 		   "    -font <font>              font instead of LED\n"
 		   "    -geometry +XPOS+YPOS      initial window position\n"
 		   "    -h                        this help screen\n"
+		   "    -hi <color>               highlight color for new mail\n"
 		   "    -v                        print the version number\n"
 		   "\n");
 }
