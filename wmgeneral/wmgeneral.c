@@ -72,7 +72,7 @@ int d_depth;
 XSizeHints mysizehints;
 XWMHints mywmhints;
 Pixel back_pix, fore_pix;
-const char *Geometry = "";
+static const char *Geometry = "";
 Window iconwin, win;
 GC NormalGC;
 XpmIcon wmgen_bkg;
@@ -98,7 +98,7 @@ MOUSE_REGION mouse_region[MAX_MOUSE_REGION];
 /***********************/
 
 static void GetXPM(XpmIcon *, const char **);
-static Pixel GetColor(const char *);
+Pixel GetColor(const char *);
 void RedrawWindow(void);
 int CheckMouseRegion(int, int);
 
@@ -212,7 +212,7 @@ static void GetXPM(XpmIcon * wmgen_local, const char *pixmap_bytes[])
 |* GetColor																	   *|
 \*******************************************************************************/
 
-static Pixel GetColor(const char *name)
+Pixel GetColor(const char *name)
 {
 
 	XColor color;
