@@ -1,4 +1,4 @@
-/* $Id: Pop3Client.c,v 1.15 2002/07/04 01:07:28 bluehal Exp $ */
+/* $Id: Pop3Client.c,v 1.16 2003/01/19 13:13:04 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -16,6 +16,7 @@
 
 #include "Client.h"
 #include "charutil.h"
+#include "regulo.h"
 
 #ifdef USE_DMALLOC
 #include <dmalloc.h>
@@ -159,7 +160,6 @@ int pop3Create(Pop3 pc, const char *str)
 	/* If 'str' line is badly formatted, wmbiff won't display the mailbox. */
 	int i;
 	int matchedchars;
-	struct re_registers regs;
 	/* ([^: ]+) user
 	   ([^@]+) or ([^ ]+) password 
 	   ([^: ]+) server 
@@ -173,10 +173,20 @@ int pop3Create(Pop3 pc, const char *str)
 		"pop3:([^: ]{1,32}):([^@]{0,32})@([^: ]+)(:[0-9]+)? *",
 		NULL
 	};
+	struct regulo regulos[] = {
+		{1, PCU.userName, regulo_strcpy},
+		{2, PCU.password, regulo_strcpy},
+		{3, PCU.serverName, regulo_strcpy},
+		{4, &PCU.serverPort, regulo_atoi},
+		{0, NULL, NULL}
+	};
+
+	/* defaults */
+	PCU.serverPort = 110;
 
 	for (matchedchars = 0, i = 0;
 		 regexes[i] != NULL && matchedchars <= 0; i++) {
-		matchedchars = compile_and_match_regex(regexes[i], str, &regs);
+		matchedchars = regulo_match(regexes[i], str, regulos);
 	}
 
 	/* failed to match either regex */
@@ -187,19 +197,7 @@ int pop3Create(Pop3 pc, const char *str)
 		return -1;
 	}
 
-	/* copy matches where they belong */
-	copy_substring(PCU.userName, regs.start[1], regs.end[1], str);
-	copy_substring(PCU.password, regs.start[2], regs.end[2], str);
-	copy_substring(PCU.serverName, regs.start[3], regs.end[3], str);
-	if (regs.start[4] != -1)
-		PCU.serverPort = atoi(str + regs.start[4] + 1);
-	else
-		PCU.serverPort = 110;
-
-	grab_authList(str + regs.end[0], PCU.authList);
-
-	free(regs.end);				// added 3 jul 02, appeasing valgrind
-	free(regs.start);			// added 3 jul 02, appeasing valgrind
+	grab_authList(str + matchedchars, PCU.authList);
 
 	POP_DM(pc, DEBUG_INFO, "userName= '%s'\n", PCU.userName);
 	POP_DM(pc, DEBUG_INFO, "password is %d chars long\n",

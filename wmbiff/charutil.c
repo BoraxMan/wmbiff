@@ -1,4 +1,4 @@
-/* $Id: charutil.c,v 1.14 2002/12/29 02:31:26 bluehal Exp $ */
+/* $Id: charutil.c,v 1.15 2003/01/19 13:13:04 bluehal Exp $ */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <sys/types.h>
+#include <regex.h>
 #ifdef USE_DMALLOC
 #include <dmalloc.h>
 #endif
@@ -36,8 +38,8 @@ static __inline__ void RightTrim(char *psValue)
 
 void FullTrim(char *psValue)
 {
-  RightTrim(psValue);
-  LeftTrim(psValue);
+	RightTrim(psValue);
+	LeftTrim(psValue);
 }
 
 void Bin2Hex(unsigned char *src, int length, char *dst)
@@ -175,7 +177,7 @@ void grab_authList(const char *source, char *destination)
 	}
 }
 
-
+#ifdef USE_GNU_REGEX
 int compile_and_match_regex(const char *regex, const char *str,	/*@out@ */
 							struct re_registers *regs)
 {
@@ -186,7 +188,6 @@ int compile_and_match_regex(const char *regex, const char *str,	/*@out@ */
 
 	/* compile the regex pattern */
 	memset(&rpbuf, 0, sizeof(struct re_pattern_buffer));
-
 	/* posix egrep interprets intervals (eg. {1,32}) nicely */
 	re_syntax_options = RE_SYNTAX_POSIX_EGREP;
 	errstr = re_compile_pattern(regex, strlen(regex), &rpbuf);
@@ -215,6 +216,7 @@ int compile_and_match_regex(const char *regex, const char *str,	/*@out@ */
 	regfree(&rpbuf);			// added 3 jul 02, appeasing valgrind
 	return matchedchars;
 }
+#endif
 
 /* like perl chomp(); useful for dealing with input from popen */
 void chomp(char *s)
@@ -233,6 +235,7 @@ char *strdup_ordie(const char *c)
 	}
 	return (ret);
 }
+
 /* vim:set ts=4: */
 /*
  * Local Variables:

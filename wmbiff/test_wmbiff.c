@@ -2,6 +2,12 @@
 #include <config.h>
 #endif
 
+#ifdef HAVE___ATTRIBUTE__
+#define UNUSED(x) /*@unused@*/  x __attribute__((unused))
+#else
+#define UNUSED(x) x
+#endif
+
 #include "Client.h"
 #include "passwordMgr.h"
 
@@ -187,22 +193,28 @@ int test_imap4creator(void) {
     CKSTRING(m.u.pop_imap.serverName, "bar");
     CKINT(m.u.pop_imap.serverPort, 12);
 
+    if(imap4Create(&m, "imap:foo:@bar/\"mybox\":12 auth")) {
+        return 1;
+    }
+    CKSTRING(m.path, "\"mybox\"");
+    CKSTRING(m.u.pop_imap.serverName, "bar");
+    CKINT(m.u.pop_imap.serverPort, 12);
+    CKSTRING(m.u.pop_imap.authList, "auth");
+
     
     return 0;
 }
 
 void initialize_blacklist(void) { } 
-void tlscomm_printf(int x __attribute__((unused)), const char *f __attribute__((unused)), ...) { }
+void tlscomm_printf(UNUSED(int x), UNUSED(const char *f), ...) { }
 void tlscomm_expect(void) {  } 
 void tlscomm_close() {  } 
-int tlscomm_is_blacklisted(const char *x __attribute__((unused))) {  return 1; } 
+int tlscomm_is_blacklisted(UNUSED(const char *x)) {  return 1; } 
 void initialize_gnutls(void) {  } 
-int sock_connect(const char *n __attribute__((unused)), 
-                 int p __attribute__((unused))) { return 1; } /* stdout */
+int sock_connect(UNUSED(const char *n), UNUSED(int p)) { return 1; } /* stdout */
 void initialize_unencrypted(void) {  } 
 
-int main(int argc __attribute__((unused)), 
-         char *argv[] __attribute__((unused))) {
+int main(UNUSED(int argc), UNUSED(char *argv[])) {
     if( test_backtickExpand() || 
         test_passwordMgr() ||
         test_imap4creator()) {

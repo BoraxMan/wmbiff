@@ -1,11 +1,11 @@
-/* $Id: Client.h,v 1.29 2002/10/13 21:27:45 bluehal Exp $ */
+/* $Id: Client.h,v 1.30 2003/01/19 13:13:04 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
  *
  * Email Checker Pop3/Imap4/Licq/Gicu/mbox/maildir/finger
  *
- * Last Updated : $Date: 2002/10/13 21:27:45 $
+ * Last Updated : $Date: 2003/01/19 13:13:04 $
  *
  */
 
@@ -111,7 +111,7 @@ int exists(const char *filename);	/* test -f */
 #define DM(mbox, msglevel, X...) \
 do { \
   if (mbox == NULL || (mbox)->debug >= msglevel) { \
-     printf("wmbiff/%s ", (mbox)->label); \
+     printf("wmbiff/%s ", (mbox != NULL) ? (mbox)->label : "NULL"); \
      printf(X); \
      (void)fflush(NULL); \
   } \

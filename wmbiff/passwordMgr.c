@@ -33,6 +33,8 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <string.h>
+#include <strings.h>			/* index */
 #include <sys/stat.h>
 #include "assert.h"
 

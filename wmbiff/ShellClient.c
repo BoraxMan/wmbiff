@@ -19,6 +19,7 @@
 #include <ctype.h>
 #include <signal.h>
 #include <assert.h>
+#include <strings.h>
 #include "charutil.h"
 #ifdef USE_DMALLOC
 #include <dmalloc.h>
@@ -32,7 +33,7 @@
 #ifdef __LCLINT__
 void (*old_signal_handler) (int);
 #else
-sig_t old_signal_handler;
+RETSIGTYPE(*old_signal_handler) (int);
 #endif
 
 /*@null@*/

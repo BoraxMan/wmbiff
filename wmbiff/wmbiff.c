@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.44 2003/01/04 03:39:35 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.45 2003/01/19 13:13:04 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -321,7 +321,10 @@ static int Read_Config_File(char *filename, int *loopinterval)
 
 static void init_biff(char *config_file)
 {
-	int zok, loopinterval = DEFAULT_LOOP;
+#ifdef HAVE_GCRYPT_H
+	int zok;
+#endif
+	int loopinterval = DEFAULT_LOOP;
 	unsigned int i;
 
 	for (i = 0; i < num_mailboxes; i++) {
@@ -415,6 +418,7 @@ static char **LoadXPM(const char *pixmap_filename)
 			pixmap_filename);
 		break;
 	default:
+		break;
 	}
 	return (xpm);
 }
@@ -966,7 +970,11 @@ static void do_biff(int argc, char **argv)
 	}
 }
 
-static void sigchld_handler(int sig __attribute__ ((unused)))
+static void sigchld_handler(int sig
+#ifdef HAVE___ATTRIBUTE__
+							__attribute__ ((unused))
+#endif
+	)
 {
 	while (waitpid(0, NULL, WNOHANG) > 0);
 	signal(SIGCHLD, sigchld_handler);

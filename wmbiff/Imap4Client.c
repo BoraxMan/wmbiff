@@ -15,6 +15,7 @@
 #include "charutil.h"
 #include "tlsComm.h"
 #include "passwordMgr.h"
+#include "regulo.h"
 
 #include <sys/types.h>
 #include <stdio.h>
@@ -84,8 +85,10 @@ static struct connection_state *state_for_pcu(Pop3 pc)
 	char *connection_id;
 	struct connection_state *retval = NULL;
 	int i;
-	asprintf(&connection_id, "%s|%s|%d", PCU.userName,
-			 PCU.serverName, PCU.serverPort);
+	connection_id =
+		malloc(strlen(PCU.userName) + strlen(PCU.serverName) + 22);
+	sprintf(connection_id, "%s|%s|%d", PCU.userName, PCU.serverName,
+			PCU.serverPort);
 	for (i = 0; i < FDMAP_SIZE; i++)
 		if (fdmap[i].user_password_server_port != NULL &&
 			(strcmp(connection_id,
@@ -105,8 +108,10 @@ static void bind_state_to_pcu(Pop3 pc,
 	if (scs == NULL) {
 		abort();
 	}
-	asprintf(&connection_id, "%s|%s|%d", PCU.userName,
-			 PCU.serverName, PCU.serverPort);
+	connection_id =
+		malloc(strlen(PCU.userName) + strlen(PCU.serverName) + 22);
+	sprintf(connection_id, "%s|%s|%d", PCU.userName, PCU.serverName,
+			PCU.serverPort);
 	for (i = 0; i < FDMAP_SIZE && fdmap[i].cs != NULL; i++);
 	if (i == FDMAP_SIZE) {
 		/* should never happen */
@@ -159,7 +164,8 @@ FILE *imap_open(Pop3 pc)
 
 	/* got this far; we're going to create a connection_state 
 	   structure, although it might be a blacklist entry */
-	asprintf(&connection_name, "%s:%d", PCU.serverName, PCU.serverPort);
+	connection_name = malloc(strlen(PCU.serverName) + 20);
+	sprintf(connection_name, "%s:%d", PCU.serverName, PCU.serverPort);
 
 	assert(pc != NULL);
 
@@ -305,15 +311,25 @@ int imap_checkmail( /*@notnull@ */ Pop3 pc)
 	return 0;
 }
 
+
 /* parse the config line to setup the Pop3 structure */
 int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 {
-	struct re_registers regs;
-	int i, matchedchars;
+	int i;
+	int matchedchars;
 	const char *regexes[] = {
 		".*imaps?:([^: ]{1,32}):([^@]{0,32})@([^/: ]+)(/(\"[^\"]+\")|([^: ]+))?(:[0-9]+)? *",
 		".*imaps?:([^: ]{1,32}) ([^ ]{1,32}) ([^/: ]+)(/(\"[^\"]+\")|([^: ]+))?( [0-9]+)? *",
 		NULL
+	};
+
+	struct regulo regulos[] = {
+		{1, PCU.userName, regulo_strcpy},
+		{2, PCU.password, regulo_strcpy},
+		{3, PCU.serverName, regulo_strcpy},
+		{4, pc->path, regulo_strcpy_skip1},
+		{7, &PCU.serverPort, regulo_atoi},
+		{0, NULL, NULL}
 	};
 
 	/* IMAP4 format: imap:user:password@server/mailbox[:port] */
@@ -336,12 +352,17 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 			   "passwords and privacy.\n");
 		exit(EXIT_FAILURE);
 #endif
-	} else
+	} else {
 		PCU.dossl = 0;
+	}
+
+	/* defaults */
+	PCU.serverPort = (PCU.dossl != 0) ? 993 : 143;
+	strcpy(pc->path, "INBOX");
 
 	for (matchedchars = 0, i = 0;
 		 regexes[i] != NULL && matchedchars <= 0; i++) {
-		matchedchars = compile_and_match_regex(regexes[i], str, &regs);
+		matchedchars = regulo_match(regexes[i], str, regulos);
 	}
 
 	/* failed to match either regex */
@@ -351,34 +372,12 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 				matchedchars);
 		return -1;
 	}
-#ifdef why_wont_you_parse
-	for (i = 0; i < 8; i++) {
-		char buf[255];
-		copy_substring(buf, regs.start[i], regs.end[i], str);
-		IMAP_DM(pc, DEBUG_INFO, "%d: %s\n", i, buf);
-	}
-#endif
 
-	/* copy matches where they belong */
-	copy_substring(PCU.userName, regs.start[1], regs.end[1], str);
-	copy_substring(PCU.password, regs.start[2], regs.end[2], str);
 	if (PCU.password[0] == '\0')
 		PCU.interactive_password = 1;
-	copy_substring(PCU.serverName, regs.start[3], regs.end[3], str);
-	if (regs.start[4] != -1)
-		copy_substring(pc->path, regs.start[4] + 1, regs.end[4], str);
-	else
-		strcpy(pc->path, "INBOX");
 
-	if (regs.start[7] != -1)
-		PCU.serverPort = atoi(str + regs.start[7] + 1);
-	else
-		PCU.serverPort = (PCU.dossl != 0) ? 993 : 143;
+	grab_authList(str + matchedchars, PCU.authList);
 
-	grab_authList(str + regs.end[0], PCU.authList);
-
-	free(regs.end);				// added 3 jul 02, appeasing valgrind
-	free(regs.start);			// added 3 jul 02, appeasing valgrind
 
 	IMAP_DM(pc, DEBUG_INFO, "userName= '%s'\n", PCU.userName);
 	IMAP_DM(pc, DEBUG_INFO, "password is %d characters long\n",
@@ -442,7 +441,8 @@ static int authenticate_plaintext( /*@notnull@ */ Pop3 pc,
 
 #ifdef HAVE_GCRYPT_H
 static int authenticate_md5(Pop3 pc,
-				 struct connection_state *scs, const char *capabilities)
+							struct connection_state *scs,
+							const char *capabilities)
 {
 	char buf[BUF_SIZE];
 	char buf2[BUF_SIZE];
