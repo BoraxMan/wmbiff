@@ -1,5 +1,19 @@
 Release Notes
 ~~~~~~~~~~~~~
+Release 0.4.3 - June 8, 2002
+  * IPv6 support for real. (missed a detail with autoconf)
+  * Preliminary font support, allowing variable colors.  Use
+    wmbiff -fg violet to give it a spin.  Note: if the number of
+    old messages is at least 1000, the old number of messages
+    will not be completely erased when new mail arrives.
+  * Mouse handling fix.
+  * Cleanup of internals: handling of default configuration when
+    .wmbiffrc does not exist, vertical position of rows, variable 
+    names, etc.
+  * GNUTLS version 0.3.5 is expected; earlier and later versions
+    may be incompatible.
+  * This release is by Neil Spring <nspring@cs.washington.edu>.
+
 Release 0.4.2 - June 1, 2002
   * Bugfix: accidentally released a partial feature.
 
@@ -317,4 +331,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.23 2002/06/01 18:10:28 bluehal Exp $
+$Id: NEWS,v 1.24 2002/06/08 22:22:11 bluehal Exp $

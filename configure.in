@@ -9,7 +9,7 @@ dnl  version
 
 AC_INIT(configure.in)
 AC_CONFIG_AUX_DIR(autoconf)
-AM_INIT_AUTOMAKE(wmbiff, 0.4.2)
+AM_INIT_AUTOMAKE(wmbiff, 0.4.3)
 dnl AUTOHEADER="$AUTOHEADER -l \\\\\\\$\(srcdir)/autoconf"
 AM_CONFIG_HEADER(config.h)
 AC_SUBST(VERSION)

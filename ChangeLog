@@ -6,13 +6,49 @@ The latest changelog entry is in a different format, because it's inserted by
 CVS on commit.
 
   $Log: ChangeLog,v $
-  Revision 1.32  2002/06/01 18:10:28  bluehal
-  0.4.2
+  Revision 1.33  2002/06/08 22:22:11  bluehal
+  release 0.4.3 final updates
 
   Revision 1.1  2002/04/07 05:08:23  bluehal
   use automake / autoconf; after checkout run ./FromCVS.sh
 
 
+
+2002-06-08 Saturday 22:20 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiff.c: make the background black when using fonts
+
+2002-06-08 Saturday 22:15 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmgeneral/: wmgeneral.c, wmgeneral.h: font support, ability to
+	erase rectangles
+
+2002-06-08 Saturday 22:14 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Client.h: slightly changed debug messages; exists() is
+	more a test -f than a test -e
+
+2002-06-08 Saturday 22:13 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiff.1: documentation of -fg and -font options
+
+2002-06-08 Saturday 22:13 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Imap4Client.c, ShellClient.c: cleanup for splint
+	annotations
+
+2002-06-08 Saturday 22:13 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiff.c: basic font support, color selection, cleanup to
+	default configuration code, bugifx and cleanup to mouse region code
+
+2002-06-08 Saturday 21:40 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/socket.c: need config.h to get IPv6 support
+
+2002-06-01 Saturday 18:10 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* ChangeLog, NEWS: 0.4.2
 
 2002-06-01 Saturday 17:58 UTC -- Neil Spring <nspring@cs.washington.edu>
 
