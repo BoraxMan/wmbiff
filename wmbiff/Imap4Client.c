@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <time.h>
 #include <ctype.h>
+#include <strings.h>
 
 #ifdef USE_DMALLOC
 #include <dmalloc.h>

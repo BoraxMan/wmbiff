@@ -1,4 +1,4 @@
-/* $Id: Pop3Client.c,v 1.18 2003/10/26 08:31:59 bluehal Exp $ */
+/* $Id: Pop3Client.c,v 1.19 2003/10/29 18:17:08 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -18,6 +18,7 @@
 #include "charutil.h"
 #include "regulo.h"
 #include "MessageList.h"
+#include <strings.h>
 
 #ifdef USE_DMALLOC
 #include <dmalloc.h>
@@ -421,11 +422,11 @@ void pop3_cacheHeaders( /*@notnull@ */ Pop3 pc)
 		fprintf(f, "TOP %i 0\r\n", i);
 		fflush(f);
 		while (fgets(buf, 256, f) && buf[0] != '.') {
-			if (!strncmp(buf, "From: ", 6)) {
+			if (!strncasecmp(buf, "From: ", 6)) {
 				/* manage the from in heads */
 				strncpy(m->from, buf + 6, FROM_LEN - 1);
 				m->from[FROM_LEN - 1] = '\0';
-			} else if (!strncmp(buf, "Subject: ", 9)) {
+			} else if (!strncasecmp(buf, "Subject: ", 9)) {
 				/* manage subject */
 				strncpy(m->subj, buf + 9, SUBJ_LEN - 1);
 				m->subj[SUBJ_LEN - 1] = '\0';
