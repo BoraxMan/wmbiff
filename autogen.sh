@@ -43,6 +43,13 @@ else
     fi
 fi
 
+if [ ! -e autoconf/libgnutls.m4 ] ; then
+    echo "WARNING: autoconf/libgnutls.m4 does not exist.  autogen is unlikely to work."
+fi
+if [ ! -e autoconf/libgcrypt.m4 ] ; then
+    echo "WARNING: autoconf/libgcrypt.m4 does not exist.  autogen is unlikely to work."
+fi
+
 ACLOCAL=${ACLOCAL} AUTOHEADER=${AUTOHEADER} \
 AUTOCONF=${AUTOCONF} AUTOMAKE=${AUTOMAKE}  \
 ${AUTORECONF} --install && \
