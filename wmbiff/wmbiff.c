@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.13 2002/03/01 11:58:23 jordi Exp $ */
+/* $Id: wmbiff.c,v 1.14 2002/03/02 06:36:33 bluehal Exp $ */
 
 #define	USE_POLL
 
@@ -18,6 +18,8 @@
 #include <X11/Xlib.h>
 #include <X11/xpm.h>
 
+#include <errno.h>
+
 #include "../wmgeneral/wmgeneral.h"
 #include "../wmgeneral/misc.h"
 
@@ -30,8 +32,8 @@
 
 #include "wmbiff-master.xpm"
 char wmbiff_mask_bits[64 * 64];
-int wmbiff_mask_width = 64;
-int wmbiff_mask_height = 64;
+const int wmbiff_mask_width = 64;
+const int wmbiff_mask_height = 64;
 
 #define CHAR_WIDTH  5
 #define CHAR_HEIGHT 7
@@ -52,7 +54,7 @@ void displayMsgCounters(int, int, int *, int *);
 
 void usage(void);
 void printversion(void);
-void do_biff(int argc, char **argv);
+void do_biff(int argc, char **argv) __attribute__ ((noreturn));
 void parse_mbox_path(int item);
 static void BlitString(const char *name, int x, int y, int new);
 void BlitNum(int num, int x, int y, int new);
@@ -497,9 +499,8 @@ int Read_Config_File(char *filename, int *loopinterval)
 	int index;
 
 	if (!(fp = fopen(filename, "r"))) {
-		perror("Read_Config_File");
-		DMA(DEBUG_ERROR, "Unable to open %s, no settings read.\n",
-			filename);
+		DMA(DEBUG_ERROR, "Unable to open %s, no settings read: %s\n",
+			filename, strerror(errno));
 		return 0;
 	}
 	while (!feof(fp)) {
@@ -574,7 +575,7 @@ void XSleep(int millisec)
 #endif
 }
 
-void sigchld_handler(int sig)
+void sigchld_handler(int sig __attribute__ ((unused)))
 {
 	waitpid(0, NULL, WNOHANG);
 	signal(SIGCHLD, sigchld_handler);
