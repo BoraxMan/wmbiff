@@ -6,17 +6,68 @@ The latest changelog entry is in a different format, because it's inserted by
 CVS on commit.
 
   $Log: ChangeLog,v $
-  Revision 1.29  2002/04/25 17:31:36  bluehal
-  add m4 macros for libgcrypt and libgnutls to the repository, so that FromCVS can be run to regenerate configure.in, even on systems without gnutls.
+  Revision 1.30  2002/05/03 05:51:58  bluehal
+  Release 0.4.0
 
   Revision 1.1  2002/04/07 05:08:23  bluehal
   use automake / autoconf; after checkout run ./FromCVS.sh
 
 
 
-2002-04-20 Saturday 18:15 UTC -- Neil Spring <nspring@cs.washington.edu>
+2002-05-03 Friday 05:43 UTC -- Neil Spring <nspring@cs.washington.edu>
 
-	* TODO: mention MH patch / shell workaround
+	* wmbiff/mboxClient.c: type casting hackery to help architectures I
+	don't have
+
+2002-05-03 Friday 05:42 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: sample.wmbiffrc, wmbiffrc.5.in: lpq example creep
+
+2002-05-03 Friday 05:42 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/ShellClient.c: bugfix when alternates between numeric and
+	text
+
+2002-04-29 Monday 02:01 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Client.h, ShellClient.c, charutil.c, charutil.h: lclint
+	cleanups - strdup_ordie, some null annotations
+
+2002-04-27 Saturday 08:54 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Client.h, ShellClient.c, passwordMgr.c: cleanup to use
+	grabCommandOutput in passwordMgr instead of duplicating the
+	popen/fgets/pclose code
+
+2002-04-27 Saturday 08:29 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Client.h, Makefile.am, charutil.c, passwordMgr.c,
+	passwordMgr.h, test_wmbiff.c: move passwordMgr testing to
+	test_wmbiff.c; catch a small bug in handling empty passwords
+
+2002-04-27 Saturday 08:29 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* FromCVS.sh: apparently aclocal barfs when macros are defined both
+	in the system directory and in a local copy.  semper fragile.
+
+2002-04-25 Thursday 21:35 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* NEWS: GNUTLS warning
+
+2002-04-25 Thursday 20:28 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* README: add a note about gnutls version 0.3.5
+
+2002-04-25 Thursday 18:33 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* configure.in: hack attempt at supporting gnutls built locally
+
+2002-04-25 Thursday 17:31 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* ChangeLog, FromCVS.sh, autoconf/libgcrypt.m4,
+	autoconf/libgnutls.m4: add m4 macros for libgcrypt and libgnutls to
+	the repository, so that FromCVS can be run to regenerate
+	configure.in, even on systems without gnutls.
 
 2002-04-20 Saturday 10:15 UTC -- Neil Spring <nspring@cs.washington.edu>
 
@@ -38,7 +89,7 @@ CVS on commit.
 
 2002-04-20 Saturday 08:53 UTC -- Neil Spring <nspring@cs.washington.edu>
 
-	* ChangeLog, NEWS, TODO, configure.in, wmbiff/Client.h: update
+	* ChangeLog, NEWS, configure.in, wmbiff/Client.h: update
 	meta-information for prerelease 5
 
 2002-04-20 Saturday 08:51 UTC -- Neil Spring <nspring@cs.washington.edu>
@@ -86,11 +137,11 @@ CVS on commit.
 
 2002-04-16 Tuesday 08:10 UTC -- Neil Spring <nspring@cs.washington.edu>
 
-	* NEWS, TODO: a little wordsmithing
+	* NEWS: a little wordsmithing
 
 2002-04-16 Tuesday 07:37 UTC -- Neil Spring <nspring@cs.washington.edu>
 
-	* ChangeLog, TODO, wmbiff/Client.h, wmbiff/Imap4Client.c,
+	* ChangeLog, wmbiff/Client.h, wmbiff/Imap4Client.c,
 	wmbiff/LicqClient.c, wmbiff/Pop3Client.c, wmbiff/mboxClient.c,
 	wmbiff/passwordMgr.c, wmbiff/wmbiff.c: remove vestigial pc->open()
 
@@ -101,10 +152,6 @@ CVS on commit.
 2002-04-15 Monday 22:58 UTC -- Neil Spring <nspring@cs.washington.edu>
 
 	* Makefile.am: dist the FAQ
-
-2002-04-15 Monday 22:58 UTC -- Neil Spring <nspring@cs.washington.edu>
-
-	* TODO: be descriptive in TODO
 
 2002-04-15 Monday 21:19 UTC -- Neil Spring <nspring@cs.washington.edu>
 
@@ -118,7 +165,7 @@ CVS on commit.
 
 2002-04-15 Monday 08:15 UTC -- Neil Spring <nspring@cs.washington.edu>
 
-	* ChangeLog, Makefile.am, TODO, configure.in, wmbiff/Makefile.am,
+	* ChangeLog, Makefile.am, configure.in, wmbiff/Makefile.am,
 	autoconf/Makefile.am: try to make the distcheck target work
 	correctly.  voodoo.
 
@@ -266,7 +313,7 @@ CVS on commit.
 
 2002-04-07 Sunday 05:08 UTC -- Neil Spring <nspring@cs.washington.edu>
 
-	* COPYING, ChangeLog, FromCVS.sh, INSTALL, Makefile.am, NEWS, TODO,
+	* COPYING, ChangeLog, FromCVS.sh, INSTALL, Makefile.am, NEWS,
 	configure.in, autoconf/acconfig.h, autoconf/install-sh,
 	autoconf/missing, autoconf/mkinstalldirs, maint/changelog-header,
 	wmbiff/Client.h, wmbiff/Imap4Client.c, wmbiff/LicqClient.c,
@@ -315,10 +362,6 @@ CVS on commit.
 
 	* ChangeLog, NEWS, wmbiff/Makefile: Released WMBiff 0.3.8.
 
-2002-03-18 Monday 21:13 UTC -- Neil Spring <nspring@cs.washington.edu>
-
-	* TODO: add failure handling in expect
-
 2002-03-18 Monday 09:47 UTC -- Neil Spring <nspring@cs.washington.edu>
 
 	* wmgeneral/wmgeneral.h: un-shadow index
@@ -336,10 +379,6 @@ CVS on commit.
 	* wmbiff/: Client.h, Imap4Client.c, Pop3Client.c, ShellClient.c,
 	tlsComm.c: fixed misunderstanding of the use of ## in macros with
 	strings - the compiler does the concatenation, not the preprocessor
-
-2002-03-12 Tuesday 09:15 UTC -- Neil Spring <nspring@cs.washington.edu>
-
-	* TODO: additional todo list items
 
 2002-03-11 Monday 00:11 UTC -- Neil Spring <nspring@cs.washington.edu>
 
@@ -541,10 +580,6 @@ CVS on commit.
 
 	* ChangeLog, NEWS, wmbiff/sample.wmbiffrc: Doc updates for 0.3.4.
 
-2001-11-23 Friday 07:20 UTC -- Neil Spring <nspring@cs.washington.edu>
-
-	* TODO: one down
-
 2001-11-16 Friday 07:11 UTC -- Neil Spring <nspring@cs.washington.edu>
 
 	* wmbiff/: Imap4Client.c, Pop3Client.c, charutil.c: regexes limit
@@ -638,7 +673,7 @@ CVS on commit.
 
 2001-10-04 Thursday 09:50 UTC -- Jordi Mallach <jordi@sindominio.net>
 
-	* NEWS, README, TODO, wmbiff/Client.h, wmbiff/Imap4Client.c,
+	* NEWS, README, wmbiff/Client.h, wmbiff/Imap4Client.c,
 	wmbiff/LicqClient.c, wmbiff/Makefile, wmbiff/Pop3Client.c,
 	wmbiff/charutil.c, wmbiff/charutil.h, wmbiff/maildirClient.c,
 	wmbiff/mboxClient.c, wmbiff/socket.c, wmbiff/tlsComm.c,
