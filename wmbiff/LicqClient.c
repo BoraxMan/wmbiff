@@ -1,10 +1,10 @@
-/* $Id: LicqClient.c,v 1.8 2002/04/20 07:53:20 bluehal Exp $ */
+/* $Id: LicqClient.c,v 1.9 2002/04/20 07:54:06 bluehal Exp $ */
 /* Author : Yong-iL Joh ( tolkien@mizi.com )
    Modified: Jorge García ( Jorge.Garcia@uv.es )
  * 
  * LICQ checker.
  *
- * Last Updated : $Date: 2002/04/20 07:53:20 $
+ * Last Updated : $Date: 2002/04/20 07:54:06 $
  *
  */
 
@@ -24,18 +24,18 @@ int licqCheckHistory(Pop3 pc)
 
 	DM(pc, DEBUG_INFO, ">Mailbox: '%s'\n", pc->path);
 
-    if(fileHasChanged(pc->path, &ut.actime, &PCM.mtime, &PCM.size) 
-       || pc->OldMsgs < 0) {
-        FILE *F;
-        char buf[1024];
-        int count_status = 0;
+	if (fileHasChanged(pc->path, &ut.actime, &PCM.mtime, &PCM.size)
+		|| pc->OldMsgs < 0) {
+		FILE *F;
+		char buf[1024];
+		int count_status = 0;
 
 		/* file was changed OR initially read */
 		DM(pc, DEBUG_INFO, "  was changed,"
 		   " TIME: new %lu SIZE: new %lu\n",
 		   PCM.mtime, (unsigned long) PCM.size);
 
-        F = openMailbox(pc, pc->path);
+		F = openMailbox(pc, pc->path);
 		/* count message */
 		while (fgets(buf, BUF_SIZE, F)) {
 			if ((buf[0] == '[') || (buf[0] == '-')) {	/* new, or old licq */
@@ -50,8 +50,8 @@ int licqCheckHistory(Pop3 pc)
 		   pc->UnreadMsgs);
 
 		/* Not clear that resetting the mtime is useful, as mutt
-           is not involved.  Unfortunately, I can't tell whether
-           this cut-and-pasted code is useful */
+		   is not involved.  Unfortunately, I can't tell whether
+		   this cut-and-pasted code is useful */
 		ut.modtime = PCM.mtime;
 		utime(pc->path, &ut);
 	}

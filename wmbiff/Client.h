@@ -1,4 +1,4 @@
-/* $Id: Client.h,v 1.17 2002/04/20 07:49:23 bluehal Exp $ */
+/* $Id: Client.h,v 1.18 2002/04/20 07:54:06 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -86,8 +86,8 @@ int mboxCreate(Pop3 pc, const char *str);
 int maildirCreate(Pop3 pc, char *str);
 FILE *openMailbox(Pop3 pc, const char *mbox_filename);
 char *backtickExpand(Pop3 pc, const char *path);
-int fileHasChanged(const char *mbox_filename,  time_t *atime,
-                   time_t *mtime, off_t *size);
+int fileHasChanged(const char *mbox_filename, time_t * atime,
+				   time_t * mtime, off_t * size);
 
 /* _NONE is for silent operation.  _ERROR is for things that should
    be printed assuming that the user might possibly see them. _INFO is

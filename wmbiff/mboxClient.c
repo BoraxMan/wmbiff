@@ -1,4 +1,4 @@
-/* $Id: mboxClient.c,v 1.10 2002/04/20 07:53:20 bluehal Exp $ */
+/* $Id: mboxClient.c,v 1.11 2002/04/20 07:54:06 bluehal Exp $ */
 /* Author:		Yong-iL Joh <tolkien@mizi.com>
    Modified:	Jorge García <Jorge.Garcia@uv.es>
    			 	Rob Funk <rfunk@funknet.net>
@@ -33,97 +33,97 @@ FILE *openMailbox(Pop3 pc, const char *mbox_filename)
 }
 
 /* count the messages in a mailbox */
-static void countMessages(Pop3 pc, const char *mbox_filename) {
-    FILE *F = openMailbox(pc, mbox_filename);
+static void countMessages(Pop3 pc, const char *mbox_filename)
+{
+	FILE *F = openMailbox(pc, mbox_filename);
 	char buf[BUF_SIZE];
 	int is_header = 0;
 	int next_from_is_start_of_header = 1;
 	int count_from = 0, count_status = 0;
 	int len_from = strlen(FROM_STR), len_status = strlen(STATUS_STR);
 
-    if(F == NULL) {
-        pc->TotalMsgs = -1;
-        pc->UnreadMsgs = -1;
-        return;
-    }
+	if (F == NULL) {
+		pc->TotalMsgs = -1;
+		pc->UnreadMsgs = -1;
+		return;
+	}
 
-    /* count message */
-    while (fgets(buf, BUF_SIZE, F)) {
-        if (buf[0] == '\n') {
-            /* a newline by itself terminates the header */
-            if (is_header)
-                is_header = 0;
-            else
-                next_from_is_start_of_header = 1;
-        } else if (!strncmp(buf, FROM_STR, len_from)) {
-            /* A line starting with "From" is the beginning of a new header.
-               "From" in the text of the mail should get escaped by the MDA.
-               If your MDA doesn't do that, it is broken.
-            */
-            if (next_from_is_start_of_header)
-                is_header = 1;
-            if (is_header)
-                count_from++;
-        } else {
-            next_from_is_start_of_header = 0;
-            if (is_header
-                && !strncmp(buf, STATUS_STR, len_status)
-                && strrchr(buf, 'R')) {
-                count_status++;
-            }
-        }
-    }
-    
-    DM(pc, DEBUG_INFO, "from: %d status: %d\n", count_from,
-       count_status);
-    pc->TotalMsgs = count_from;
-    pc->UnreadMsgs = count_from - count_status;
-    fclose(F);
+	/* count message */
+	while (fgets(buf, BUF_SIZE, F)) {
+		if (buf[0] == '\n') {
+			/* a newline by itself terminates the header */
+			if (is_header)
+				is_header = 0;
+			else
+				next_from_is_start_of_header = 1;
+		} else if (!strncmp(buf, FROM_STR, len_from)) {
+			/* A line starting with "From" is the beginning of a new header.
+			   "From" in the text of the mail should get escaped by the MDA.
+			   If your MDA doesn't do that, it is broken.
+			 */
+			if (next_from_is_start_of_header)
+				is_header = 1;
+			if (is_header)
+				count_from++;
+		} else {
+			next_from_is_start_of_header = 0;
+			if (is_header && !strncmp(buf, STATUS_STR, len_status)
+				&& strrchr(buf, 'R')) {
+				count_status++;
+			}
+		}
+	}
+
+	DM(pc, DEBUG_INFO, "from: %d status: %d\n", count_from, count_status);
+	pc->TotalMsgs = count_from;
+	pc->UnreadMsgs = count_from - count_status;
+	fclose(F);
 }
 
 /* check file status; hold on to file information used 
    to restore access time */
-int fileHasChanged(const char *mbox_filename,  time_t *atime,
-                   time_t *mtime, off_t *size) {
-    struct stat st;
-    
-    /* mbox file */
-    if (stat(mbox_filename, &st)) {
+int fileHasChanged(const char *mbox_filename, time_t * atime,
+				   time_t * mtime, off_t * size)
+{
+	struct stat st;
+
+	/* mbox file */
+	if (stat(mbox_filename, &st)) {
 		DMA(DEBUG_ERROR, "Can't stat '%s': %s\n",
-		   mbox_filename, strerror(errno));
+			mbox_filename, strerror(errno));
 	} else if (st.st_mtime != *mtime || st.st_size != *size) {
 		/* file was changed OR initially read */
 		DMA(DEBUG_INFO, " %s was changed,"
-		   " mTIME: %lu -> %lu; SIZE: %lu -> %lu\n",
-           mbox_filename, *mtime, st.st_mtime,
-           (unsigned long) *size, st.st_size);
+			" mTIME: %lu -> %lu; SIZE: %lu -> %lu\n",
+			mbox_filename, *mtime, st.st_mtime,
+			(unsigned long) *size, st.st_size);
 
-        *atime = st.st_atime;
-        *mtime = st.st_mtime;
-        *size = st.st_size;
-        return 1;
-    }
-    return 0;	
+		*atime = st.st_atime;
+		*mtime = st.st_mtime;
+		*size = st.st_size;
+		return 1;
+	}
+	return 0;
 }
 
 int mboxCheckHistory(Pop3 pc)
 {
-    char *mbox_filename = backtickExpand(pc, pc->path);
-    struct utimbuf ut;
+	char *mbox_filename = backtickExpand(pc, pc->path);
+	struct utimbuf ut;
 
 	DM(pc, DEBUG_INFO, ">Mailbox: '%s'\n", mbox_filename);
 
-    if(fileHasChanged(mbox_filename, &ut.actime, &PCM.mtime, &PCM.size) 
-       || pc->OldMsgs < 0) {
+	if (fileHasChanged(mbox_filename, &ut.actime, &PCM.mtime, &PCM.size)
+		|| pc->OldMsgs < 0) {
 
-        countMessages(pc, mbox_filename);
+		countMessages(pc, mbox_filename);
 
 		/* Reset atime for (at least) MUTT to work */
-        /* ut.actime is set above */
+		/* ut.actime is set above */
 		ut.modtime = PCM.mtime;
 		utime(mbox_filename, &ut);
 	}
-    free(mbox_filename);
+	free(mbox_filename);
 	return 0;
 }
 
