@@ -410,10 +410,10 @@ void imap_cacheHeaders( /*@notnull@ */ Pop3 pc)
 				m->from[0] = '\0';
 				while (m->subj[0] == '\0' || m->from[0] == '\0') {
 					if (tlscomm_expect(scs, "", hdrbuf, 127)) {
-						if (strncmp(hdrbuf, "Subject:", 8) == 0) {
+						if (strncasecmp(hdrbuf, "Subject:", 8) == 0) {
 							strncpy(m->subj, hdrbuf + 9, SUBJ_LEN - 1);
 							m->subj[SUBJ_LEN - 1] = '\0';
-						} else if (strncmp(hdrbuf, "From: ", 5) == 0) {
+						} else if (strncasecmp(hdrbuf, "From: ", 5) == 0) {
 							strncpy(m->from, hdrbuf + 6, FROM_LEN - 1);
 							m->from[FROM_LEN - 1] = '\0';
 						}
