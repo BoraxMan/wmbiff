@@ -1,12 +1,22 @@
 Release Notes
 ~~~~~~~~~~~~~
-Release 0.4.14 - Feb 13, 2003
+Release 0.4.15 - Mar x, 2003
+  * Frobnicate internally stored passwords, partially 
+    obfuscating them in memory.  Not actually more 
+    secure, but harder to casually discover a password.
+  * Tighten configuration file lines to more quickly
+    detect misconfiguration; give the -relax option if
+    it is too paranoid.
+
+Release 0.4.14 - Jan 24, 2003
+  * Handle building on systems with both posix and gnu
+    regex in different but conflicting files.  
   * Restart wmbiff on SIGUSR1.  You may need to use 
     'killall -USR1 wmbiff' if it gets stuck.
   * Restart wmbiff on ctrl-shift mouse 1.
 
 Release 0.4.13 - Jan 20, 2003
-  * Fix a potential file descriptor leak when using 
+  * Fix a file descriptor leak when using 
     both Shell and IMAP clients.
   * Portability to Mac OS X, Solaris, and probably BSD
     restored (thanks sourceforge compile farm!) with a
@@ -401,4 +411,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.39 2003/02/13 21:07:34 bluehal Exp $
+$Id: NEWS,v 1.40 2003/03/02 02:37:07 bluehal Exp $

@@ -36,6 +36,9 @@ AC_CHECK_HEADERS(stdio.h)
 dnl for IPv6 support
 AC_CHECK_FUNCS(getaddrinfo)
 
+dnl see if we can cheaply "encrypt" passwords in memory
+AC_CHECK_FUNCS(memfrob)
+
 dnl AC_CHECK_FUNC(asprintf, , VASPRINTF="vasprintf.c")
 
 dnl replacing the old USE_POLL define

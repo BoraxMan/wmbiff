@@ -42,10 +42,10 @@ typedef struct password_binding_struct {
 	struct password_binding_struct *next;
 	char user[32];
 	char server[255];
-	char password[32];
+	char password[32];			/* may be frobnicated */
 } *password_binding;
 
-password_binding pass_list = NULL;
+static password_binding pass_list = NULL;
 
 /* verifies that askpass_fname, if it has no spaces, exists as 
    a file, is owned by the user or by root, and is not world 
@@ -81,8 +81,8 @@ int permissions_ok(Pop3 pc, const char *askpass_fname)
 	return (1);
 }
 
-const char *passwordFor(const char *username,
-						const char *servername, Pop3 pc, int bFlushCache)
+char *passwordFor(const char *username,
+				  const char *servername, Pop3 pc, int bFlushCache)
 {
 
 	password_binding p;
@@ -99,8 +99,13 @@ const char *passwordFor(const char *username,
 	/* if so, return the password */
 	if (p != NULL) {
 		if (p->password[0] != '\0') {
-			if (bFlushCache == 0)
-				return (p->password);
+			if (bFlushCache == 0) {
+				char *ret = strdup(p->password);
+#ifdef HAVE_MEMFROB
+				memfrob(ret, strlen(ret));
+#endif
+				return (ret);
+			}
 			/* else fall through, overwrite */
 		} else if (pc) {
 			/* if we've asked, but received nothing, disable this box */
@@ -148,11 +153,13 @@ const char *passwordFor(const char *username,
 			strcpy(p->server, servername);
 			strncpy(p->password, password_ptr, 31);
 			p->password[31] = '\0';	/* force a null termination */
-			free(password_ptr);
-
+			// caller is responsible for freeing plaintext version free(password_ptr);
+#ifdef HAVE_MEMFROB
+			memfrob(p->password, strlen(p->password));
+#endif
 			p->next = pass_list;
 			pass_list = p;
-			return (p->password);
+			return (password_ptr);
 		}
 	}
 

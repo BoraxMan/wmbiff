@@ -34,13 +34,21 @@ extern int Relax;
 
 #define IMAP_DM(pc, lvl, args...) DM(pc, lvl, "imap4: " args)
 
+#ifdef HAVE_MEMFROB
+#define DEFROB(x) memfrob(x, strlen(x))
+#define ENFROB(x) memfrob(x, strlen(x))
+#else
+#define DEFROB(x)
+#define ENFROB(x)
+#endif
+
 /* this array maps server:port pairs to file descriptors, so
    that when more than one mailbox is queried from a server,
    we only use one socket.  It's limited in size by the
    number of different mailboxes displayed. */
 #define FDMAP_SIZE 5
 static struct fdmap_struct {
-	char *user_password_server_port;	/* tuple, in string form */
+	char *user_server_port;		/* tuple, in string form */
 	/*@owned@ */ struct connection_state *cs;
 } fdmap[FDMAP_SIZE];
 
@@ -88,9 +96,8 @@ static struct connection_state *state_for_pcu(Pop3 pc)
 	sprintf(connection_id, "%s|%s|%d", PCU.userName, PCU.serverName,
 			PCU.serverPort);
 	for (i = 0; i < FDMAP_SIZE; i++)
-		if (fdmap[i].user_password_server_port != NULL &&
-			(strcmp(connection_id,
-					fdmap[i].user_password_server_port) == 0)) {
+		if (fdmap[i].user_server_port != NULL &&
+			(strcmp(connection_id, fdmap[i].user_server_port) == 0)) {
 			retval = fdmap[i].cs;
 		}
 	free(connection_id);
@@ -117,7 +124,7 @@ static void bind_state_to_pcu(Pop3 pc,
 				"Tried to open too many IMAP connections. Sorry!\n");
 		exit(EXIT_FAILURE);
 	}
-	fdmap[i].user_password_server_port = connection_id;
+	fdmap[i].user_server_port = connection_id;
 	fdmap[i].cs = scs;
 }
 
@@ -135,7 +142,7 @@ struct connection_state *unbind(
 
 	for (i = 0; i < FDMAP_SIZE && fdmap[i].cs != scs; i++);
 	if (i < FDMAP_SIZE) {
-		free(fdmap[i].user_password_server_port);
+		free(fdmap[i].user_server_port);
 		retval = fdmap[i].cs;
 		fdmap[i].cs = NULL;
 	}
@@ -390,8 +397,13 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 		return -1;
 	}
 
-	if (PCU.password[0] == '\0')
+	if (PCU.password[0] == '\0') {
 		PCU.interactive_password = 1;
+	} else {
+#ifdef HAVE_MEMFROB
+		memfrob(PCU.password, strlen(PCU.password));
+#endif
+	}
 
 	// grab_authList(unaliased_str + matchedchars, PCU.authList);
 
@@ -431,8 +443,10 @@ static int authenticate_plaintext( /*@notnull@ */ Pop3 pc,
 	ask_user_for_password(pc, 0);
 	do {
 		/* login */
+		DEFROB(PCU.password);
 		tlscomm_printf(scs, "a001 LOGIN %s \"%s\"\r\n", PCU.userName,
 					   PCU.password);
+		ENFROB(PCU.password);
 		if (tlscomm_expect(scs, "a001 ", buf, BUF_SIZE) == 0) {
 			IMAP_DM(pc, DEBUG_ERROR,
 					"Did not get a response to the LOGIN command.\n");
@@ -483,7 +497,9 @@ static int authenticate_md5(Pop3 pc,
 	strcat(buf, " ");
 	ask_user_for_password(pc, 0);
 	gmh = gcry_md_open(GCRY_MD_MD5, GCRY_MD_FLAG_HMAC);
+	DEFROB(PCU.password);
 	gcry_md_setkey(gmh, PCU.password, strlen(PCU.password));
+	ENFROB(PCU.password);
 	gcry_md_write(gmh, (unsigned char *) buf2, strlen(buf2));
 	gcry_md_final(gmh);
 	md5 = gcry_md_read(gmh, 0);
@@ -522,13 +538,15 @@ static void ask_user_for_password( /*@notnull@ */ Pop3 pc, int bFlushCache)
 	if (PCU.interactive_password) {
 		if (strlen(PCU.password) == 0) {
 			/* we need to grab the password from the user. */
-			const char *password;
+			char *password;
 			IMAP_DM(pc, DEBUG_INFO, "asking for password %d\n",
 					bFlushCache);
 			password =
 				passwordFor(PCU.userName, PCU.serverName, pc, bFlushCache);
 			if (password != NULL) {
 				strcpy(PCU.password, password);
+				free(password);
+				ENFROB(PCU.password);
 			}
 		}
 	}
