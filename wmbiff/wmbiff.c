@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.20 2002/04/09 07:44:28 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.21 2002/04/15 01:30:04 bluehal Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -402,6 +402,23 @@ void do_biff(int argc, char **argv)
 	}
 }
 
+/* helper function for displayMsgCounters, which has outgrown its name */
+static void blitMsgCounters(int i)
+{
+	int y_row = (11 * i) + 5;	/* constant for each mailbox */
+	ClearDigits(i);				/* Clear digits */
+	if ((mbox[i].blink_stat & 0x01) == 0) {
+		int newmail = (mbox[i].UnreadMsgs > 0) ? 1 : 0;
+		if (mbox[i].TextStatus[0] != '\0') {
+			BlitString(mbox[i].TextStatus, 39, y_row, newmail);
+		} else {
+			int mailcount =
+				(newmail) ? mbox[i].UnreadMsgs : mbox[i].TotalMsgs;
+			BlitNum(mailcount, 45, y_row, newmail);
+		}
+	}
+}
+
 void displayMsgCounters(int i, int mail_stat, int *Sleep_Interval,
 						int *Blink_Mode)
 {
@@ -411,10 +428,7 @@ void displayMsgCounters(int i, int mail_stat, int *Sleep_Interval,
 		mbox[i].blink_stat = BLINK_TIMES * 2;
 		*Sleep_Interval = BLINK_SLEEP_INTERVAL;
 		*Blink_Mode |= (1 << i);	/* Global blink flag set for this mailbox */
-		ClearDigits(i);			/* Clear digits */
-		if ((mbox[i].blink_stat & 0x01) == 0) {
-			BlitNum(mbox[i].UnreadMsgs, 45, (11 * i) + 5, 1);	/* Yellow digits */
-		}
+		blitMsgCounters(i);
 		if (mbox[i].notify[0] != 0) {	/* need to call notify() ? */
 			if (!strcasecmp(mbox[i].notify, "beep")) {	/* Internal keyword ? */
 				XBell(display, 100);	/* Yes, bell */
@@ -429,14 +443,7 @@ void displayMsgCounters(int i, int mail_stat, int *Sleep_Interval,
 		}
 		break;
 	case 1:					/* mailbox has been rescanned/changed */
-		ClearDigits(i);			/* Clear digits */
-		if ((mbox[i].blink_stat & 0x01) == 0) {
-			if (mbox[i].UnreadMsgs > 0) {	/* New mail arrived */
-				BlitNum(mbox[i].UnreadMsgs, 45, (11 * i) + 5, 1);	/* Yellow digits */
-			} else {
-				BlitNum(mbox[i].TotalMsgs, 45, (11 * i) + 5, 0);	/* Cyan digits */
-			}
-		}
+		blitMsgCounters(i);
 		break;
 	case 0:
 		break;
@@ -500,7 +507,7 @@ static void BlitString(const char *name, int x, int y, int new)
 		c = toupper(name[i]);
 		if (c >= 'A' && c <= 'Z') {	/* it's a letter */
 			c -= 'A';
-			copyXPMArea(c * (CHAR_WIDTH + 1), 74,
+			copyXPMArea(c * (CHAR_WIDTH + 1), (new ? 95 : 74),
 						(CHAR_WIDTH + 1), (CHAR_HEIGHT + 1), k, y);
 			k += (CHAR_WIDTH + 1);
 		} else {				/* it's a number or symbol */
@@ -537,7 +544,8 @@ void ClearDigits(int i)
 {
 	copyXPMArea((10 * (CHAR_WIDTH + 1)), 64, (CHAR_WIDTH + 1),
 				(CHAR_HEIGHT + 1), 35, (11 * i) + 5);
-	copyXPMArea(39, 84, (3 * (CHAR_WIDTH + 1)), (CHAR_HEIGHT + 1), 39, (11 * i) + 5);	/* Clear digits */
+	copyXPMArea(39, 84, (3 * (CHAR_WIDTH + 1)), (CHAR_HEIGHT + 1), 39,
+				(11 * i) + 5);
 }
 
 /* 	Read a line from a file to obtain a pair setting=value 
@@ -611,6 +619,14 @@ void parse_mbox_path(int item)
 		} else {
 			sprintf(buf, "shell:::gnomeicu-client msgcount");
 		}
+		shellCreate((&mbox[item]), buf);
+	} else if (!strncasecmp(mbox[item].path, "finger:", 7)) {
+		char buf[255];
+		sprintf(buf, "shell:::finger -lm %s | "
+				"perl -ne '(/^new mail/i && print \"new\");' "
+				"-e '(/^mail last read/i && print \"old\");' "
+				"-e '(/^no( unread)? mail/i && print \"0\");'",
+				mbox[item].path + 7);
 		shellCreate((&mbox[item]), buf);
 	} else if (!strncasecmp(mbox[item].path, "licq:", 5)) {	/* licq history file */
 		licqCreate((&mbox[item]), mbox[item].path);
