@@ -37,7 +37,7 @@ extern const char *certificate_filename;
    that holds the per-mailbox debug flag. */
 #define TDM(lvl, args...) DM(scs->pc, lvl, "comm: " args)
 
-/* how long to wait for the server to do its thing 
+/* how long to wait for the server to do its thing
    when we issue it a command (in seconds) */
 #define EXPECT_TIMEOUT 20
 
@@ -267,47 +267,56 @@ void tlscomm_printf(struct connection_state *scs, const char *format, ...)
    gnutls to make this as easy as it should be, or someone
    to port Andrew McDonald's gnutls-for-mutt patch.
 */
-#ifdef FAILS_TO_COMPILE
 int tls_check_certificate(struct connection_state *scs)
 {
-    CertificateStatus certstat; */
+	GNUTLS_CertificateStatus certstat;
 	const gnutls_datum *cert_list;
 	int cert_list_size = 0;
 
-	if (gnutls_auth_get_type(scs->state) != GNUTLS_X509PKI) {
+	if (gnutls_auth_get_type(scs->state) != GNUTLS_CRD_CERTIFICATE) {
 		TDM(DEBUG_ERROR, "Unable to get certificate from peer.\n");
 		exit(1);
 	}
-	certstat =
-		gnutls_x509pki_client_get_peer_certificate_status(scs->state);
-	switch (certstat) {
-	case GNUTLS_CERT_TRUSTED:
-		TDM(DEBUG_INFO, "certificate is trusted.\n");
-		return 0;
-	case GNUTLS_CERT_NOT_TRUSTED:
-		/* note, here is one place where we provide no security */
-		TDM(DEBUG_INFO, "certificate is not trusted (but valid).\n");
-		return 0;
-	case GNUTLS_CERT_INVALID:
-		TDM(DEBUG_ERROR, "certificate is invalid.\n");
-		exit(1);
-	case GNUTLS_CERT_EXPIRED:
-		TDM(DEBUG_ERROR, "certificate has expired.\n");
-		exit(1);
-	case GNUTLS_CERT_NONE:
+	certstat = gnutls_certificate_verify_peers(scs->state);
+	if (certstat ==
+		(GNUTLS_CertificateStatus) GNUTLS_E_NO_CERTIFICATE_FOUND) {
 		TDM(DEBUG_ERROR, "server has no certificate.\n");
 		exit(1);
+	} else if (certstat & GNUTLS_CERT_CORRUPTED) {
+		TDM(DEBUG_ERROR, "server's certificate is corrupt.\n");
+		exit(1);
+	} else if (certstat & GNUTLS_CERT_REVOKED) {
+		TDM(DEBUG_ERROR, "server's certificate has been revoked.\n");
+		exit(1);
+	} else if (certstat & GNUTLS_CERT_INVALID) {
+		TDM(DEBUG_ERROR, "server's certificate is invalid.\n");
+		exit(1);
+	} else if (certstat & GNUTLS_CERT_NOT_TRUSTED) {
+		TDM(DEBUG_INFO, "server's certificate is not trusted.\n");
+		TDM(DEBUG_INFO,
+			"at the moment, wmbiff doesn't trust certificates.\n");
 	}
+
 	/* not checking for not-yet-valid certs... this would make sense
 	   if we weren't just comparing to stored ones */
-	cert_list =
-		gnutls_x509pki_client_get_peer_certificate_list(scs->state,
-														&cert_list_size);
+	cert_list = gnutls_certificate_get_peers(scs->state, &cert_list_size);
+
+	if (gnutls_x509_extract_certificate_expiration_time(&cert_list[0]) <
+		time(NULL)) {
+		TDM(DEBUG_ERROR, "server's certificate has expired.\n");
+		exit(1);
+	} else
+		if (gnutls_x509_extract_certificate_activation_time(&cert_list[0])
+			> time(NULL)) {
+		TDM(DEBUG_ERROR, "server's certificate is not yet valid.\n");
+		exit(1);
+	} else {
+		TDM(DEBUG_INFO, "certificate passed time check.\n");
+	}
 
 	TDM(DEBUG_INFO, "certificate check ok.\n");
 	return (0);
 }
-#endif
 
 struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc)
 {
@@ -328,11 +337,15 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc)
 	{
 		const int protocols[] = { GNUTLS_TLS1, GNUTLS_SSL3, 0 };
 		const int ciphers[] =
-			{ GNUTLS_CIPHER_3DES_CBC, GNUTLS_CIPHER_ARCFOUR, 0 };
+			{ GNUTLS_CIPHER_RIJNDAEL_128_CBC, GNUTLS_CIPHER_3DES_CBC,
+			GNUTLS_CIPHER_RIJNDAEL_256_CBC, GNUTLS_CIPHER_TWOFISH_128_CBC,
+			GNUTLS_CIPHER_ARCFOUR, 0
+		};
 		const int compress[] = { GNUTLS_COMP_ZLIB, GNUTLS_COMP_NULL, 0 };
-		const int key_exch[] = { GNUTLS_KX_RSA, GNUTLS_KX_DHE_DSS, 
-                                 GNUTLS_KX_DHE_RSA, GNUTLS_KX_SRP,
-                                 GNUTLS_KX_ANON_DH, 0 };
+		const int key_exch[] = { GNUTLS_KX_RSA, GNUTLS_KX_DHE_DSS,
+			GNUTLS_KX_DHE_RSA, 0
+		};
+		/* mutt with gnutls doesn't use kx_srp or kx_anon_dh */
 		const int mac[] = { GNUTLS_MAC_SHA, GNUTLS_MAC_MD5, 0 };
 		assert(gnutls_protocol_set_priority(scs->state, protocols) == 0);
 		assert(gnutls_cipher_set_priority(scs->state, ciphers) == 0);
@@ -354,8 +367,9 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc)
 				exit(1);
 			}
 			zok = gnutls_certificate_set_x509_trust_file(scs->xcred,
-													   certificate_filename,
-													   GNUTLS_X509_FMT_PEM);
+														 (char *)
+														 certificate_filename,
+														 GNUTLS_X509_FMT_PEM);
 			if (zok != 0) {
 				DMA(DEBUG_ERROR,
 					"GNUTLS did not like your certificate file %s.\n",
@@ -371,9 +385,7 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc)
 			zok = gnutls_handshake(scs->state);
 		} while (zok == GNUTLS_E_INTERRUPTED || zok == GNUTLS_E_AGAIN);
 
-#ifdef FAILS_TO_COMPILE
 		tls_check_certificate(scs);
-#endif
 	}
 
 	if (zok < 0) {
