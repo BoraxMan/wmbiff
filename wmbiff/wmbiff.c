@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.65 2004/06/19 20:53:01 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.66 2004/08/23 00:37:52 bluehal Exp $ */
 
 // typedef int gcry_error_t;
 
@@ -431,14 +431,25 @@ static void init_biff(char *config_file)
 	}
 
 #ifdef HAVE_GCRYPT_H
-	/* recently made a requirement, section 2.4 of gcrypt manual */
-	if (gcry_check_version("1.1.42") == NULL) {
-		DMA(DEBUG_ERROR, "Error: incompatible gcrypt version.\n");
-	}
 	/* gcrypt is a little strange, in that it doesn't
 	 * seem to initialize its memory pool by itself.
 	 * I believe we *expect* "Warning: using insecure memory!"
 	 */
+    /* gcryctl_disable_secmem gets called before check_version -- in a message on
+       gcrypt-devel august 17 2004. */
+    if ((rc = gcry_control(GCRYCTL_DISABLE_SECMEM, 0)) != 0) {
+        DMA(DEBUG_ERROR, "Error: tried to disable gcrypt warning and failed: %d\n"
+            " Message: %s\n"
+			" libgcrypt version: %s\n",
+			rc, gcry_strerror(rc), gcry_check_version(NULL));
+    }
+
+	/* recently made a requirement, section 2.4 of gcrypt manual */
+	if (gcry_check_version("1.1.42") == NULL) {
+		DMA(DEBUG_ERROR, "Error: incompatible gcrypt version.\n");
+	}
+
+    /* 
 	if ((rc = gcry_control(GCRYCTL_INIT_SECMEM, 16384, 0)) != 0) {
 		DMA(DEBUG_ERROR,
 			"Error: gcry_control() to initialize secure memory returned non-zero: %d\n"
@@ -447,6 +458,7 @@ static void init_biff(char *config_file)
 			" recovering: will fail later if using CRAM-MD5 or APOP authentication.\n",
 			rc, gcry_strerror(rc), gcry_check_version(NULL));
 	};
+    */
 #endif
 
 	DMA(DEBUG_INFO, "config_file = %s.\n", config_file);
