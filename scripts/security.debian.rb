@@ -110,9 +110,16 @@ packagelists.each { |urlpath, sc, uc|
         session = Net::HTTP.new(Server)
         # session.set_pipe($stderr); 
       end
-      resp, data = session.get(urlpath, 
-                               { 'If-Modified-Since' => 
-                                 cached_time.strftime( "%a, %d %b %Y %H:%M:%S GMT" ) })
+      begin 
+        resp, data = session.get(urlpath, 
+                                 { 'If-Modified-Since' => 
+                                   cached_time.strftime( "%a, %d %b %Y %H:%M:%S GMT" ) })
+      rescue SocketError => e
+        # if the net is down, we'll get this error; avoid printing a stack trace.
+        puts "XX old"
+        puts e
+        exit 1;
+      end
       test(?e, Cachedir) or Dir.mkdir(Cachedir)
       File.open(uc, 'w') { |o| o.puts data }
       test(?e, uc + '.stamp') and File.unlink(uc + '.stamp')  # we have a copy, don't need the stamp.
