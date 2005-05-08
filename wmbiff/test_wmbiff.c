@@ -23,6 +23,16 @@
 #include "tlsComm.h"
 #include "charutil.h"
 
+void ProcessPendingEvents(void)
+{
+	return;
+}
+
+int x_socket(void)
+{
+	return (0);
+}
+
 int debug_default = DEBUG_INFO;
 int Relax = 1;
 

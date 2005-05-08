@@ -10,8 +10,6 @@
 #include <X11/Xutil.h>			/* needed for Region on solaris? */
 #include <assert.h>
 
-#define min(a,b) ((a)<(b) ? (a) : (b))
-#define max(a,b) ((a)>(b) ? (a) : (b))
 #define LEFT_MAR 6
 #define RIGHT_MAR 6
 #define COL_SEP 4

@@ -12,8 +12,17 @@ int exists(const char *filename __attribute__ ((unused)))
 {
 	return (0);
 }
+void ProcessPendingEvents(void)
+{
+	return;
+}
 
-int print_info(void *state __attribute__ ((unused)))
+int x_socket(void)
+{
+	return (0);
+}
+
+int print_info(void *state __attribute__((unused)))
 {
 	return (0);
 }
