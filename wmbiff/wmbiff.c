@@ -1,4 +1,4 @@
-/* $Id: wmbiff.c,v 1.69 2005/05/08 21:31:22 bluehal Exp $ */
+/* $Id: wmbiff.c,v 1.70 2005/10/07 03:07:58 bluehal Exp $ */
 
 // typedef int gcry_error_t;
 
@@ -259,6 +259,8 @@ static int Read_Config_File(char *filename, int *loopinterval)
 		return 0;
 	}
 	while (!feof(fp)) {
+		/* skanky: -1 can represent an unparsed line 
+		   or an error */
 		if (ReadLine(fp, setting, value, &mbox_index) == -1)
 			continue;
 
@@ -612,6 +614,11 @@ static int wmbiffrc_permissions_check(const char *wmbiffrc_fname)
 		return (1);				/* well, it's not a bad permission
 								   problem: if you can't find it,
 								   neither can the bad guys.. */
+	}
+	if ((st.st_mode & S_IFDIR) != 0) {
+		DMA(DEBUG_ERROR, ".wmbiffrc '%s' is a directory!\n"
+			"exiting.  don't do that.", wmbiffrc_fname);
+		exit(EXIT_FAILURE);
 	}
 	if (st.st_uid != getuid()) {
 		char *user = getenv("USER");
@@ -1015,138 +1022,137 @@ static void restart_wmbiff(int sig
 	exit(EXIT_FAILURE);
 }
 
-extern int x_socket(void) {
-    return ConnectionNumber(display);
+extern int x_socket(void)
+{
+	return ConnectionNumber(display);
 }
-extern void ProcessPendingEvents(void) {
+extern void ProcessPendingEvents(void)
+{
 	static int but_pressed_region = -1;	/* static so click can be determined */
 	int but_released_region = -1;
-    /* X Events */
-    while (XPending(display)) {
-        XEvent Event;
-        const char *press_action;
-        
-        XNextEvent(display, &Event);
-        
-        switch (Event.type) {
-        case Expose:
-            if (Event.xany.window != win &&
-                Event.xany.window != iconwin) {
-                msglst_redraw();
-            } else {
-                RedrawWindow();
-            }
-            break;
-        case DestroyNotify:
-            XCloseDisplay(display);
-            exit(EXIT_SUCCESS);
-            break;
-        case ButtonPress:
-            but_pressed_region =
-                CheckMouseRegion(Event.xbutton.x, Event.xbutton.y);
-            switch (Event.xbutton.button) {
-            case 1:
-                press_action = mbox[but_pressed_region].action;
-                break;
-            case 2:
-                press_action = mbox[but_pressed_region].button2;
-                break;
-            case 3:
-                press_action = mbox[but_pressed_region].fetchcmd;
-                break;
-            default:
-                press_action = NULL;
-                break;
-                
-            }
-            if (press_action && strcmp(press_action, "msglst") == 0) {
-                msglst_show(&mbox[but_pressed_region],
-                            Event.xbutton.x_root,
-                            Event.xbutton.y_root);
-            }
-            break;
-        case ButtonRelease:
-            but_released_region =
-                CheckMouseRegion(Event.xbutton.x, Event.xbutton.y);
-            if (but_released_region == but_pressed_region
-                && but_released_region >= 0) {
-                const char *click_action, *extra_click_action = NULL;
-                
-                switch (Event.xbutton.button) {
-                case 1:	/* Left mouse-click */
-						/* C-S-left will restart wmbiff. */
-                    if ((Event.xbutton.state & ControlMask) &&
-                        (Event.xbutton.state & ShiftMask)) {
-                        restart_wmbiff(0);
-                    }
-                    /* do we need to run an extra action? */
-                    if (mbox[but_released_region].UnreadMsgs == -1) {
-                        extra_click_action =
-                            mbox[but_released_region].actiondc;
-                    } else if (mbox[but_released_region].
-                               UnreadMsgs > 0) {
-                        extra_click_action =
-                            mbox[but_released_region].actionnew;
-                    } else {
-                        extra_click_action =
-                            mbox[but_released_region].actionnonew;
-                    }
-                    click_action = mbox[but_released_region].action;
-                    break;
-                case 2:	/* Middle mouse-click */
-                    click_action = mbox[but_released_region].button2;
-                    break;
-                case 3:	/* Right mouse-click */
-                    click_action = mbox[but_released_region].fetchcmd;
-                    break;
-                default:
-                    click_action = NULL;
-                    break;
-                }
-                if (extra_click_action != NULL
-                    && extra_click_action[0] != 0
-                    && strcmp(extra_click_action, "msglst")) {
-                    DM(&mbox[but_released_region], DEBUG_INFO,
-                       "runing: %s", extra_click_action);
-                    (void) execCommand(extra_click_action);
-                }
-                if (click_action != NULL
-                    && click_action[0] != '\0'
-                    && strcmp(click_action, "msglst")) {
-                    DM(&mbox[but_released_region], DEBUG_INFO,
-                       "running: %s", click_action);
-                    (void) execCommand(click_action);
-                }
-            }
-            
-            /* a button was released, hide the message list if open */
-            msglst_hide();
-            
-            but_pressed_region = -1;
-            /* RedrawWindow(); */
-            break;
-        case MotionNotify:
-            break;
-        case KeyPress: {
-            XKeyPressedEvent *xkpe = (XKeyPressedEvent *)&Event;
-            KeySym ks = XKeycodeToKeysym(display, xkpe->keycode, 0);
-            if( ks > XK_0 && ks < XK_0 + min(9U, num_mailboxes)) {
-                const char *click_action = mbox[ks - XK_1].action;
-                if (click_action != NULL
-                    && click_action[0] != '\0'
-                    && strcmp(click_action, "msglst")) {
-                    DM(&mbox[but_released_region], DEBUG_INFO,
-                       "running: %s", click_action);
-                    (void) execCommand(click_action);
-                }
-            }
-            
-        }
-            break;
-        default:
-            break;
-        }
-    }
+	/* X Events */
+	while (XPending(display)) {
+		XEvent Event;
+		const char *press_action;
+
+		XNextEvent(display, &Event);
+
+		switch (Event.type) {
+		case Expose:
+			if (Event.xany.window != win && Event.xany.window != iconwin) {
+				msglst_redraw();
+			} else {
+				RedrawWindow();
+			}
+			break;
+		case DestroyNotify:
+			XCloseDisplay(display);
+			exit(EXIT_SUCCESS);
+			break;
+		case ButtonPress:
+			but_pressed_region =
+				CheckMouseRegion(Event.xbutton.x, Event.xbutton.y);
+			switch (Event.xbutton.button) {
+			case 1:
+				press_action = mbox[but_pressed_region].action;
+				break;
+			case 2:
+				press_action = mbox[but_pressed_region].button2;
+				break;
+			case 3:
+				press_action = mbox[but_pressed_region].fetchcmd;
+				break;
+			default:
+				press_action = NULL;
+				break;
+
+			}
+			if (press_action && strcmp(press_action, "msglst") == 0) {
+				msglst_show(&mbox[but_pressed_region],
+							Event.xbutton.x_root, Event.xbutton.y_root);
+			}
+			break;
+		case ButtonRelease:
+			but_released_region =
+				CheckMouseRegion(Event.xbutton.x, Event.xbutton.y);
+			if (but_released_region == but_pressed_region
+				&& but_released_region >= 0) {
+				const char *click_action, *extra_click_action = NULL;
+
+				switch (Event.xbutton.button) {
+				case 1:		/* Left mouse-click */
+					/* C-S-left will restart wmbiff. */
+					if ((Event.xbutton.state & ControlMask) &&
+						(Event.xbutton.state & ShiftMask)) {
+						restart_wmbiff(0);
+					}
+					/* do we need to run an extra action? */
+					if (mbox[but_released_region].UnreadMsgs == -1) {
+						extra_click_action =
+							mbox[but_released_region].actiondc;
+					} else if (mbox[but_released_region].UnreadMsgs > 0) {
+						extra_click_action =
+							mbox[but_released_region].actionnew;
+					} else {
+						extra_click_action =
+							mbox[but_released_region].actionnonew;
+					}
+					click_action = mbox[but_released_region].action;
+					break;
+				case 2:		/* Middle mouse-click */
+					click_action = mbox[but_released_region].button2;
+					break;
+				case 3:		/* Right mouse-click */
+					click_action = mbox[but_released_region].fetchcmd;
+					break;
+				default:
+					click_action = NULL;
+					break;
+				}
+				if (extra_click_action != NULL
+					&& extra_click_action[0] != 0
+					&& strcmp(extra_click_action, "msglst")) {
+					DM(&mbox[but_released_region], DEBUG_INFO,
+					   "runing: %s", extra_click_action);
+					(void) execCommand(extra_click_action);
+				}
+				if (click_action != NULL
+					&& click_action[0] != '\0'
+					&& strcmp(click_action, "msglst")) {
+					DM(&mbox[but_released_region], DEBUG_INFO,
+					   "running: %s", click_action);
+					(void) execCommand(click_action);
+				}
+			}
+
+			/* a button was released, hide the message list if open */
+			msglst_hide();
+
+			but_pressed_region = -1;
+			/* RedrawWindow(); */
+			break;
+		case MotionNotify:
+			break;
+		case KeyPress:{
+				XKeyPressedEvent *xkpe = (XKeyPressedEvent *) & Event;
+				KeySym ks = XKeycodeToKeysym(display, xkpe->keycode, 0);
+				if (ks > XK_0 && ks < XK_0 + min(9U, num_mailboxes)) {
+					const char *click_action = mbox[ks - XK_1].action;
+					if (click_action != NULL
+						&& click_action[0] != '\0'
+						&& strcmp(click_action, "msglst")) {
+						DM(&mbox[but_released_region], DEBUG_INFO,
+						   "running: %s", click_action);
+						(void) execCommand(click_action);
+					}
+				}
+
+			}
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 static void do_biff(int argc, const char **argv)
@@ -1215,7 +1221,7 @@ static void do_biff(int argc, const char **argv)
 
 		Sleep_Interval = periodic_mail_check();
 
-        ProcessPendingEvents() ;
+		ProcessPendingEvents();
 
 		XSleep(Sleep_Interval);
 	}
