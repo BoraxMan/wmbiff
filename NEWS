@@ -1,5 +1,9 @@
 Release Notes
 ~~~~~~~~~~~~~
+Release 0.4.27 - October 8, 2005
+  * GNUTLS 1.2 support
+  * Minor bugfixes.
+
 Release 0.4.26 - October 10, 2004
   * Don't crash if no certificate is sent by the remote side
     and -skip-certificate-check has been given.
@@ -486,4 +490,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.61 2005/10/08 18:13:09 bluehal Exp $
+$Id: NEWS,v 1.62 2005/10/08 22:38:53 bluehal Exp $
