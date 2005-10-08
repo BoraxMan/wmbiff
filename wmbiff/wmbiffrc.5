@@ -1,5 +1,5 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
-.\" $Id: wmbiffrc.5.in,v 1.17 2004/03/12 21:35:25 bluehal Exp $
+.\" $Id: wmbiffrc.5.in,v 1.18 2004/12/12 00:01:53 bluehal Exp $
 .\"
 .\" wmbiff/wmbiffrc.5.  Generated from wmbiffrc.5.in by configure.
 .\"
@@ -114,6 +114,10 @@ pop3:user:passwd@server[:port] [auth]
 pop3:user passwd server[ port] [auth] 
 .RE
 .TP
+.I pop3s
+Exactly like pop3, only uses TLS (SSL) when built with gnutls and defaults
+to port 995. This copy of WMBiff was compiled with GNUTLS. 
+.TP
 .I imap
 These are IMAP4 boxes. As with pop3, WMBiff will report the
 status of an IMAP4 mbox using the given values. This type
@@ -142,7 +146,7 @@ imap:user:passwd@server[/"mail box"][:port] [auth]
 .TP
 .I imaps
 These are IMAP4 boxes wrapped in a TLS (SSL)
-connection. This copy of WMBiff was not compiled with GNUTLS. Parameters are the same as
+connection. This copy of WMBiff was compiled with GNUTLS. Parameters are the same as
 those for ordinary IMAP4 boxes.  Port defaults to 993. If
 143 is specified, WMBiff will attempt to connect unencrypted
 but negotiate TLS using IMAP's STARTTLS command.  TLS
@@ -259,7 +263,7 @@ mailboxes as you want.
 Authentication methods include "cram-md5", "apop" (for
 Pop3), and "plaintext".  "cram-md5" and "apop" are only
 available when wmbiff is compiled with libgcrypt.
-This copy of WMBiff was not compiled with gcrypt.
+This copy of WMBiff was compiled with gcrypt.
 Authentication methods are tried in the following order:
 cram-md5, apop, plaintext.
 

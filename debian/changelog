@@ -1,3 +1,12 @@
+wmbiff (0.4.27-1) unstable; urgency=low
+
+  * New upstream release.
+    + Catches if a directory name is given for a config file (closes: #332540)
+  * Remove xlibs-dev (transitional package) build dependency
+  * Add libxpm-dev, libx11-dev, libxext-dev build dependencies
+
+ -- Neil Spring <nspring@cs.washington.edu>  Sat,  8 Oct 2005 14:29:06 -0400
+
 wmbiff (0.4.26-1) unstable; urgency=low
 
   * New upstream release. 

@@ -1,4 +1,4 @@
-/* $Id: Pop3Client.c,v 1.22 2004/06/19 20:53:01 bluehal Exp $ */
+/* $Id: Pop3Client.c,v 1.23 2004/12/12 00:01:53 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -19,23 +19,27 @@
 #include "regulo.h"
 #include "MessageList.h"
 #include <strings.h>
+#include "tlsComm.h"
+#include "passwordMgr.h"
 
 #ifdef USE_DMALLOC
 #include <dmalloc.h>
 #endif
 
 extern int Relax;
+/* temp */
+static void ask_user_for_password( /*@notnull@ */ Pop3 pc, int bFlushCache);
 
 #define	PCU	(pc->u).pop_imap
 #define POP_DM(pc, lvl, args...) DM(pc, lvl, "pop3: " args)
 
 #ifdef HAVE_GCRYPT_H
-static FILE *authenticate_md5( /*@notnull@ */ Pop3 pc, FILE * fp,
+static struct connection_state *authenticate_md5( /*@notnull@ */ Pop3 pc, struct connection_state * scs,
 							  char *unused);
-static FILE *authenticate_apop( /*@notnull@ */ Pop3 pc, FILE * fp,
+static struct connection_state *authenticate_apop( /*@notnull@ */ Pop3 pc, struct connection_state * scs,
 							   char *apop_str);
 #endif
-static FILE *authenticate_plaintext( /*@notnull@ */ Pop3 pc, FILE * fp,
+static struct connection_state *authenticate_plaintext( /*@notnull@ */ Pop3 pc, struct connection_state * scs,
 									char *unused);
 
 void pop3_cacheHeaders( /*@notnull@ */ Pop3 pc);
@@ -48,9 +52,9 @@ extern struct connection_state *state_for_pcu(Pop3 pc);
 
 static struct authentication_method {
 	const char *name;
-	/* callback returns the filehandle if successful, 
+	/* callback returns the connection state pointer if successful, 
 	   NULL if failed */
-	FILE *(*auth_callback) (Pop3 pc, FILE * fp, char *apop_str);
+	struct connection_state  *(*auth_callback) (Pop3 pc, struct connection_state * scs, char *apop_str);
 } auth_methods[] = {
 	{
 #ifdef HAVE_GCRYPT_H
@@ -62,14 +66,16 @@ static struct authentication_method {
 };
 
 /*@null@*/
-FILE *pop3Login(Pop3 pc)
+struct connection_state *pop3Login(Pop3 pc)
 {
 	int fd;
-	FILE *fp;
 	char buf[BUF_SIZE];
 	char apop_str[BUF_SIZE];
 	char *ptr1, *ptr2;
 	struct authentication_method *a;
+	struct connection_state *scs;
+	char *connection_name;
+
 
 	apop_str[0] = '\0';			/* if defined, server supports apop */
 
@@ -79,9 +85,20 @@ FILE *pop3Login(Pop3 pc)
 		return NULL;
 	}
 
-	fp = fdopen(fd, "r+");
-	fgets(buf, BUF_SIZE, fp);
-	fflush(fp);
+	connection_name = malloc(strlen(PCU.serverName) + 20);
+	sprintf(connection_name, "%s:%d", PCU.serverName, PCU.serverPort);
+
+	if (PCU.dossl != 0) {
+		scs = initialize_gnutls(fd, connection_name, pc, PCU.serverName);
+		if (scs == NULL) {
+			POP_DM(pc, DEBUG_ERROR, "Failed to initialize TLS\n");
+			return NULL;
+		}
+	} else {
+		scs = initialize_unencrypted(fd, connection_name, pc);
+	}
+
+    tlscomm_gets(buf, BUF_SIZE, scs);
 	POP_DM(pc, DEBUG_INFO, "%s", buf);
 
 	/* Detect APOP, copy challenge into apop_str */
@@ -103,33 +120,32 @@ FILE *pop3Login(Pop3 pc)
 		/* was it specified or did the user leave it up to us? */
 		if (PCU.authList[0] == '\0' || strstr(PCU.authList, a->name))
 			/* did it work? */
-			if ((a->auth_callback(pc, fp, apop_str)) != NULL)
-				return (fp);
+			if ((a->auth_callback(pc, scs, apop_str)) != NULL)
+				return (scs);
 	}
 
 	/* if authentication worked, we won't get here */
 	POP_DM(pc, DEBUG_ERROR,
 		   "All Pop3 authentication methods failed for '%s@%s:%d'\n",
 		   PCU.userName, PCU.serverName, PCU.serverPort);
-	fprintf(fp, "QUIT\r\n");
-	fclose(fp);
+    tlscomm_printf(scs, "QUIT\r\n");
+    tlscomm_close(scs);
+
 	return NULL;
 }
 
 int pop3CheckMail( /*@notnull@ */ Pop3 pc)
 {
-	FILE *f;
+	struct connection_state *scs;
 	int read;
 	char buf[BUF_SIZE];
 
-	f = pop3Login(pc);
-	if (f == NULL)
+	scs = pop3Login(pc);
+	if (scs == NULL)
 		return -1;
 
-	fprintf(f, "STAT\r\n");
-	fflush(f);
-	fgets(buf, 256, f);
-	if (buf[0] != '+') {
+	tlscomm_printf(scs, "STAT\r\n");
+	if( ! tlscomm_expect(scs, "+", buf, BUF_SIZE) ) {
 		POP_DM(pc, DEBUG_ERROR,
 			   "Error Receiving Stats '%s@%s:%d'\n",
 			   PCU.userName, PCU.serverName, PCU.serverPort);
@@ -147,20 +163,20 @@ int pop3CheckMail( /*@notnull@ */ Pop3 pc)
 	 *  We will leave it here for those servers which haven't
 	 *  caught up with the spec.
 	 */
-	fprintf(f, "LAST\r\n");
-	fflush(f);
-	fgets(buf, 256, f);
+    tlscomm_printf(scs, "LAST\r\n");
+	tlscomm_gets(buf, BUF_SIZE, scs);
 	if (buf[0] != '+') {
 		/* it is not an error to receive this according to RFC 1725 */
 		/* no error should be returned */
 		pc->UnreadMsgs = pc->TotalMsgs;
+        // there's also a LIST command... not sure how to make use of it. */ 
 	} else {
 		sscanf(buf, "+OK %d", &read);
 		pc->UnreadMsgs = pc->TotalMsgs - read;
 	}
 
-	fprintf(f, "QUIT\r\n");
-	fclose(f);
+	tlscomm_printf(scs, "QUIT\r\n");
+	tlscomm_close(scs);
 
 	return 0;
 }
@@ -193,8 +209,8 @@ int pop3Create(Pop3 pc, const char *str)
 	   use of '@' in passwords
 	 */
 	const char *regexes[] = {
-		"pop3:([^: ]{1,32}):([^@]{0,32})@([A-Za-z1-9][-A-Za-z0-9_.]+)(:[0-9]+)?(  *([CcAaPp][-A-Za-z5 ]*))?$",
-		"pop3:([^: ]{1,32}) ([^ ]{1,32}) ([A-Za-z1-9][-A-Za-z0-9_.]+)( [0-9]+)?(  *([CcAaPp][-A-Za-z5 ]*))?$",
+		"pop3s?:([^: ]{1,32}):([^@]{0,32})@([A-Za-z1-9][-A-Za-z0-9_.]+)(:[0-9]+)?(  *([CcAaPp][-A-Za-z5 ]*))?$",
+		"pop3s?:([^: ]{1,32}) ([^ ]{1,32}) ([A-Za-z1-9][-A-Za-z0-9_.]+)( [0-9]+)?(  *([CcAaPp][-A-Za-z5 ]*))?$",
 		//      "pop3:([^: ]{1,32}) ([^ ]{1,32}) ([^: ]+)( [0-9]+)? *",
 		// "pop3:([^: ]{1,32}):([^@]{0,32})@([^: ]+)(:[0-9]+)? *",
 		NULL
@@ -215,8 +231,31 @@ int pop3Create(Pop3 pc, const char *str)
 			"pop3:([^: ]{1,32}) ([^ ]{1,32}) ([^/: ]+)( [0-9]+)?(  *(.*))?$";
 	}
 
+	if (strncmp("pop3s:", str, 6) == 0) {
+#ifdef HAVE_GNUTLS_GNUTLS_H
+		static int haveBeenWarned;
+		PCU.dossl = 1;
+		if (!haveBeenWarned) {
+			printf("wmbiff uses gnutls for TLS/SSL encryption support:\n"
+				   "  If you distribute software that uses gnutls, don't forget\n"
+				   "  to warn the users of your software that gnutls is at a\n"
+				   "  testing phase and may be totally insecure.\n"
+				   "\nConsider yourself warned.\n");
+			haveBeenWarned = 1;
+		}
+#else
+		printf("This copy of wmbiff was not compiled with gnutls;\n"
+			   "imaps is unavailable.  Exiting to protect your\n"
+			   "passwords and privacy.\n");
+		exit(EXIT_FAILURE);
+#endif
+	} else {
+		PCU.dossl = 0;
+	}
+
+
 	/* defaults */
-	PCU.serverPort = 110;
+	PCU.serverPort = (PCU.dossl != 0) ? 995 : 110;
 	PCU.authList[0] = '\0';
 
 	for (matchedchars = 0, i = 0;
@@ -235,8 +274,15 @@ int pop3Create(Pop3 pc, const char *str)
 	}
 	// grab_authList(str + matchedchars, PCU.authList);
 
+	PCU.password_len = strlen(PCU.password);
+	if (PCU.password[0] == '\0') {
+		PCU.interactive_password = 1;
+	} else {
+      // ENFROB(PCU.password);
+	}
+
 	POP_DM(pc, DEBUG_INFO, "userName= '%s'\n", PCU.userName);
-	POP_DM(pc, DEBUG_INFO, "password is %d chars long\n",
+	POP_DM(pc, DEBUG_INFO, "password is %ld chars long\n",
 		   strlen(PCU.password));
 	POP_DM(pc, DEBUG_INFO, "serverName= '%s'\n", PCU.serverName);
 	POP_DM(pc, DEBUG_INFO, "serverPort= '%d'\n", PCU.serverPort);
@@ -254,7 +300,7 @@ int pop3Create(Pop3 pc, const char *str)
 
 
 #ifdef HAVE_GCRYPT_H
-static FILE *authenticate_md5(Pop3 pc, FILE * fp, char *apop_str
+static struct connection_state *authenticate_md5(Pop3 pc, struct connection_state * scs, char *apop_str
 							  __attribute__ ((unused)))
 {
 	char buf[BUF_SIZE];
@@ -264,9 +310,8 @@ static FILE *authenticate_md5(Pop3 pc, FILE * fp, char *apop_str
 	gcry_error_t rc;
 
 	/* See if MD5 is supported */
-	fprintf(fp, "AUTH CRAM-MD5\r\n");
-	fflush(fp);
-	fgets(buf, BUF_SIZE, fp);
+	tlscomm_printf(scs, "AUTH CRAM-MD5\r\n");
+	tlscomm_gets(buf, BUF_SIZE, scs);
 	POP_DM(pc, DEBUG_INFO, "%s", buf);
 
 	if (buf[0] != '+' || buf[1] != ' ') {
@@ -299,12 +344,11 @@ static FILE *authenticate_md5(Pop3 pc, FILE * fp, char *apop_str
 	POP_DM(pc, DEBUG_INFO, "CRAM-MD5 response: %s\n", buf);
 	Encode_Base64(buf, buf2);
 
-	fprintf(fp, "%s\r\n", buf2);
-	fflush(fp);
-	fgets(buf, BUF_SIZE, fp);
+	tlscomm_printf(scs, "%s\r\n", buf2);
+	tlscomm_gets(buf, BUF_SIZE, scs);
 
 	if (!strncmp(buf, "+OK", 3))
-		return fp;				/* AUTH successful */
+		return scs;				/* AUTH successful */
 	else {
 		POP_DM(pc, DEBUG_ERROR,
 			   "CRAM-MD5 AUTH failed for user '%s@%s:%d'\n",
@@ -314,7 +358,7 @@ static FILE *authenticate_md5(Pop3 pc, FILE * fp, char *apop_str
 	}
 }
 
-static FILE *authenticate_apop(Pop3 pc, FILE * fp, char *apop_str)
+static struct connection_state *authenticate_apop(Pop3 pc, struct connection_state * scs, char *apop_str)
 {
 	gcry_md_hd_t gmh;
 	gcry_error_t rc;
@@ -341,12 +385,11 @@ static FILE *authenticate_apop(Pop3 pc, FILE * fp, char *apop_str)
 	gcry_md_close(gmh);
 
 	POP_DM(pc, DEBUG_INFO, "APOP response: %s %s\n", PCU.userName, buf);
-	fprintf(fp, "APOP %s %s\r\n", PCU.userName, buf);
-	fflush(fp);
-	fgets(buf, BUF_SIZE, fp);
+	tlscomm_printf(scs, "APOP %s %s\r\n", PCU.userName, buf);
+	tlscomm_gets(buf, BUF_SIZE, scs);
 
 	if (!strncmp(buf, "+OK", 3))
-		return fp;				/* AUTH successful */
+		return scs;				/* AUTH successful */
 	else {
 		POP_DM(pc, DEBUG_ERROR,
 			   "APOP AUTH failed for user '%s@%s:%d'\n",
@@ -358,15 +401,14 @@ static FILE *authenticate_apop(Pop3 pc, FILE * fp, char *apop_str)
 #endif							/* HAVE_GCRYPT_H */
 
 /*@null@*/
-static FILE *authenticate_plaintext( /*@notnull@ */ Pop3 pc,
-									FILE * fp, char *apop_str
+static struct connection_state *authenticate_plaintext( /*@notnull@ */ Pop3 pc,
+									struct connection_state * scs, char *apop_str
 									__attribute__ ((unused)))
 {
 	char buf[BUF_SIZE];
 
-	fprintf(fp, "USER %s\r\n", PCU.userName);
-	fflush(fp);
-	if (fgets(buf, BUF_SIZE, fp) == NULL) {
+	tlscomm_printf(scs, "USER %s\r\n", PCU.userName);
+	if (tlscomm_gets(buf, BUF_SIZE, scs) == NULL) {
 		POP_DM(pc, DEBUG_ERROR,
 			   "Error reading from server authenticating '%s@%s:%d'\n",
 			   PCU.userName, PCU.serverName, PCU.serverPort);
@@ -382,14 +424,27 @@ static FILE *authenticate_plaintext( /*@notnull@ */ Pop3 pc,
 		return NULL;
 	};
 
-	fprintf(fp, "PASS %s\r\n", PCU.password);
-	fflush(fp);
-	if (fgets(buf, BUF_SIZE, fp) == NULL) {
+
+	tlscomm_printf(scs, "PASS %s\r\n", PCU.password);
+	if (tlscomm_gets(buf, BUF_SIZE, scs) == NULL) {
 		POP_DM(pc, DEBUG_ERROR,
 			   "Error reading from server (2) authenticating '%s@%s:%d'\n",
 			   PCU.userName, PCU.serverName, PCU.serverPort);
 		return NULL;
 	}
+    if (strncmp(buf, "-ERR [AUTH] Password required", 20) == 0) {
+      if (PCU.interactive_password) {
+        PCU.password[0] = '\0';
+        ask_user_for_password(pc, 1);	/* 1=overwrite the cache */
+        tlscomm_printf(scs, "PASS %s\r\n", PCU.password);
+        if (tlscomm_gets(buf, BUF_SIZE, scs) == NULL) {
+          POP_DM(pc, DEBUG_ERROR,
+                 "Error reading from server (2) authenticating '%s@%s:%d'\n",
+                 PCU.userName, PCU.serverName, PCU.serverPort);
+          return NULL;
+        }
+      }
+    }
 	if (buf[0] != '+') {
 		POP_DM(pc, DEBUG_ERROR,
 			   "Failed password when authenticating '%s@%s:%d'\n",
@@ -399,13 +454,13 @@ static FILE *authenticate_plaintext( /*@notnull@ */ Pop3 pc,
 		return NULL;
 	};
 
-	return fp;
+	return scs;
 }
 
 void pop3_cacheHeaders( /*@notnull@ */ Pop3 pc)
 {
 	char buf[BUF_SIZE];
-	FILE *f;
+	struct connection_state *scs;
 	int i;
 
 	if (pc->headerCache != NULL) {
@@ -416,8 +471,8 @@ void pop3_cacheHeaders( /*@notnull@ */ Pop3 pc)
 
 	POP_DM(pc, DEBUG_INFO, "working headers\n");
 	/* login the server */
-	f = pop3Login(pc);
-	if (!f)
+	scs = pop3Login(pc);
+	if (scs == NULL)
 		return;
 	/* pc->UnreadMsgs = pc->TotalMsgs - read; */
 	pc->headerCache = NULL;
@@ -429,9 +484,8 @@ void pop3_cacheHeaders( /*@notnull@ */ Pop3 pc)
 		m->from[0] = '\0';
 		POP_DM(pc, DEBUG_INFO, "search: %s", buf);
 
-		fprintf(f, "TOP %i 0\r\n", i);
-		fflush(f);
-		while (fgets(buf, 256, f) && buf[0] != '.') {
+		tlscomm_printf(scs, "TOP %i 0\r\n", i);
+		while (tlscomm_gets(buf, 256, scs) && buf[0] != '.') {
 			if (!strncasecmp(buf, "From: ", 6)) {
 				/* manage the from in heads */
 				strncpy(m->from, buf + 6, FROM_LEN - 1);
@@ -452,9 +506,35 @@ void pop3_cacheHeaders( /*@notnull@ */ Pop3 pc)
 		pc->headerCache = m;
 		pc->headerCache->in_use = 0;
 	}
-	fprintf(f, "QUIT\r\n");
-	fflush(f);
-	fclose(f);
+	tlscomm_printf(scs, "QUIT\r\n");
+	tlscomm_close(scs);
 }
 
 /* vim:set ts=4: */
+static void ask_user_for_password( /*@notnull@ */ Pop3 pc, int bFlushCache)
+{
+	/* see if we already have a password, as provided in the config file, or
+	   already requested from the user. */
+	if (PCU.interactive_password) {
+		if (strlen(PCU.password) == 0) {
+			/* we need to grab the password from the user. */
+			char *password;
+			POP_DM(pc, DEBUG_INFO, "asking for password %d\n",
+					bFlushCache);
+			password =
+				passwordFor(PCU.userName, PCU.serverName, pc, bFlushCache);
+			if (password != NULL) {
+				if (strlen(password) + 1 > BUF_SMALL) {
+					DMA(DEBUG_ERROR, "Password is too long.\n");
+					memset(PCU.password, 0, BUF_SMALL - 1);
+				} else {
+					strncpy(PCU.password, password, BUF_SMALL - 1);
+					PCU.password_len = strlen(PCU.password);
+				}
+				free(password);
+				// ENFROB(PCU.password);
+			}
+		}
+	}
+}
+

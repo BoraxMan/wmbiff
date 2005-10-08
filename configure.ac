@@ -6,9 +6,9 @@ dnl and configure:
 dnl  installation prefix
 dnl  version
 
-AC_INIT(WMBiff, 0.4.26, wmbiff-devel@lists.sourceforge.net, wmbiff)
+AC_INIT(WMBiff, 0.4.27, wmbiff-devel@lists.sourceforge.net, wmbiff)
 AC_CONFIG_AUX_DIR(autoconf)
-AM_INIT_AUTOMAKE(wmbiff, 0.4.26) dnl tarded syntax for automake <= 1.5
+AM_INIT_AUTOMAKE(wmbiff, 0.4.27) dnl tarded syntax for automake <= 1.5
 AM_CONFIG_HEADER(config.h)
 dnl make sure autoheader finds version, implicitly defined above.
 AH_TEMPLATE([VERSION], [wmbiff's release version])
@@ -110,13 +110,16 @@ AC_CHECK_HEADERS(regex.h) dnl gnuregex.h
 dnl no longer needed AC_CHECK_LIB(gnuregex, re_search) dnl BSD.
 
 dnl X11 stuff.
-AC_PATH_XTRA
+AC_PATH_XTRA_CORRECTED
+if test "$no_x" = yes; then
+   AC_MSG_ERROR("Really need a working X.  Check config.log to see why configure couldn't find it")
+fi
 LIBS="$X_LIBS $LIBS"
 dnl want to get the -I flags so that later tests for include files work.
 dnl the preprocessor is used for check_headers, which doesn't use cflags.
 CPPFLAGS="$X_CFLAGS $CPPFLAGS"
 AC_CHECK_LIB(X11, XrmParseCommand)
-AC_CHECK_LIB(Xext, XextAddDisplay)
+AC_CHECK_LIB(Xext, XShapeCombineMask, , AC_MSG_ERROR(libXext not found or does not include XShape))
 AC_CHECK_LIB(Xpm, XpmCreateImageFromXpmImage)
 
 AC_CHECK_HEADERS(X11/xpm.h, [], [AC_CHECK_HEADERS(xpm.h, [], AC_MSG_ERROR([xpm.h is needed]))])

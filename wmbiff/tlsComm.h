@@ -57,3 +57,11 @@ void tlscomm_close( /*@only@ */ struct connection_state *scs);
 /* internal function exported for testing */
 int getline_from_buffer(char *readbuffer, char *linebuffer,
 						int linebuflen);
+#ifndef UNUSED
+#ifdef HAVE___ATTRIBUTE__
+#define UNUSED(x) /*@unused@*/  x __attribute__((unused))
+#else
+#define UNUSED(x) x
+#endif
+#endif
+

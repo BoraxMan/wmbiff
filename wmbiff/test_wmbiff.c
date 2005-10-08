@@ -23,6 +23,16 @@
 #include "tlsComm.h"
 #include "charutil.h"
 
+void ProcessPendingEvents(void)
+{
+	return;
+}
+
+int x_socket(void)
+{
+	return (0);
+}
+
 int debug_default = DEBUG_INFO;
 int Relax = 1;
 
@@ -349,8 +359,8 @@ int test_charutil(void)
 	return 0;
 }
 
-#include <netinet/in.h>
 #include <sys/types.h>
+#include <netinet/in.h>
 #include <sys/socket.h>
 int test_sock_connect(void)
 {
@@ -364,11 +374,11 @@ int test_sock_connect(void)
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = 0;
 	addr.sin_port = 0;
-	if (bind(s, &addr, sizeof(struct sockaddr_in)) < 0) {
+	if (bind(s, (const struct sockaddr *)&addr, sizeof(struct sockaddr_in)) < 0) {
 		perror("bind");
 		return 1;
 	}
-	getsockname(s, &addr, &addrlen);
+	getsockname(s, (struct sockaddr *)&addr, &addrlen);
 	if (listen(s, 5) < 0) {
 		perror("listen");
 		return 1;

@@ -1,11 +1,11 @@
-/* $Id: Client.h,v 1.41 2004/06/19 20:53:01 bluehal Exp $ */
+/* $Id: Client.h,v 1.42 2005/05/08 21:31:22 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
  *
  * Email Checker Pop3/Imap4/Licq/Gicu/mbox/maildir/finger
  *
- * Last Updated : $Date: 2004/06/19 20:53:01 $
+ * Last Updated : $Date: 2005/05/08 21:31:22 $
  *
  */
 
@@ -169,6 +169,25 @@ do { \
 #define FALSE (0)
 #define TRUE (!FALSE)
 #endif
+
+#ifdef __LCLINT__
+/* lclint doesn't do typeof */
+#define min(x,y) ((x > y) ? x : y)
+#define max(x,y) ((x > y) ? x : y)
+#else
+/* from linux/kernel.h */
+#define min(x,y) ({ \
+        const typeof(x) _xi = (x);       \
+        const typeof(y) _yi = (y);       \
+        (void) (&_xi == &_yi);            \
+        _xi < _yi ? _xi : _yi; })
+#define max(x,y) ({ \
+        const typeof(x) _xa = (x);       \
+        const typeof(y) _ya = (y);       \
+        (void) (&_xa == &_ya);            \
+        _xa > _ya ? _xa : _ya; })
+#endif
+
 
 /* vim:set ts=4: */
 /*
