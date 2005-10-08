@@ -1,5 +1,12 @@
 Release Notes
 ~~~~~~~~~~~~~
+Release 0.4.26 - October 10, 2004
+  * Don't crash if no certificate is sent by the remote side
+    and -skip-certificate-check has been given.
+  * Avoid duplicate error messages.
+  * Disable libgcrypt secure memory warning.
+  * security.debian.rb: better when disconnected.
+
 Release 0.4.25 - June 23, 2004
   * Fix a build error in the new gnutls certificate
     verification code on s390.
@@ -479,4 +486,4 @@ Release 0.1 - Wed, 17 Nov 1999 00:00:00 +0000
   * Initial release by Gennady Belyakov <gb@ccat.elect.ru>.
 
 
-$Id: NEWS,v 1.60 2004/06/23 21:51:40 bluehal Exp $
+$Id: NEWS,v 1.61 2005/10/08 18:13:09 bluehal Exp $
