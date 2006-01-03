@@ -3,7 +3,7 @@ Section: x11
 Priority: optional
 Maintainer: Neil Spring <nspring@cs.washington.edu>
 Uploaders: Jordi Mallach <jordi@debian.org>
-Build-Depends: debhelper (>= 4.1.0), cdbs, libgnutls11-dev | libgnutls-dev, libgcrypt11-dev, libxpm-dev, libxext-dev, libx11-dev
+Build-Depends: debhelper (>= 4.1.0), cdbs, libgnutls-dev, libgcrypt11-dev, libxpm-dev, libxext-dev, libx11-dev
 Standards-Version: 3.6.1.0
 
 Package: wmbiff
