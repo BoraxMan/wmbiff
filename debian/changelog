@@ -1,3 +1,20 @@
+wmbiff (0.4.27-2.2) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Switch to quilt v3 format.
+  * 15_no_more_LZO.diff: Stop trying to use gnutls LZO compression, which was
+    removed upstream. Closes: #638736
+  * 16_gnutls_deprecated.diff: Pull parts of
+    4e9e018b2236e00aa591f1d5d99ec59f74475480 from upstream GIT, use
+    gnutls_certificate_verify_peers2() instead of
+    gnutls_certificate_verify_peers(). Closes: #624083
+  * 10_use_pkg-config.diff/11_autoconfgenchanges.diff:
+    gnutls_certificate_verify_peers2() was added in gnutls 1.2.0, check for
+    this version in ./configure.
+  * Build against libgnutls28-dev/libgcrypt20-dev.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 09 Aug 2014 15:08:24 +0200
+
 wmbiff (0.4.27-2.1) unstable; urgency=low
 
   * Non-maintainer upload.
