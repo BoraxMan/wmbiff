@@ -1,3 +1,15 @@
+wmbiff (0.4.27-2.3) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * 20_gnutls_set_default_priority.diff: Use gnutls_set_default_priority()
+    to get GnuTLS upstream's recommended default values (SSL/TLS versions,
+    ciphers, et al.) instead of setting local defaults using the deprecated
+    gnutls_cipher_set_priority/gnutls_protocol_set_priority/... functions.
+    This fixes transmission errors to modern systems. Closes: #759259
+    (Thanks to Nye Liu for debugging the issue and finding the solution.)
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 02 Nov 2014 08:04:00 +0100
+
 wmbiff (0.4.27-2.2) unstable; urgency=medium
 
   * Non-maintainer upload.
