@@ -6,6 +6,9 @@ Uploaders: Jordi Mallach <jordi@debian.org>
 Build-Depends: debhelper (>= 9), cdbs, libgnutls28-dev,
  libgcrypt20-dev, libxpm-dev, libxext-dev, libx11-dev, pkg-config
 Standards-Version: 3.9.6
+Homepage: http://windowmaker.org/dockapps/?name=wmbiff
+Vcs-Browser: https://github.com/d-torrance/wmbiff
+Vcs-Git: https://github.com/d-torrance/wmbiff.git
 
 Package: wmbiff
 Architecture: any
