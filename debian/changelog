@@ -1,3 +1,24 @@
+wmbiff (0.4.27+20141005-1) UNRELEASED; urgency=medium
+
+  * New upstream release (git snapshot).
+  * New maintainer (Closes: #767915).
+  * debian/compat
+    - Bump to 9.
+  * debian/control
+    - Bump versioned dependency on debhelper to >=9.
+    - Bump Standards-Version to 3.9.6.
+    - Add ${misc:Depends} to Depends.
+    - Remove article from beginning of Description.
+    - Add Homepage and Vcs-* fields.
+  * debian/copyright
+    - Convert to machine-readable format version 1.0.
+  * debian/menu
+    - Update section.
+  * debian/watch
+    - Bump to version 3; update with new location (Closes: #449774).
+
+ -- Doug Torrance <dtorrance@monmouthcollege.edu>  Wed, 05 Nov 2014 16:18:56 -0600
+
 wmbiff (0.4.27-2.3) unstable; urgency=medium
 
   * Non-maintainer upload.
