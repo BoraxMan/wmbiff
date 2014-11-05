@@ -1,13 +1,7 @@
 #!/usr/bin/make -f
-#
-# CDBS-like debian/rules file for wmbiff.
-# Currently, it needs no special flags.
-#
-# Copyright (C) 2003 Jordi Mallach <jordi@debian.org>,
-# licensed under the terms of the GNU GPL.
 
-include /usr/share/cdbs/1/class/autotools.mk
-include /usr/share/cdbs/1/rules/debhelper.mk
+%:
+	dh $@ --with autoreconf
 
 get-orig-source:
 	uscan --verbose --force-download --no-symlink
