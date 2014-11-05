@@ -9,7 +9,7 @@ Standards-Version: 3.9.6
 
 Package: wmbiff
 Architecture: any
-Depends: ${shlibs:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: ssh-askpass, ruby
 Description: A dockable app that displays information about mailboxes
  WMBiff is an WindowMaker docking utility, that displays the
