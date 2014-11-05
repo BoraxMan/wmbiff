@@ -1,17 +1,88 @@
-This package was debianized by Jordi Mallach <jordi@debian.org> on
-Thu, 18 Nov 1999 02:53:59 +0100.
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: wmbiff
+Upstream-Contact: Window Maker Developers Team <wmaker-dev@lists.windowmaker.org>
+Source: http://windowmaker.org/dockapps/?name=wmbiff
 
-It was downloaded from http://sourceforge.net/projects/wmbiff.
+Files: *
+Copyright: 1999 Gennady Belyakov <gb@ccat.elect.ru>
+	   2000-2001 Yong-iL Joh <tolkien@mizi.com>
+	   2001 Jorge García <Jorge.Garcia@uv.es>.
+	   2002-2005 Neil Spring <nspring@cs.washington.edu>
+License: GPL-2+
 
-Upstream Author: Gennady Belyakov <gb@ccat.elect.ru>,
-		 Yong-iL Joh <tolkien@mizi.com>,
-		 Neil Spring <nspring@cs.washington.edu>
-		 and others.
+Files: wmbiff/Client.h wmbiff/Pop3Client.c
+Copyright: 1999 Scott Holden <scotth@thezone.net>
+License: GPL-2+
 
-Copyright:
+Files: wmbiff/gnutls-common.c
+Copyright: 2001-2003 Nikos Mavroyanopoulos
+License: GPL-2+
 
-This software is copyright (c) by Gennady Belyakov
-You are free to distribute this software under the terms of
-the GNU General Public License.
-On Debian GNU/Linux systems, the complete text of the GNU General
-Public License can be found in /usr/share/common-licenses/GPL file.
+Files: wmbiff/socket.c
+Copyright: 1998 Trent Piepho <xyzzy@u.washington.edu>
+	   1999 Trent Piepho <xyzzy@speakeasy.org>
+License: GPL-2+
+
+Files: wmgeneral/misc.c
+Copyright: 1997 Alfredo K. Kojima
+License: GPL-2+
+
+Files: wmgeneral/list.*
+Copyright: 1993, 1994 Free Software Foundation, Inc.
+License: GPL-2+ with linking exception
+
+Files: debian/*
+Copyright: 1999-2003 Jordi Mallach <jordi@debian.org>
+	   2003-2006 Neil Spring <nspring@cs.washington.edu>
+	   2014 Doug Torrance <dtorrance@monmouthcollege.edu>
+License: GPL-2+
+
+License: GPL-2+
+ This program is free software; you can redistribute it
+ and/or modify it under the terms of the GNU General Public
+ License as published by the Free Software Foundation; either
+ version 2 of the License, or (at your option) any later
+ version.
+ .
+ This program is distributed in the hope that it will be
+ useful, but WITHOUT ANY WARRANTY; without even the implied
+ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ PURPOSE.  See the GNU General Public License for more
+ details.
+ .
+ You should have received a copy of the GNU General Public
+ License along with this package; if not, write to the Free
+ Software Foundation, Inc., 51 Franklin St, Fifth Floor,
+ Boston, MA  02110-1301 USA
+ .
+ On Debian systems, the full text of the GNU General Public
+ License version 2 can be found in the file
+ `/usr/share/common-licenses/GPL-2'.
+
+License: GPL-2+ with linking exception
+ This program is free software; you can redistribute it
+ and/or modify it under the terms of the GNU General Public
+ License as published by the Free Software Foundation; either
+ version 2 of the License, or (at your option) any later
+ version.
+ .
+ This program is distributed in the hope that it will be
+ useful, but WITHOUT ANY WARRANTY; without even the implied
+ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ PURPOSE.  See the GNU General Public License for more
+ details.
+ .
+ You should have received a copy of the GNU General Public
+ License along with this package; if not, write to the Free
+ Software Foundation, Inc., 51 Franklin St, Fifth Floor,
+ Boston, MA  02110-1301 USA
+ .
+ On Debian systems, the full text of the GNU General Public
+ License version 2 can be found in the file
+ `/usr/share/common-licenses/GPL-2'.
+ .
+ As a special exception, if you link this library with files compiled with
+ GCC to produce an executable, this does not cause the resulting executable
+ to be covered by the GNU General Public License. This exception does not
+ however invalidate any other reasons why the executable file might be
+ covered by the GNU General Public License.
