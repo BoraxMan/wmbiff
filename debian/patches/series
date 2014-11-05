@@ -1,5 +1,4 @@
 10_use_pkg-config.diff
-11_autoconfgenchanges.diff
 15_no_more_LZO.diff
 16_gnutls_deprecated.diff
 20_gnutls_set_default_priority.diff
