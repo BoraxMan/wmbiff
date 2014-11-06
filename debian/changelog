@@ -10,14 +10,34 @@ wmbiff (0.4.27+20141005-1) UNRELEASED; urgency=medium
     - Add ${misc:Depends} to Depends.
     - Remove article from beginning of Description.
     - Add Homepage and Vcs-* fields.
+    - Add dh-autoreconf to Build-Depends.
+    - Remove cdbs from Build-Depends.
   * debian/copyright
     - Convert to machine-readable format version 1.0.
+  * debian/dirs
+    - Remove unnecessary file.
+  * debian/docs
+    - Remove README.licq, which no longer exists.
   * debian/menu
     - Update section.
+  * debian/patches
+    - (11_autoconfgenchanges.diff) Remove patch; no longer needed because
+      of dh_autoreconf_clean.
+    - (10_use_pkg-config.diff, 16_gnutls_deprecated.diff,
+      20_gnutls_set_default_priority.diff) Remove patches; similar patches
+      applied upstream.
+    - (15_no_more_LZO.diff) Refresh for new upstream version.
+    - (update_autotools.diff) Fix FTBFS because of configure error.
+    - (fix_manpage.diff) Fix manpage-related Lintian warnings.
+    - (fix_deprecated_gnutls_types.diff, fix_pointer_cast.diff) Fix
+      compiler warnings.
+  * debian/rules
+    - Add get-orig-source target.
+    - Update to use dh and dh_autoreconf.
   * debian/watch
     - Bump to version 3; update with new location (Closes: #449774).
 
- -- Doug Torrance <dtorrance@monmouthcollege.edu>  Wed, 05 Nov 2014 16:18:56 -0600
+ -- Doug Torrance <dtorrance@monmouthcollege.edu>  Wed, 05 Nov 2014 21:10:43 -0600
 
 wmbiff (0.4.27-2.3) unstable; urgency=medium
 
