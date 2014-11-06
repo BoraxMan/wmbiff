@@ -1,0 +1,153 @@
+Description: Fix deprecated gnutls types
+Author: Doug Torrance <dtorrance@monmouthcollege.edu>
+Last-Update: 2014-11-05
+
+--- a/wmbiff/gnutls-common.h
++++ b/wmbiff/gnutls-common.h
+@@ -25,8 +25,8 @@
+ 
+ extern const char str_unknown[];
+ 
+-int print_info( gnutls_session state, const char* hostname);
+-void print_cert_info( gnutls_session state, const char* hostname);
++int print_info( gnutls_session_t state, const char* hostname);
++void print_cert_info( gnutls_session_t state, const char* hostname);
+ void print_list(void);
+ 
+ void parse_comp( char** comp, int ncomp, int* comp_priority);
+--- a/wmbiff/tlsComm.c
++++ b/wmbiff/tlsComm.c
+@@ -58,8 +58,8 @@
+ 	int sd;
+ 	char *name;
+ #ifdef USE_GNUTLS
+-	gnutls_session tls_state;
+-	gnutls_certificate_credentials xcred;
++	gnutls_session_t tls_state;
++	gnutls_certificate_credentials_t xcred;
+ #else
+ 	/*@null@ */ void *tls_state;
+ 	/*@null@ */ void *xcred;
+@@ -364,13 +364,13 @@
+ #define CERT_SEP "-----BEGIN"
+ 
+ /* this bit is based on read_ca_file() in gnutls */
+-static int tls_compare_certificates(const gnutls_datum * peercert)
++static int tls_compare_certificates(const gnutls_datum_t * peercert)
+ {
+-	gnutls_datum cert;
++	gnutls_datum_t cert;
+ 	unsigned char *ptr;
+ 	FILE *fd1;
+ 	int ret;
+-	gnutls_datum b64_data;
++	gnutls_datum_t b64_data;
+ 	unsigned char *b64_data_data;
+ 	struct stat filestat;
+ 
+@@ -427,9 +427,9 @@
+ {
+ 	int ret;
+ 	unsigned int certstat;
+-	const gnutls_datum *cert_list;
++	const gnutls_datum_t *cert_list;
+ 	unsigned int cert_list_size = 0;
+-	gnutls_x509_crt cert;
++	gnutls_x509_crt_t cert;
+ 
+ 	if (gnutls_auth_get_type(scs->tls_state) != GNUTLS_CRD_CERTIFICATE) {
+ 		bad_certificate(scs, "Unable to get certificate from peer.\n");
+@@ -598,7 +598,7 @@
+ 		gnutls_cred_set(scs->tls_state, GNUTLS_CRD_CERTIFICATE,
+ 						scs->xcred);
+ 		gnutls_transport_set_ptr(scs->tls_state,
+-								 (gnutls_transport_ptr) sd);
++								 (gnutls_transport_ptr_t) sd);
+ 		do {
+ 			zok = gnutls_handshake(scs->tls_state);
+ 		}
+--- a/wmbiff/gnutls-common.c
++++ b/wmbiff/gnutls-common.c
+@@ -34,10 +34,10 @@
+ 
+ }
+ 
+-void print_x509_info(gnutls_session session, const char* hostname)
++void print_x509_info(gnutls_session_t session, const char* hostname)
+ {
+-	gnutls_x509_crt crt;
+-	const gnutls_datum *cert_list;
++	gnutls_x509_crt_t crt;
++	const gnutls_datum_t *cert_list;
+ 	unsigned int cert_list_size = 0;
+ 	int ret;
+ 	char digest[20];
+@@ -107,7 +107,7 @@
+ 
+ 		if (xml) {
+ #ifdef ENABLE_PKI
+-			gnutls_datum xml_data;
++			gnutls_datum_t xml_data;
+ 
+ 			ret = gnutls_x509_crt_to_xml( crt, &xml_data, 0);
+ 			if (ret < 0) {
+@@ -200,7 +200,7 @@
+ 
+ #ifdef HAVE_LIBOPENCDK
+ 
+-void print_openpgp_info(gnutls_session session, const char* hostname)
++void print_openpgp_info(gnutls_session_t session, const char* hostname)
+ {
+ 
+ 	char digest[20];
+@@ -212,7 +212,7 @@
+ 	char name[256];
+ 	size_t name_len = sizeof(name);
+ 	gnutls_openpgp_key crt;
+-	const gnutls_datum *cert_list;
++	const gnutls_datum_t *cert_list;
+ 	unsigned int cert_list_size = 0;
+ 	time_t expiret;
+ 	time_t activet;
+@@ -259,7 +259,7 @@
+ 		}
+ 
+ 		if (xml) {
+-			gnutls_datum xml_data;
++			gnutls_datum_t xml_data;
+ 
+ 			ret = gnutls_openpgp_key_to_xml( crt, &xml_data, 0);
+ 			if (ret < 0) {
+@@ -332,7 +332,7 @@
+ 
+ #endif
+ 
+-void print_cert_vrfy(gnutls_session session)
++void print_cert_vrfy(gnutls_session_t session)
+ {
+ 
+ 	unsigned int status;
+@@ -369,11 +369,11 @@
+ 	}
+ }
+ 
+-int print_info(gnutls_session session, const char* hostname)
++int print_info(gnutls_session_t session, const char* hostname)
+ {
+ 	const char *tmp;
+-	gnutls_credentials_type cred;
+-	gnutls_kx_algorithm kx;
++	gnutls_credentials_type_t cred;
++	gnutls_kx_algorithm_t kx;
+ 
+ 
+ 	/* print the key exchange's algorithm name
+@@ -454,7 +454,7 @@
+ 	return 0;
+ }
+ 
+-void print_cert_info(gnutls_session session, const char* hostname)
++void print_cert_info(gnutls_session_t session, const char* hostname)
+ {
+ 
+ 	printf("- Certificate type: ");

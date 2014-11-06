@@ -1,0 +1,34 @@
+Description: Fix cast to pointer from integer of different size warning.
+Author: Doug Torrance <dtorrance@monmouthcollege.edu>
+Last-Update: 2014-11-05
+
+--- a/wmbiff/tlsComm.c
++++ b/wmbiff/tlsComm.c
+@@ -539,7 +539,7 @@
+ 	return;
+ }
+ 
+-struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc,
++struct connection_state *initialize_gnutls(intptr_t sd, char *name, Pop3 pc,
+ 										   const char *remote_hostname)
+ {
+ 	static int gnutls_initialized;
+--- a/wmbiff/tlsComm.h
++++ b/wmbiff/tlsComm.h
+@@ -9,6 +9,7 @@
+ */
+ 
+ /* used to drill through per-mailbox debug keys */
++#include <stdint.h>
+ #include "Client.h"
+ 
+ /* opaque reference to the state associated with a
+@@ -19,7 +20,7 @@
+ /* take a socket descriptor and negotiate a TLS connection
+    over it */
+ /*@only@*/
+-struct connection_state *initialize_gnutls(int sd, /*@only@ */ char *name,
++struct connection_state *initialize_gnutls(intptr_t sd, /*@only@ */ char *name,
+ 										   Pop3 pc, const char *hostname);
+ 
+ /* take a socket descriptor and bundle it into a connection
