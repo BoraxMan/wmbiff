@@ -20,16 +20,13 @@ Description: Dockable app that displays information about mailboxes
  mail arrival (for example, play a sound file),
  [auto]fetchmail from a remote server, execute your mail
  reader with a mouse click, or list subject lines from unread
- messages. WMBiff also supports notification of incoming Licq
- messages, so you can put Licq in the background.
+ messages.
  .
  At this moment, wmbiff supports unix-style, maildir, pop3, APOP, IMAP
- and IMAPS mailboxes, as well as Licq and GnomeICU history files.
+ and IMAPS mailboxes.
  .
  It also includes scripts to perform miscellaneous tasks. At
  the moment, these include a checker for Debian security updates.
  .
  wmbiff is similar to the wmmaiload package, but features an
  LED-style appearance, IMAPS support, and other minor differences.
-
-
