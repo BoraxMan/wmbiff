@@ -27,10 +27,6 @@ Files: wmgeneral/misc.c
 Copyright: 1997 Alfredo K. Kojima
 License: GPL-2+
 
-Files: wmgeneral/list.*
-Copyright: 1993, 1994 Free Software Foundation, Inc.
-License: GPL-2+ with linking exception
-
 Files: debian/*
 Copyright: 1999-2003 Jordi Mallach <jordi@debian.org>
 	   2003-2006 Neil Spring <nspring@cs.washington.edu>
