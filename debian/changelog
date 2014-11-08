@@ -42,7 +42,7 @@ wmbiff (0.4.27-2.3) unstable; urgency=medium
     to get GnuTLS upstream's recommended default values (SSL/TLS versions,
     ciphers, et al.) instead of setting local defaults using the deprecated
     gnutls_cipher_set_priority/gnutls_protocol_set_priority/... functions.
-    This fixes transmission errors to modern systems. Closes: #759259
+    This fixes transmission errors to modern systems (Closes: #759259).
     (Thanks to Nye Liu for debugging the issue and finding the solution.)
 
  -- Andreas Metzler <ametzler@debian.org>  Sun, 02 Nov 2014 08:04:00 +0100
@@ -52,11 +52,11 @@ wmbiff (0.4.27-2.2) unstable; urgency=medium
   * Non-maintainer upload.
   * Switch to quilt v3 format.
   * 15_no_more_LZO.diff: Stop trying to use gnutls LZO compression, which was
-    removed upstream. Closes: #638736
+    removed upstream (Closes: #638736).
   * 16_gnutls_deprecated.diff: Pull parts of
     4e9e018b2236e00aa591f1d5d99ec59f74475480 from upstream GIT, use
     gnutls_certificate_verify_peers2() instead of
-    gnutls_certificate_verify_peers(). Closes: #624083
+    gnutls_certificate_verify_peers() (Closes: #624083).
   * 10_use_pkg-config.diff/11_autoconfgenchanges.diff:
     gnutls_certificate_verify_peers2() was added in gnutls 1.2.0, check for
     this version in ./configure.
@@ -67,144 +67,144 @@ wmbiff (0.4.27-2.2) unstable; urgency=medium
 wmbiff (0.4.27-2.1) unstable; urgency=low
 
   * Non-maintainer upload.
-  * Search for gnutls with pkg-config. Required for gnutls 2.8.
-    Closes: #529915
+  * Search for gnutls with pkg-config. Required for gnutls 2.8
+    (Closes: #529915).
 
  -- Andreas Metzler <ametzler@debian.org>  Sat, 21 Nov 2009 18:10:40 +0100
 
 wmbiff (0.4.27-2) unstable; urgency=low
 
-  * Use gnutls12 instead of gnutls11 (closes: #335773)
+  * Use gnutls12 instead of gnutls11 (Closes: #335773).
 
  -- Neil Spring <nspring@cs.washington.edu>  Tue,  3 Jan 2006 18:03:36 -0500
 
 wmbiff (0.4.27-1) unstable; urgency=low
 
   * New upstream release.
-    + Catches if a directory name is given for a config file (closes: #332540)
-  * Remove xlibs-dev (transitional package) build dependency
-  * Add libxpm-dev, libx11-dev, libxext-dev build dependencies
+    - Catches if a directory name is given for a config file (Closes: #332540).
+  * Remove xlibs-dev (transitional package) build dependency.
+  * Add libxpm-dev, libx11-dev, libxext-dev build dependencies.
 
  -- Neil Spring <nspring@cs.washington.edu>  Sat,  8 Oct 2005 14:29:06 -0400
 
 wmbiff (0.4.26-1) unstable; urgency=low
 
-  * New upstream release. 
-    + security.debian.rb initializes properly (closes: #256505)
+  * New upstream release.
+    - security.debian.rb initializes properly (Closes: #256505).
 
  -- Neil Spring <nspring@cs.washington.edu>  Sun, 10 Oct 2004 17:36:10 -0700
 
 wmbiff (0.4.25-3) unstable; urgency=low
 
-  * Update dependencies to libgcrypt11 and libgnutls11. (closes: #263663)
+  * Update dependencies to libgcrypt11 and libgnutls11 (Closes: #263663).
 
  -- Neil Spring <nspring@cs.washington.edu>  Wed, 28 Jul 2004 23:04:10 -0700
 
 wmbiff (0.4.25-2) unstable; urgency=low
 
-  * Fix menu entry: quote unquoted strings 
+  * Fix menu entry: quote unquoted strings.
 
  -- Neil Spring <nspring@cs.washington.edu>  Sat, 26 Jun 2004 11:31:38 -0700
 
 wmbiff (0.4.25-1) unstable; urgency=low
 
-  * New upstream release
-    + Should fix a build error on s390.
+  * New upstream release.
+    - Should fix a build error on s390.
 
  -- Neil Spring <nspring@cs.washington.edu>  Wed, 23 Jun 2004 15:02:38 -0700
 
 wmbiff (0.4.24-1) unstable; urgency=low
 
-  * New upstream release
-    + Uses newer gnutls: now depends on libgnutls10
+  * New upstream release.
+    - Uses newer gnutls: now depends on libgnutls10.
 
  -- Neil Spring <nspring@cs.washington.edu>  Tue, 22 Jun 2004 20:24:24 -0700
 
 wmbiff (0.4.23-1) unstable; urgency=low
 
-  * New upstream release
-    + Support IP addresses in IMAP paths. (closes: #242458)
+  * New upstream release.
+    - Support IP addresses in IMAP paths. (Closes: #242458).
 
  -- Neil Spring <nspring@cs.washington.edu>  Tue, 27 Apr 2004 17:32:36 -0700
 
 wmbiff (0.4.22-1) unstable; urgency=low
 
-  * New upstream release
-    + Only runs imap examine/search when msglst option requested, to 
+  * New upstream release.
+    - Only runs imap examine/search when msglst option requested, to
       address bad flag handling on read-only mailboxes.
-    + Exits if configured ssh-askpass is not found (closes: #239628)
+    - Exits if configured ssh-askpass is not found (Closes: #239628).
 
  -- Neil Spring <nspring@cs.washington.edu>  Sat, 27 Mar 2004 16:50:01 -0800
 
 wmbiff (0.4.21-1) unstable; urgency=low
 
   * New upstream release
-    + Prevent a hang with certain IMAP servers (closes: #234011)
+    - Prevent a hang with certain IMAP servers (Closes: #234011).
 
  -- Neil Spring <nspring@cs.washington.edu>  Sat, 21 Feb 2004 10:10:16 -0800
 
 wmbiff (0.4.20-1) unstable; urgency=low
 
   * New upstream release
-    + Allows different mouse-click actions when a box has new mail.
+    - Allows different mouse-click actions when a box has new mail.
   * New maintainer (thanks, Jordi).
 
  -- Neil Spring <nspring@cs.washington.edu>  Thu,  1 Jan 2004 15:53:48 -0800
 
 wmbiff (0.4.19-1) unstable; urgency=low
 
-  * New upstream release 
-    + fixes an FTBFS problem in a regression test (closes: #219787)
+  * New upstream release.
+    - Fixes an FTBFS problem in a regression test (Closes: #219787).
 
  -- Neil Spring <nspring@cs.washington.edu>  Sat,  8 Nov 2003 19:17:55 -0800
 
 wmbiff (0.4.18-1) unstable; urgency=low
 
   * New upstream release.
-    + fixes another (unreported to the BTS) infinite loop in the IMAP/TLS code.
-    + update security.debian.rb for ruby1.8 (closes: #215122) 
+    - Fixes another (unreported to the BTS) infinite loop in the IMAP/TLS code.
+    - Update security.debian.rb for ruby1.8 (Closes: #215122).
 
  -- Neil Spring <nspring@cs.washington.edu>  Sat,  8 Nov 2003 14:25:29 -0800
 
 wmbiff (0.4.17-1) unstable; urgency=low
 
   * New upstream release.
-    + fixes an (unreported to the BTS) infinite loop in the TLS code.
-  * debian/control: bump Standards-Version to 3.6.1.0.
-  * debian/copyright: add Neil to list of authors. Whoops.
-  * debian/changelog: recode to UTF-8 per new policy.
+    - Fixes an (unreported to the BTS) infinite loop in the TLS code.
+  * debian/control: Bump Standards-Version to 3.6.1.0.
+  * debian/copyright: Add Neil to list of authors. Whoops.
+  * debian/changelog: Recode to UTF-8 per new policy.
 
  -- Jordi Mallach <jordi@debian.org>  Mon,  1 Sep 2003 02:46:01 +0200
 
 wmbiff (0.4.16-1) unstable; urgency=low
 
   * New upstream release.
-  * debian/control:
-    + bump gnutls build-dependency to libgnutls7-dev.
-    + bump debhelper build-dependency to 4.1.0 and add cdbs.
-    + bump Standards-Version to 3.5.10.0 (no changes required).
-    + add Neil Spring (upstream developer) to Uploaders, as he will probably
+  * debian/control
+    - Bump gnutls build-dependency to libgnutls7-dev.
+    - Bump debhelper build-dependency to 4.1.0 and add cdbs.
+    - Bump Standards-Version to 3.5.10.0 (no changes required).
+    - Add Neil Spring (upstream developer) to Uploaders, as he will probably
       take over this package soon.
-  * debian/rules: repackage with cdbs.
+  * debian/rules: Repackage with cdbs.
 
  -- Jordi Mallach <jordi@debian.org>  Wed,  9 Jul 2003 17:27:26 +0200
 
 wmbiff (0.4.15-1) unstable; urgency=low
 
   * New upstream release.
-    + tries to detect missconfiguration, to avoid doing bad stuff with
-      passwords (closes: #182875). This can't be fixed entirely without a
+    - Tries to detect missconfiguration, to avoid doing bad stuff with
+      passwords (Closes: #182875). This can't be fixed entirely without a
       configuration file format redesign, though.
-    + fixes issues with -debug output (closes: #183529).
+    - Fixes issues with -debug output (Closes: #183529).
   * debian/control: Standards-Version: 3.5.9.0 (no changes).
-  * debian/rules: pass DEB_BUILD_GNU_TYPE and DEB_HOST_GNU_TYPE to configure.
+  * debian/rules: Pass DEB_BUILD_GNU_TYPE and DEB_HOST_GNU_TYPE to configure.
 
  -- Jordi Mallach <jordi@debian.org>  Mon, 31 Mar 2003 15:09:10 +0200
 
 wmbiff (0.4.14-1) unstable; urgency=low
 
   * New upstream release.
-    + adds a method to easily restart wmbiff, to recover stale remote
+    - Adds a method to easily restart wmbiff, to recover stale remote
       mailboxes.
 
  -- Jordi Mallach <jordi@debian.org>  Fri, 14 Feb 2003 18:03:56 +0100
@@ -218,73 +218,73 @@ wmbiff (0.4.13-1) unstable; urgency=low
 wmbiff (0.4.12-1) unstable; urgency=low
 
   * New upstream release.
-    + fixes parsing of -geometry option (closes: #175220).
+    + Fixes parsing of -geometry option (Closes: #175220).
 
  -- Jordi Mallach <jordi@debian.org>  Sat,  4 Jan 2003 16:45:56 +0100
 
 wmbiff (0.4.11-1) unstable; urgency=low
 
   * New upstream release.
-    + adds a checker for Debian security updates. See the NEWS file for more
+    - Adds a checker for Debian security updates. See the NEWS file for more
       information.
-  * debian/control:
-    + Suggests: ruby.
-    + Standards-Version: 3.5.8.0 (no changes).
+  * debian/control
+    - Suggests: ruby.
+    - Standards-Version: 3.5.8.0 (no changes).
 
  -- Jordi Mallach <jordi@debian.org>  Sun, 29 Dec 2002 13:28:44 +0100
 
 wmbiff (0.4.10-1) unstable; urgency=low
 
   * New upstream release.
-    + adds an override for the certificate check introduced in 0.4.9, so
+    - Adds an override for the certificate check introduced in 0.4.9, so
       connecting to server with wrong certificates is still possible
-      (closes: #172767).
-    + new "globalnotify" option.
-  * debian/compat: define debhelper's compatibility mode here.
-  * debian/rules: remove DH_COMPAT definition.
+      (Closes: #172767).
+    - New "globalnotify" option.
+  * debian/compat: Define debhelper's compatibility mode here.
+  * debian/rules: Remove DH_COMPAT definition.
 
  -- Jordi Mallach <jordi@debian.org>  Fri, 13 Dec 2002 17:16:14 +0100
 
 wmbiff (0.4.9-1) unstable; urgency=low
 
   * New upstream release.
-    + Adds OpenBox "slit" support, or what is the same, support for
+    - Adds OpenBox "slit" support, or what is the same, support for
       more than 5 mailboxes for capable window managers.
-  * debian/control: bump gnutls minimal version to 0.5.9 in Build-Depends.
+  * debian/control: Bump gnutls minimal version to 0.5.9 in Build-Depends.
 
  -- Jordi Mallach <jordi@debian.org>  Mon,  9 Dec 2002 02:35:06 +0100
 
 wmbiff (0.4.8-1) unstable; urgency=low
 
   * New upstream release.
-  * debian/control:
-    + Standards-Version: 3.5.7.0.
-    + change gnutls build-dep to libgnutls5-dev | libgnutls-dev.
+  * debian/control
+    - Standards-Version: 3.5.7.0.
+    - Change gnutls build-dep to libgnutls5-dev | libgnutls-dev.
 
  -- Jordi Mallach <jordi@debian.org>  Thu, 19 Sep 2002 12:05:03 +0200
 
 wmbiff (0.4.7-1) unstable; urgency=low
 
-  * New upstream release. 
+  * New upstream release.
 
  -- Jordi Mallach <jordi@debian.org>  Sun, 18 Aug 2002 23:07:23 +0200
 
 wmbiff (0.4.6-2) unstable; urgency=low
 
   * Recompile against libgnutls5.
-  * debian/control:
-    + Build-Depend on libgnutls-dev (>= 0.5.1-4).
-    + bump debhelper build-dep to (>= 4.0.0).
-  * wmbiff/{gnutls-common.{c,h},tlsComm.c,Imap4Client.c}: fix includes and
+  * debian/control
+    - Build-Depend on libgnutls-dev (>= 0.5.1-4).
+    - Bump debhelper build-dep to (>= 4.0.0).
+  * wmbiff/{gnutls-common.{c,h},tlsComm.c,Imap4Client.c}: Fix includes and
     defines for gnutls 0.5. Gross hack till 0.4.7.
-  * configure, config.h.in: fix for gnutls 0.5.
+  * configure, config.h.in: Fix for gnutls 0.5.
 
  -- Jordi Mallach <jordi@debian.org>  Thu, 15 Aug 2002 18:10:51 +0200
 
 wmbiff (0.4.6-1) unstable; urgency=low
 
   * New upstream release.
-  * debian/rules: switch to DH_COMPAT=4.
+  * debian/rules: Switch to DH_COMPAT=4.
 
  -- Jordi Mallach <jordi@debian.org>  Fri, 19 Jul 2002 22:04:37 +0200
 
@@ -297,22 +297,22 @@ wmbiff (0.4.5-1) unstable; urgency=low
 
 wmbiff (0.4.3-2) unstable; urgency=medium
 
-  * Recompiled with libgcrypt 1.1.7 (closes: #150068).
+  * Recompiled with libgcrypt 1.1.7 (Closes: #150068).
 
  -- Jordi Mallach <jordi@debian.org>  Sat, 15 Jun 2002 15:50:13 +0200
 
 wmbiff (0.4.3-1) unstable; urgency=low
 
   * New upstream release.
-    + IPv6 support! (really!)
-    + partial custom font support.
+    - IPv6 support! (really!).
+    - Partial custom font support.
 
  -- Jordi Mallach <jordi@debian.org>  Sun,  9 Jun 2002 03:32:05 +0200
 
 wmbiff (0.4.2-1) unstable; urgency=low
 
   * New upstream release.
-    + disables buggy, unfinished font feature which broke the display
+    - Disables buggy, unfinished font feature which broke the display
       quite a bit.
 
  -- Jordi Mallach <jordi@debian.org>  Sat,  1 Jun 2002 21:26:18 +0200
@@ -320,35 +320,35 @@ wmbiff (0.4.2-1) unstable; urgency=low
 wmbiff (0.4.1-1) unstable; urgency=low
 
   * New upstream release.
-    + IPv6 support!
+    - IPv6 support!
 
  -- Jordi Mallach <jordi@debian.org>  Sat,  1 Jun 2002 11:58:55 +0200
 
 wmbiff (0.4.0-2) unstable; urgency=low
 
-  * debian/control: Suggests: ssh-askpass 
+  * debian/control: Suggests: ssh-askpass.
 
  -- Jordi Mallach <jordi@debian.org>  Wed,  8 May 2002 12:47:08 +0200
 
 wmbiff (0.4.0-1) unstable; urgency=low
 
   * New upstream release.
-  * debian/rules: build changes, upstream is now using autoconf.
-  * debian/docs: added new docs AUTHORS and FAQ.
+  * debian/rules: Build changes, upstream is now using autoconf.
+  * debian/docs: Add new docs AUTHORS and FAQ.
 
  -- Jordi Mallach <jordi@debian.org>  Fri,  3 May 2002 14:06:13 +0200
 
 wmbiff (0.3.8-3) unstable; urgency=low
 
   * Apply patch from Neil Spring to change the semantics of the
-    -geometry switch, to make it standard (closes: #142958).
+    -geometry switch, to make it standard (Closes: #142958).
 
  -- Jordi Mallach <jordi@debian.org>  Tue, 16 Apr 2002 18:19:47 +0200
 
 wmbiff (0.3.8-2) unstable; urgency=low
 
   * Moving to main, now that gnutls made it into ftp-master.
-  * debian/control: changed section to x11 (as opposed to mail,
+  * debian/control: Change section to x11 (as opposed to mail,
     as wmbiff is getting more and more non-mail features).
 
  -- Jordi Mallach <jordi@debian.org>  Wed,  3 Apr 2002 19:17:06 +0200
@@ -357,19 +357,19 @@ wmbiff (0.3.8-1) unstable; urgency=low
 
   * New upstream release.
   * Not moving to ftp-master yet, waiting for gnutls/gcrypt.
-  * debian/control: added note about the new GnomeICU support.
+  * debian/control: Add note about the new GnomeICU support.
 
  -- Jordi Mallach <jordi@debian.org>  Tue, 26 Mar 2002 18:15:07 +0100
 
 wmbiff (0.3.7-3) unstable; urgency=low
 
-  * What if... I really bump Build-Deps?
+  * Bump Build-Deps?
 
  -- Jordi Mallach <jordi@debian.org>  Tue, 19 Feb 2002 15:11:19 +0100
 
 wmbiff (0.3.7-2) unstable; urgency=medium
 
-  * Really recompiled against gnutls3 (really closes: #132229).
+  * Really recompile against gnutls3 (Closes: #132229).
   * debian/control: Tighten again Build-Deps to gnutls (>> 0.3.5-3).
 
  -- Jordi Mallach <jordi@debian.org>  Sun, 17 Feb 2002 23:27:17 +0100
@@ -377,31 +377,31 @@ wmbiff (0.3.7-2) unstable; urgency=medium
 wmbiff (0.3.7-1) unstable; urgency=medium
 
   * New upstream release.
-    + IMAP now has an alternative syntax that allows "@" in
+    - IMAP now has an alternative syntax that allows "@" in
       passwords (closes: #130899).
-  * Recompiled against fixed gnutls3, *sigh* (closes: #132229).
-  * wmbiff/Makefile: correct error in install rule.
-  * debian/control: promote Build-Depends to gnutls (>> 0.3.5-1).
-  * debian/rules:
-    + tweaks to install rule for the new upstream Makefile.
-    + removed manual D_B_O nostrip support, as we're using debhelper
+  * Recompile against fixed gnutls3 (Closes: #132229).
+  * wmbiff/Makefile: Correct error in install rule.
+  * debian/control: Promote Build-Depends to gnutls (>> 0.3.5-1).
+  * debian/rules
+    - Tweaks to install rule for the new upstream Makefile.
+    - Remove manual D_B_O nostrip support, as we're using debhelper
       anyway.
 
  -- Jordi Mallach <jordi@debian.org>  Thu,  8 Feb 2002 20:06:47 +0100
 
 wmbiff (0.3.5-1) unstable; urgency=low
 
-  * New upstream release (closes: #128863, #128865).
+  * New upstream release (Closes: #128863, #128865).
   * debian/control: Build-Depend on gnutls (>= 0.3.2-3),
-    libgcrypt (>= 1.1.5-3) (closes: #128678, #129458).
-  * debian/changelog: removed emacs stuff.
+    libgcrypt (>= 1.1.5-3) (Closes: #128678, #129458).
+  * debian/changelog: Remove emacs stuff.
 
  -- Jordi Mallach <jordi@debian.org>  Fri, 18 Jan 2002 19:28:22 +0100
 
 wmbiff (0.3.4-2) unstable; urgency=low
 
-  * debian/control: typo fix: s/maiboxes/mailboxes/ (closes: #125486).
-  * debian/rules: removed dh_make cruft.
+  * debian/control: Typo fix: s/maiboxes/mailboxes/ (Closes: #125486).
+  * debian/rules: Remove dh_make cruft.
 
  -- Jordi Mallach <jordi@debian.org>  Tue, 18 Dec 2001 11:50:19 +0100
 
@@ -409,7 +409,7 @@ wmbiff (0.3.4-1) unstable; urgency=low
 
   * New upstream release.
   * This release adds authentication protocol selection for IMAP and Pop3
-    mailboxes (closes: #118691).
+    mailboxes (Closes: #118691).
 
  -- Jordi Mallach <jordi@debian.org>  Fri, 23 Nov 2001 17:14:11 +0100
 
@@ -423,25 +423,24 @@ wmbiff (0.3.2-1) unstable; urgency=low
 
   * New upstream release.
   * debian/control:
-    + moved to non-US.
-    + Build-Depend on gnutls-dev (>= 0.2.4-2) and libgcrypt-dev.
-    + Standards-Version: 3.5.6.0.
-    + adjusted description for the new mailbox types support.
-  * debian/docs: added TODO.
+    - Move to non-US.
+    - Build-Depend on gnutls-dev (>= 0.2.4-2) and libgcrypt-dev.
+    - Standards-Version: 3.5.6.0.
+    - Adjust description for the new mailbox types support.
+  * debian/docs: Add TODO.
 
  -- Jordi Mallach <jordi@debian.org>  Tue, 23 Oct 2001 20:57:17 +0200
 
 wmbiff (0.3.1-3) unstable; urgency=low
 
-  * Rebuilt with dpkg-dev 1.9.14.1.
+  * Rebuild with dpkg-dev 1.9.14.1.
 
  -- Jordi Mallach <jordi@debian.org>  Wed, 27 Jun 2001 21:00:06 +0200
 
 wmbiff (0.3.1-2) unstable; urgency=low
 
-  * Okay, really add NEWS to the docs.
-  * debian/rules: removed dh_testversion calls. Will you shut up now,
-    lintian?
+  * Add NEWS to the docs.
+  * debian/rules: Remove dh_testversion calls.
 
  -- Jordi Mallach <jordi@debian.org>  Wed, 27 Jun 2001 13:57:37 +0200
 
@@ -449,7 +448,7 @@ wmbiff (0.3.1-1) unstable; urgency=low
 
   * New upstream release.
   * debian/control: Standards-Version: 3.5.5.0.
-  * debian/docs: added NEWS.
+  * debian/docs: Add NEWS.
   * wmbiff now uses /var/mail as mail spool dir.
 
  -- Jordi Mallach <jordi@debian.org>  Tue, 26 Jun 2001 15:00:05 +0200
@@ -458,8 +457,8 @@ wmbiff (0.3.0-1) unstable; urgency=low
 
   * New upstream release.
   * This version fixes a broken behaviour of the new parsing, which had
-    lost some backwards compatibility (closes: #95849).
-  * debian/copyright: updated download location, new upstreams are using
+    lost some backwards compatibility (Closes: #95849).
+  * debian/copyright: Update download location, new upstreams are using
     SourceForge now.
 
  -- Jordi Mallach <jordi@debian.org>  Wed, 16 May 2001 12:53:30 +0200
@@ -468,24 +467,23 @@ wmbiff (0.2q1-1) unstable; urgency=low
 
   * New upstream release.
   * Patches merged upstream again.
-  * wmbiff/Makefile: *sigh*, again he forgot to bump the version number.
-  * Got two nice patches from Rob Funk <rfunk@funknet.net>:
-    + wmbiff/Imap4Client.c: fix for imap servers which quote the folder
-      name (closes: #95077)
-    + wmbiff/mboxClient.c: wmbiff only considered new mails those which
+  * wmbiff/Makefile: Upstream forgot to bump the version number.
+  * Add two nice patches from Rob Funk <rfunk@funknet.net>:
+    - wmbiff/Imap4Client.c: Fix for imap servers which quote the folder
+      name (Closes: #95077)
+    - wmbiff/mboxClient.c: wmbiff only considered new mails those which
       had a "N" as first flag, so "ON" messages wouldn't be shown as new
-      (closes: #95128)
+      (Closes: #95128)
     Thanks Rob!
   * Mark Hurley sent another patch, which fixes a little issue with empty
-    mailboxes not updating (closes: #94450).
+    mailboxes not updating (Closes: #94450).
 
  -- Jordi Mallach <jordi@debian.org>  Mon, 30 Apr 2001 13:46:03 +0200
 
 wmbiff (0.2q-2) unstable; urgency=low
 
-  * The `duh, I did it again' release.
-  * wmbiff/Client.h: yeah, we want to undefine all the debugging stuff now.
-  * wmbiff/wmbiff.c: we have 5 mailboxes, not 4 (thanks to Jorge García).
+  * wmbiff/Client.h: Undefine debugging stuff.
+  * wmbiff/wmbiff.c: We have 5 mailboxes, not 4 (thanks to Jorge García).
 
  -- Jordi Mallach <jordi@debian.org>  Wed, 11 Apr 2001 23:25:23 +0200
 
@@ -493,7 +491,7 @@ wmbiff (0.2q-1) unstable; urgency=low
 
   * New upstream release.
   * Removed new patches, applied upstream.
-  * wmbiff/Makefile: fix WMBIFF_VERSION (again).
+  * wmbiff/Makefile: Fix WMBIFF_VERSION (again).
 
  -- Jordi Mallach <jordi@debian.org>  Mon,  9 Apr 2001 15:09:20 +0200
 
@@ -501,33 +499,31 @@ wmbiff (0.2p-1) unstable; urgency=low
 
   * New upstream release.
   * All the Debian patches have been merged upstream.
-  * This release introduces maildir support, which closes: #75005.
-  * wmbiff/Makefile: added DESTDIR, EXTRAFLAGS and some INSTALL things,
+  * This release introduces maildir support (Closes: #75005).
+  * wmbiff/Makefile: Add DESTDIR, EXTRAFLAGS and some INSTALL things,
     to install manpages with proper permissions.
-  * debian/rules:
-    + update D_B_O things for the manpages installation
-    + add DESTDIR to the install rule
-    + remove dh_installman invocation
-  * debian/control: updated description for Maildir.
-  * debian/{wmbiff.1,wmbiffrc.5,manpages}: removed.
+  * debian/rules
+    - Update D_B_O things for the manpages installation
+    - Add DESTDIR to the install rule
+    - Remove dh_installman invocation
+  * debian/control: Update description for Maildir.
+  * debian/{wmbiff.1,wmbiffrc.5,manpages}: Remove.
 
  -- Jordi Mallach <jordi@debian.org>  Tue, 13 Mar 2001 18:21:38 +0100
 
 wmbiff (0.2n-2) unstable; urgency=low
 
-  * The `if you want to test, install the appropriate package' release.
-  * Fixed a major upstream bug that renders this new wmbiff unusable.
+  * Fix a major upstream bug that renders this new wmbiff unusable.
     Thanks to Guillaume Morin, Jérôme Marant and Mark Hurley for their
     help identifying the bug, and Jorge García <Jorge.Garcia@uv.es> for
     writing a patch. Basically, the new upstream broke backwards
     compatibility of wmbiffrc with Gennady's wmbiff, fixed that.
     This patch also fixes wmbiff not using $MAIL or defaulting to
-    /var/spool/mail/$USER if no ~/.wmbiffrc is found (closes: #87778).
-  * wmbiff/wmbiff.c: updated WMBIFF_VERSION to current "0.2n".
-  * wmbiff/{socket.c, wmbiff.c}: removed <sys/time.h> includes.
-  * debian/{wmbiff.1, wmbiffrc.5}: updated for IMAP4 and Licq support.
-  * debian/rules: quote around $(CFLAGS), oops. No wonder how I found this,
-    right?
+    /var/spool/mail/$USER if no ~/.wmbiffrc is found (Closes: #87778).
+  * wmbiff/wmbiff.c: Update WMBIFF_VERSION to current "0.2n".
+  * wmbiff/{socket.c, wmbiff.c}: Remove <sys/time.h> includes.
+  * debian/{wmbiff.1, wmbiffrc.5}: Update for IMAP4 and Licq support.
+  * debian/rules: Quote around $(CFLAGS).
 
  -- Jordi Mallach <jordi@debian.org>  Thu,  1 Mar 2001 22:57:51 +0100
 
@@ -538,46 +534,44 @@ wmbiff (0.2n-1) unstable; urgency=low
     unresponsive, without positive results. Mark Hurley just told me there
     was some guy releasing new versions, so I'll use Yong-iL Joh's branch
     from now on. This new version adds licq and IMAP4 support, and more.
-  * Reapplied the patches to this new version, some of them seem to be
+  * Reapply the patches to this new version, some of them seem to be
     obsolete by upstream changes... there's no changelog, so it's a bit hard
     to know.
-  * Applied the patches from OpenBSD's port.
-  * wmbiff/Makefile: changes to install rule.
-  * debian/rules:
-    + DH_COMPAT=3 and the changes needed
-    + DEB_BUILD_OPTIONS support
-    + s/`pwd`/$(CURDIR)
-  * debian/control:
-    + Standards-Version: 3.5.2.0
-    + Updated Build-Depends for X4
-    + removed Suggests: menu
-    + updated Description.
-  * debian/copyright: updated authors and URL.
-  * debian/manpages: added for dh_installman.
+  * Apply the patches from OpenBSD's port.
+  * wmbiff/Makefile: Changes to install rule.
+  * debian/rules
+    - DH_COMPAT=3 and the changes needed.
+    - DEB_BUILD_OPTIONS support.
+    - s/`pwd`/$(CURDIR).
+  * debian/control
+    - Standards-Version: 3.5.2.0.
+    - Update Build-Depends for X4.
+    - Remove Suggests: menu.
+    - Update Description.
+  * debian/copyright: Update authors and URL.
+  * debian/manpages: Add for dh_installman.
 
  -- Jordi Mallach <jordi@debian.org>  Mon, 26 Feb 2001 14:47:21 +0100
 
 wmbiff (0.2-4) unstable; urgency=low
 
-  * wmbiff/wmbiff.c:
-    + add an ifdef to get rid of that stupid, annoying
-      debug message that bloated all our .xsession-errors files. This should
-      have been fixed about 6 months ago, how lazy.
-    + apply patch from Jorge Garcia <Jorge.Garcia@uv.es>: if a mailbox has
+  * wmbiff/wmbiff.c
+    - Add an ifdef to get rid of that stupid, annoying
+      debug message that bloated all our .xsession-errors files.
+    - Apply patch from Jorge Garcia <Jorge.Garcia@uv.es>: if a mailbox has
       > 1000 messages and after a rescan less than 1000 remain, the first
-      character in the number display should be removed (closes: #63048).
+      character in the number display should be removed (Closes: #63048).
       The patch also fixes a possible segfault when too many files are open.
-  * debian/control:
-    + changed maintainer email address.
-    + added Build-Depends.
-  * debian/wmbiffrc.5: months late, wmbiffrc finally has its manpage.
-  * debian/wmbiff.1: small modifications to reflect the new wmbiffrc.5.
-  * debian/rules:
-    + install wmbiffrc.5.
-    + revert changes to wmbiff/Makefile, all the modifications are handled
+  * debian/control
+    - Change maintainer email address.
+    - Add Build-Depends.
+  * debian/wmbiffrc.5: Add manpage for wmbiffrc.
+  * debian/wmbiff.1: Small modifications to reflect the new wmbiffrc.5.
+  * debian/rules
+    - Install wmbiffrc.5.
+    - Revert changes to wmbiff/Makefile, all the modifications are handled
       here now.
-  * In advance to Overfiend's rage and destruction against /usr/X11R6, I'm
-    installing the binary and manpages in /usr, and removing the "1x" suffix
+  * Install the binary and manpages in /usr, and remove the "1x" suffix
     to the manpage. Conforms with new Policy 3.2.0.0.
   * Upload the tar.gz as well, the old one was broken.
 
@@ -585,19 +579,19 @@ wmbiff (0.2-4) unstable; urgency=low
 
 wmbiff (0.2-3) frozen unstable; urgency=low
 
-  * debian/copyright: fixed location of common-licenses.
-  * Fixed some errors on the manpage.
-  * debian/rules: moved sample.wmbiffrc to examples/.
-  * debian/control: updated to Standards-Version: 3.1.1.1.
-  * Compiled against new xlib6g 3.3.6.
+  * debian/copyright: Fix location of common-licenses.
+  * Fix some errors on the manpage.
+  * debian/rules: Move sample.wmbiffrc to examples/.
+  * debian/control: Update to Standards-Version: 3.1.1.1.
+  * Compile against new xlib6g 3.3.6.
 
  -- Jordi Mallach <jordi@sindominio.net>  Thu, 13 Jan 2000 13:28:57 +0100
 
 wmbiff (0.2-2) unstable; urgency=low
 
-  * Wrote a manpage for wmbiff. I still need to write a wmbiffrc(5)
+  * Add a manpage for wmbiff. I still need to write a wmbiffrc(5)
     manpage, in the meanwhile, sample.wmbiffrc file is a good start.
-  * Removed my second surname from the maintainer's name entry.
+  * Remove my second surname from the maintainer's name entry.
 
  -- Jordi Mallach <jordi@sindominio.net>  Sat, 18 Dec 1999 20:04:07 +0100
 
