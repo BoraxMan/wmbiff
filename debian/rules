@@ -6,6 +6,6 @@
 get-orig-source:
 	uscan --verbose --force-download --no-symlink
 	@if test -e ../wmbiff-*.download ; then \
-		rename -fv "s/wmbiff-(.+)\.download/wmbiff_\1\.orig\.tar\.gz/" \
+		rename -f -v "s/wmbiff-(.+)\.download/wmbiff_\1\.orig\.tar\.gz/" \
 			../wmbiff-*.download; \
 	fi
