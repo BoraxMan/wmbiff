@@ -1,10 +1,9 @@
 #!/usr/bin/make -f
 
+export DEB_BUILD_OPTIONS += nocheck
+
 %:
 	dh $@ --with autoreconf
-
-override_dh_auto_test:
-#skip the tests for now -- why does test_tlscomm fail with pbuilder?
 
 get-orig-source:
 	uscan --verbose --force-download --no-symlink
