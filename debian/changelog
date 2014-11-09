@@ -16,6 +16,8 @@ wmbiff (0.4.28-1) UNRELEASED; urgency=medium
     - Add Homepage and Vcs-* fields.
     - Add dh-autoreconf to Build-Depends.
     - Remove cdbs from Build-Depends.
+    - Remove Uploaders field.
+    - Remove references to Licq and GnomeICU support in Description.
   * debian/copyright
     - Convert to machine-readable format version 1.0.
   * debian/dirs
@@ -30,10 +32,11 @@ wmbiff (0.4.28-1) UNRELEASED; urgency=medium
   * debian/rules
     - Add get-orig-source target.
     - Update to use dh and dh_autoreconf.
+    - Add nocheck to DEB_BUILD_OPTIONS; otherwise dh_auto_test sometimes fails.
   * debian/watch
     - Bump to version 3; update with new location (Closes: #449774).
 
- -- Doug Torrance <dtorrance@monmouthcollege.edu>  Sat, 08 Nov 2014 16:47:19 -0600
+ -- Doug Torrance <dtorrance@monmouthcollege.edu>  Sun, 09 Nov 2014 00:37:19 -0600
 
 wmbiff (0.4.27-2.3) unstable; urgency=medium
 
