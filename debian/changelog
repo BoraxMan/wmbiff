@@ -1,4 +1,4 @@
-wmbiff (0.4.28-1) UNRELEASED; urgency=medium
+wmbiff (0.4.28-1) unstable; urgency=medium
 
   * New upstream release.
     - Fix security.debian.rb script (Closes: #525749).
@@ -36,7 +36,7 @@ wmbiff (0.4.28-1) UNRELEASED; urgency=medium
   * debian/watch
     - Bump to version 3; update with new location (Closes: #449774).
 
- -- Doug Torrance <dtorrance@monmouthcollege.edu>  Sun, 09 Nov 2014 00:37:19 -0600
+ -- Doug Torrance <dtorrance@monmouthcollege.edu>  Thu, 13 Nov 2014 16:15:11 -0600
 
 wmbiff (0.4.27-2.3) unstable; urgency=medium
 
