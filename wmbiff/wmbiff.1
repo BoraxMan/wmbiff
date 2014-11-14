@@ -1,0 +1,88 @@
+.\" Hey, Emacs!  This is an -*- nroff -*- source file.
+.\" $Id: wmbiff.1,v 1.7 2002/03/06 07:15:08 bluehal Exp $
+.\"
+.\" wmbiff.1 and wmbiffrc.5 are copyright 1999-2001 by
+.\" Jordi Mallach <jordi@debian.org>
+.\"
+.\" This is free documentation, see the latest version of the GNU
+.\" General Public License for copying conditions. There is NO warranty.
+.TH WMBIFF 1 "October 4, 2001" "wmbiff"
+
+.SH NAME
+WMBiff \- A dockable Mailbox Monitor
+
+.SH SYNOPSIS
+.B wmbiff
+[-display <display name>] [-geometry +XPOS+YPOS] [-c <filename>] [-h] [-v] [-debug]
+.br
+
+.SH DESCRIPTION
+WMbiff displays the status of up to five mailboxes. It gives information
+about new mail, if any, or total number of messages. It also has mail
+retrieval capabilies, and can be configured to do this automatically. At the
+moment, UNIX-style, maildir, POP3, APOP and IMAP4 mailboxes are supported.
+WMbiff also supports Licq history files and gnomeicu, displaying the number of new
+messages in your running session, as if they were mail.  
+
+The mailboxes are displayed in 5 different lines, each one with its own
+description of up to five chars. If no mail is present in a given mailbox,
+WMbiff will display the total number of mails in cyan. If there's new mail
+in the box, the number of new messages will be displayed in yellow. When new
+mail arrives, this number will optionally flash for a small period of time,
+and also optionally, a command can be executed on mail arrival (for example,
+opening your mail reader or playing a sound file).
+
+Pressing mouse button 1 will execute a command, defined in the user's config
+file. Mouse button 3 will execute a command to fetch mail, if defined.
+.PP
+
+.SH OPTIONS
+.TP
+.B \-h
+Show summary of options.
+.TP
+.B \-v
+Show version of program.
+.TP
+.B \-display <display name>
+Use an alternate X Display.
+.TP
+.B \-geometry <geometry>
+Initial window position.
+.TP
+.B \-c <filename>
+Use specified config file.
+.TP
+.B \-debug 
+Print verbose log of progress.
+
+.SH BUGS
+Send bug reports or suggestions to the WMBiff Development
+Mailing List <wmbiff-devel@lists.sourceforge.net>.   Consider
+attaching a transcript of your session, generated using:
+.RS
+wmbiff -debug | tee wmbiff-log
+.RE
+Be sure to remove any instances of your password.
+
+.SH FILES
+.TP
+.I ~/.wmbiffrc
+peruser wmbiff configuration file.
+
+.SH AUTHOR
+This manual page was written by Jordi Mallach <jordi@sindominio.net>,
+originally for the Debian GNU/Linux system (but may be used by others).
+.br
+WMBiff was first maintained by Gennady Belyakov. Since January 2001 it is
+maintained group of people that have added lots of new features to the
+original program. Please see the README document for a list of all the people
+involved.
+
+.SH SEE ALSO
+.PD 0
+.TP
+\fBwmbiffrc\fP(5)
+.PP
+\fI/usr/share/doc/wmbiff/examples/sample.wmbiffrc\fP
+(or equivalent for your system)

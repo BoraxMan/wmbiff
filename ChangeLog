@@ -1,13 +1,507 @@
-  *	v 0.1	17-Nov-1999
-  -	Initial release
+2002-03-26 Tuesday 16:30 UTC -- Jordi Mallach <jordi@sindominio.net>
 
-  *	v 0.1a	18-Nov-1999
-  -	Some fixes with intialization
+	* ChangeLog, NEWS, wmbiff/Makefile: Released WMBiff 0.3.8.
 
-  *	v 0.2	26-Nov-1999
-  -	POP3 support added with (auto)fetching
-  -	digits blinking on new mail arrival
-  -	resource wasting lowered
-  -	individual rescan interval for differrent mailboxes
-  -	some bugfixes
+2002-03-18 Monday 21:13 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* TODO: add failure handling in expect
+
+2002-03-18 Monday 09:47 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmgeneral/wmgeneral.h: un-shadow index
+
+2002-03-18 Monday 09:46 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmgeneral/wmgeneral.c: un-shadow a global variable
+
+2002-03-14 Thursday 08:51 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* README: correct and expand upon crypto instructions
+
+2002-03-12 Tuesday 23:53 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Client.h, Imap4Client.c, Pop3Client.c, ShellClient.c,
+	tlsComm.c: fixed misunderstanding of the use of ## in macros with
+	strings - the compiler does the concatenation, not the preprocessor
+
+2002-03-12 Tuesday 09:15 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* TODO: additional todo list items
+
+2002-03-11 Monday 00:11 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/tlsComm.c: slightly better message on expect failure
+
+2002-03-09 Saturday 08:50 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/ShellClient.c: debug messages cleanup; start handling
+	pclose errors; remove open() function pointer assignment; #include
+	fix
+
+2002-03-09 Saturday 08:03 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmgeneral/: list.h, wmgeneral.c: minor warning cleanups
+
+2002-03-08 Friday 19:26 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* README: credit Ben
+
+2002-03-07 Thursday 22:20 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/ShellClient.c: fix error return status (ben's 'lil' patch)
+
+2002-03-07 Thursday 07:04 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/ShellClient.c: appropriate credits
+
+2002-03-06 Wednesday 18:01 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/ShellClient.c: fix my sloppy mistake in shell path parsing
+
+2002-03-06 Wednesday 07:59 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/ShellClient.c: misplaced string.h
+
+2002-03-06 Wednesday 07:59 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiff.c: rename in Read_Config_File for more 'index'
+	purging
+
+2002-03-06 Wednesday 07:44 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/ShellClient.c: fix a potential file descriptor leak
+
+2002-03-06 Wednesday 07:15 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Client.h, Makefile, ShellClient.c, mboxClient.c,
+	sample.wmbiffrc, test-wmbiffrc.shell, wmbiff.1, wmbiff.c,
+	wmbiffrc.5: Draft shell command and gnomeicu support from Benoît
+	Rouits with minor modifications 1) implement gicu using the shell
+	module rather than as a separate module, 2) edit Ben's shell format
+	to have extra colons for extensibility, 3) add some extra error
+	checking in the shell method.  I also added a test wmbiffrc that
+	can be used to verify that the gicu and shell methods "work".
+
+2002-03-05 Tuesday 05:02 UTC -- Dwayne C. Litzenberger <dlitz@dlitz.net>
+
+	* wmbiff/maildirClient.c: cosmetic changes
+
+2002-03-04 Monday 06:57 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/mboxClient.c: convert a lingering fprintf to DM
+
+2002-03-02 Saturday 23:25 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Imap4Client.c, Makefile, wmbiff.c: a little -Wshadow and
+	-Wcast-qual cleanup (or, eliminate the use of 'index' as a variable
+	name)
+
+2002-03-02 Saturday 22:38 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Client.h: add preprocessor define to handle portability of
+	__attribute__ tag to non-gcc compilers (untested)
+
+2002-03-02 Saturday 06:42 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/tlsComm.c: indent run (oops)
+
+2002-03-02 Saturday 06:41 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Pop3Client.c, Imap4Client.c: minor reorganization of
+	gcrypt-needing authentication schemes
+
+2002-03-02 Saturday 06:39 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/tlsComm.c: attribute tags for warning cleanup w/o gnutls
+
+2002-03-02 Saturday 06:36 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiff.c: gcc attribute tags, minor debug message cleanup
+
+2002-03-02 Saturday 06:31 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Makefile: rearrange which compiler warnings are implied by
+	DEBUG
+
+2002-03-02 Saturday 05:58 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Client.h: use off_t instead of size_t in Licq and Maildir
+	for file sizes from stat()
+
+2002-03-02 Saturday 05:50 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/tlsComm.c: bugfix to support compilation without crypto
+
+2002-03-01 Friday 11:58 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* wmbiff/wmbiff.c: Added -debug to help text.  Removed Gennady's
+	mail address and added our devel list.
+
+2002-03-01 Friday 11:28 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* wmbiff/Makefile: Fixed install rule in Makefile.
+
+2002-03-01 Friday 08:41 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Client.h, Imap4Client.c, LicqClient.c, Makefile,
+	Pop3Client.c, maildirClient.c, mboxClient.c, tlsComm.c, tlsComm.h,
+	wmbiff.1, wmbiff.c, wmbiffrc.5: Replaced DEBUG_x preprocessor
+	defines with a -debug option and debug configuration keyword. 
+	Replaced most debugging messages with a DM (debug message) macro. 
+	Removed gnutls version 0.2.x support.  Added troubleshooting
+	section to man page.
+
+2002-02-03 Sunday 22:48 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, NEWS: Released WMBiff 0.3.7.
+
+2002-02-03 Sunday 22:43 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* wmbiff/Makefile: Bumped WMBIFF_VERSION to 0.3.7.
+
+2002-02-02 Saturday 18:04 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* NEWS, wmbiff/Client.h, wmbiff/Imap4Client.c, wmbiff/Makefile,
+	wmbiff/Pop3Client.c, wmbiff/charutil.h: Makefile fixes from Simon
+	L. Nielsen, which help building wmbiff in FreeBSD.  Fixed the
+	previous IMAP regex patch.
+
+2002-01-27 Sunday 20:20 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, maint/changelog.sed, maint/prerelease.sh: Some fixes
+	for the maint scripts.
+
+2002-01-27 Sunday 19:59 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, NEWS: Released WMBiff 0.3.6.
+
+2002-01-27 Sunday 19:56 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* wmbiff/Imap4Client.c: Indent fixes.
+
+2002-01-27 Sunday 19:52 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* wmbiff/Makefile: Bump WMBIFF_VERSION to 0.3.6.
+
+2002-01-27 Sunday 12:46 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* NEWS, README, wmbiff/Imap4Client.c, wmbiff/Makefile,
+	wmbiff/wmbiffrc.5: Alternate regex for imap/imaps which allows "@"
+	in passwords.  Fix to correctly handle the auth list in imap. 
+	Patch from David Smith <davidsmith@acm.org>.
+
+2002-01-14 Monday 01:51 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, NEWS: Released WMBiff 0.3.5.
+
+2002-01-14 Monday 01:50 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* wmbiff/Makefile: Bump WMBIFF_VERSION to 0.3.5.
+
+2002-01-12 Saturday 19:18 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Imap4Client.c: quote patch from Nick Mitchell, ref debian
+	#128863
+
+2002-01-12 Saturday 06:17 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/tlsComm.c: debugging for gnutls3
+
+2002-01-12 Saturday 05:50 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Makefile: clarify what to do with gnutls version define
+
+2002-01-12 Saturday 05:30 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Makefile, charutil.c, tlsComm.c: update for the
+	interface change in gnutls 0.3.0
+
+2001-11-23 Friday 15:57 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog: Released WMBiff 0.3.4.
+
+2001-11-23 Friday 15:55 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* NEWS, wmbiff/Makefile: Bumped version to 0.3.4, and release.
+
+2001-11-23 Friday 15:53 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, NEWS, wmbiff/sample.wmbiffrc: Doc updates for 0.3.4.
+
+2001-11-23 Friday 07:20 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* TODO: one down
+
+2001-11-16 Friday 07:11 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Imap4Client.c, Pop3Client.c, charutil.c: regexes limit
+	password and username to 32 characters
+
+2001-11-16 Friday 06:08 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmgeneral/: wmgeneral.c, wmgeneral.h: -Wwrite-strings cleanliness
+
+2001-11-16 Friday 01:13 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Client.h, Imap4Client.c, Makefile, Pop3Client.c,
+	charutil.c: rewrite of authentication code to a) allow users to
+	specify authentication type, b) fall back to other authentication
+	methods when hash-based authentication fails (because not everybody
+	uses the cleartext password file) c) fix debug messages
+
+2001-11-16 Friday 00:40 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/charutil.h: regex helpers common to pop3 and imap4 clients
+	extracted and moved here
+
+2001-11-16 Friday 00:40 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: tlsComm.c, tlsComm.h: blacklist and debugging updates
+	for gnutls 0.2.10 and DM macro
+
+2001-11-16 Friday 00:39 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiffrc.5: authentication method list, reduced
+	indentation to fit screen better
+
+2001-11-16 Friday 00:38 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiff-master-led.xpm: made pixmap const char
+
+2001-11-16 Friday 00:37 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiff.c: -Wwrite-strings cleanliness
+
+2001-11-02 Friday 08:53 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/: Imap4Client.c, wmbiff.c, wmbiffrc.5: Prefer "imaps"
+	instead of "sslimap" (sslimap is still supported, but imaps is
+	documented, and a better name).
+
+2001-11-02 Friday 08:48 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/tlsComm.c: Small debugging message to help if a connection
+	ends unexpectedly.
+
+2001-10-29 Monday 13:57 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, NEWS: Released WMBiff 0.3.3.
+
+2001-10-29 Monday 13:54 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* wmbiff/: Imap4Client.c, wmbiff.c: Indent run.
+
+2001-10-28 Sunday 23:32 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, NEWS, README, wmbiff/Makefile, wmbiff/sample.wmbiffrc:
+	Preparation for 0.3.3.	Documentation updates.
+
+2001-10-28 Sunday 22:22 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/wmbiff.c: Bugfix: initialize libgcrypt properly before
+	cram-md5 (or probably apop) authentication.
+
+2001-10-24 Wednesday 15:35 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* maint/changelog.sed: Added Neil to the sed script.
+
+2001-10-23 Tuesday 21:14 UTC -- Neil Spring <nspring@cs.washington.edu>
+
+	* wmbiff/Imap4Client.c: error check just in case sighup patch is
+	applied
+
+2001-10-23 Tuesday 18:35 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, NEWS: Released WMBiff 0.3.2.
+
+2001-10-23 Tuesday 18:33 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* wmbiff/Makefile: Bump WMBIFF_VERSION to 0.3.2.
+
+2001-10-05 Friday 16:10 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* wmbiff/Makefile: Changed order of additions to LIBS and
+	EXTRAFLAGS, removed extra WMBIFF_VERSION definition.
+
+2001-10-04 Thursday 09:50 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* NEWS, README, TODO, wmbiff/Client.h, wmbiff/Imap4Client.c,
+	wmbiff/LicqClient.c, wmbiff/Makefile, wmbiff/Pop3Client.c,
+	wmbiff/charutil.c, wmbiff/charutil.h, wmbiff/maildirClient.c,
+	wmbiff/mboxClient.c, wmbiff/socket.c, wmbiff/tlsComm.c,
+	wmbiff/tlsComm.h, wmbiff/wmbiff.1, wmbiff/wmbiff.c,
+	wmbiff/wmbiffrc.5: * Big patch from Neil Spring which adds lots of
+	crypto support to WMBiff.  * WMBiff can now speak IMAP over TLS and
+	CRAM-MD5, and APOP using libgcrypt.  * Known problems:	 - gnutls
+	is being developed still, so it may have security related bugs.   
+	- A bug in gnutls (a too-small buffer) may cause problems      in
+	the parsing of openssl certificates. This should be fixed by gnutls
+	     soon, hopefully. Added error messages if this bug is tickled.
+	If you've      got problems with IMAP SSL, please try upgrading
+	gnutls. If the problem	    persists, let us know.    - IMAP has
+	totally been rewritten, so bugs may crop up.	- Pop3 hasn't been
+	rewritten to use the TLS primitives, though it probably      could
+	be if someone wanted to.  * There's a new interface for reading and
+	writing to the socket in   tlsComm.[ch].  This makes the IMAP code
+	somewhat independent of whether   ssl is used, and provides nicer
+	primitives to help skip 'informational'   messages.  * WITH_TLS and
+	WITH_GCRYPT are on-by-default in the Makefile.	TLS   applies to
+	encryption, GCRYPT to cram-md5 and apop authentication.    Since
+	gnutls depends on libgcrypt anyway, these probably don't need to be
+	   independent.  Some compile warnings may be generated when these
+	are    disabled.  * Added code to optionally include dmalloc.h and
+	link -ldmalloc. This   doesn't do anything at the moment, but
+	shouldn't hurt. It's off-by-default.  * IMAP connections are now
+	persistent.  persistent.  This is to cut down on   the need to
+	re-negotiate an SSL connection every time you want to check   mail.
+	It tries to use just one connection per
+	(server/username/password/port	 number), which means multiple
+	mailboxes need only one connection.  * There are a handful of
+	lclint (http://lclint.cs.virginia.edu) annotations   in
+	tlsComm.[ch]. These should also not hurt anyone, and are meant to
+	keep   the signal to noise ratio of lclint high.  * The rewritten
+	IMAP code uses the GNU regex library to handle the   configuration
+	line.  I think its clearer than the cascading strtok()	 solution,
+	but the regex might not be perfect.  * Removed an unnecessary
+	"inline" keyword from charutil.h.  * Added a TODO document with the
+	bits that are missing from the picture.  * Please bow in awe at
+	NAKAYAMA Takao, Jay T. Francis and specially   Neil Spring for all
+	of this.
+
+2001-10-04 Thursday 09:21 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* wmbiff/ApopClient.c: Removed unneeded Apop support code, now
+	integrated in Neil and Jay's patch.
+
+2001-10-04 Thursday 09:00 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* maint/changelog.sed: Added my other SF account, which I intend to
+	use now.
+
+2001-10-04 Thursday 08:54 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, NEWS, README, wmbiff/Client.h, wmbiff/Makefile,
+	wmbiff/sample.wmbiffrc, wmbiff/wmbiff.1, wmbiff/wmbiff.c,
+	wmbiff/wmbiffrc.5: Backed out hoehoe's patch, preparing to apply
+	Neil's.
+
+2001-09-24 Monday 11:58 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, NEWS, README, wmbiff/ApopClient.c, wmbiff/Client.h,
+	wmbiff/Makefile, wmbiff/sample.wmbiffrc, wmbiff/wmbiff.1,
+	wmbiff/wmbiff.c, wmbiff/wmbiffrc.5: Added APOP support, patch from
+	NAKAYAMA Takao <hoehoe@wakaba.jp>.  Fixed some bits of the manpage
+	(Jordi) Bumped version to 0.3.2.
+
+2001-09-24 Monday 11:56 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* maint/prerelease.sh: Removed -t to cvs2cl invocation, to make
+	cleaner ChangeLogs.
+
+2001-06-24 Sunday 18:17 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, NEWS: Released wmbiff 0.3.1.
+
+2001-06-24 Sunday 18:08 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, README: Removed duplicate entry for Vladimir Popov in
+	README.
+
+2001-06-23 Saturday 00:09 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* wmbiff/Imap4Client.c: Imap fix from Rob Funk
+
+2001-06-23 Saturday 00:07 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, NEWS, maint/changelog.sed, maint/prerelease.sh:
+	Renamed CHANGES to ChangeLog and RELEASE-NOTES to NEWS, modified
+	release scripts accordingly. Added Mark to the sed file.
+
+2001-06-22 Friday 23:55 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* CHANGES, RELEASE-NOTES: Renamed to NEWS and ChangeLog
+
+2001-06-19 Tuesday 03:52 UTC -- Dwayne C. Litzenberger <dlitz@dlitz.net>
+
+	* CHANGES, maint/prerelease.sh: * Whoops!  Messed up CVS expansion
+	in maint/prerelease.sh.  Fixed it.  * Also changed
+	maint/prerelease.sh a bit.
+
+2001-06-19 Tuesday 03:38 UTC -- Dwayne C. Litzenberger <dlitz@dlitz.net>
+
+	* CHANGES, ChangeLog, README, RELEASE-NOTES, maint/changelog.sed,
+	maint/prerelease.sh, wmbiff/Client.h, wmbiff/Imap4Client.c,
+	wmbiff/LicqClient.c, wmbiff/Makefile, wmbiff/Pop3Client.c,
+	wmbiff/charutil.c, wmbiff/charutil.h, wmbiff/maildirClient.c,
+	wmbiff/mboxClient.c, wmbiff/sample.wmbiffrc, wmbiff/socket.c,
+	wmbiff/wmbiff.1, wmbiff/wmbiff.c, wmbiff/wmbiffrc.5: * Another big
+	patch that mucks with everything.  I probably deserve to be  
+	flamed for this practice.  Feel free... :-) * Added
+	maint/prerelease.sh script.  Run it before making any releases.  *
+	Added maint/changelog.sed.  Add your SourceForge userid here.  *
+	Moved ChangeLog to RELEASE-NOTES (see below).  * Added a new file,
+	CHANGES (created by maint/prerelease.sh) that tabulates   all the
+	CVS changes.  * Added "distclean" to wmbiff/Makefile.  * Added CVS
+	Id$ to all the files in wmbiff/ .  * I reformatted ths changelog,
+	again.	I hope this is the last time I need   to do this.  The CVS
+	logs should be used for all changes, and this file   should by
+	updated for user-visible changes only, from now on.    (Dwayne C.
+	Litzenberger)  * Updated the README to reflect that Gennady
+	Belyakov died right after releasing   wmBiff 0.2.  May your soul
+	rest in peace, Gennady.  (Dwayne C. Litzenberger)
+
+2001-06-16 Saturday 01:02 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, wmbiff/Makefile, wmbiff/sample.wmbiffrc,
+	wmbiff/wmbiff.c: An FHS fix for wmbiff.c and use $(CC) in the
+	Makefile
+
+2001-05-17 Thursday 04:22 UTC -- Dwayne C. Litzenberger <dlitz@dlitz.net>
+
+	* ChangeLog, wmbiff/Makefile, wmbiff/charutil.c: Committing Mark
+	Hurley's patch
+
+2001-05-16 Wednesday 10:48 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, README: Updated some obsolete info in README
+
+2001-05-11 Friday 15:04 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, wmbiff/Imap4Client.c, wmbiff/Makefile,
+	wmbiff/charutil.c, wmbiff/charutil.h, wmbiff/wmbiff.c: Mark's
+	wmbiffrc parsing fix, small Makefile changes and bump version to
+	0.3.0.
+
+2001-05-11 Friday 14:49 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* wmbiff/: .cvsignore, Makefile: Uncommitted stuff to deal with the
+	removal of the xmp link
+
+2001-05-04 Friday 11:01 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* ChangeLog, wmbiff/Makefile: Updated Changelog and Makefile for
+	0.2r.
+
+2001-05-01 Tuesday 16:11 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* README.licq, ChangeLog, README, wmgeneral/list.c,
+	wmgeneral/list.h, wmgeneral/misc.c, wmgeneral/misc.h,
+	wmgeneral/wmgeneral.h, wmbiff/socket.c, wmgeneral/wmgeneral.c,
+	wmbiff/Imap4Client.c, wmbiff/Makefile, wmbiff/mboxClient.c,
+	wmbiff/sample.wmbiffrc, wmbiff/wmbiff.1, wmbiff/wmbiff.c,
+	wmbiff/wmbiff-master-led.xpm, wmbiff/.cvsignore, wmbiff/Client.h,
+	wmbiff/LicqClient.c, wmbiff/Pop3Client.c, wmbiff/maildirClient.c,
+	wmbiff/wmbiffrc.5: Initial revision
+
+2001-05-01 Tuesday 16:11 UTC -- Jordi Mallach <jordi@sindominio.net>
+
+	* README.licq, ChangeLog, README, wmgeneral/list.c,
+	wmgeneral/list.h, wmgeneral/misc.c, wmgeneral/misc.h,
+	wmgeneral/wmgeneral.h, wmbiff/socket.c, wmgeneral/wmgeneral.c,
+	wmbiff/Imap4Client.c, wmbiff/Makefile, wmbiff/mboxClient.c,
+	wmbiff/sample.wmbiffrc, wmbiff/wmbiff.1, wmbiff/wmbiff.c,
+	wmbiff/wmbiff-master-led.xpm, wmbiff/.cvsignore, wmbiff/Client.h,
+	wmbiff/LicqClient.c, wmbiff/Pop3Client.c, wmbiff/maildirClient.c,
+	wmbiff/wmbiffrc.5: Initial import to SourceForge, version
+	0.2q1+Debian
 
