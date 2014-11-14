@@ -526,12 +526,15 @@ void openXwindow(int argc, const char *argv[],
 	classHint.res_class = wname;
 	XSetClassHint(display, win, &classHint);
 
+    /* Was PointerMotionMask instead of KeyPressMask, but pointer motion is irrelevant,
+       and if the user went to the trouble of giving us keypresses, the least we can do
+       is handle em... */
 	XSelectInput(display, win,
 				 ButtonPressMask | ExposureMask | ButtonReleaseMask |
-				 PointerMotionMask | StructureNotifyMask);
+				 KeyPressMask | StructureNotifyMask);
 	XSelectInput(display, iconwin,
 				 ButtonPressMask | ExposureMask | ButtonReleaseMask |
-				 PointerMotionMask | StructureNotifyMask);
+				 KeyPressMask | StructureNotifyMask);
 
 	/* wname is argv[0] */
 	if (XStringListToTextProperty(&wname, 1, &name) == 0) {

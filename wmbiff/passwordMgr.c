@@ -133,7 +133,7 @@ get_password_from_keychain(Pop3 pc, const char *username,
 										 &pwdlen, (void **) &secpwd, NULL);
 	if (rc != noErr) {
 		DM(pc, DEBUG_ERROR,
-		   "passmgr: keychain password grab failed, exiting\n");
+		   "passmgr: keychain password grab for %s at %s failed, exiting\n", username, servername);
 		DM(pc, DEBUG_ERROR, "passmgr: (perhaps you pressed 'deny')\n");
 		/* this seems like the sanest thing to do, for now */
 		exit(EXIT_FAILURE);

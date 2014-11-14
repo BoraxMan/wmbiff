@@ -29,12 +29,6 @@
 #include <dmalloc.h>
 #endif
 
-#ifdef HAVE___ATTRIBUTE__
-#define UNUSED(x) /*@unused@*/  x __attribute__((unused))
-#else
-#define UNUSED(x) x
-#endif
-
 #include "tlsComm.h"
 
 #include "Client.h"				/* debugging messages */
@@ -104,18 +98,49 @@ void tlscomm_close(struct connection_state *scs)
 	free(scs);
 }
 
+extern int x_socket(void);
+extern void ProcessPendingEvents(void);
+
 /* this avoids blocking without using non-blocking i/o */
 static int wait_for_it(int sd, int timeoutseconds)
 {
 	fd_set readfds;
 	struct timeval tv;
 	int ready_descriptors;
-	tv.tv_sec = timeoutseconds;
-	tv.tv_usec = 0;
-	FD_ZERO(&readfds);
-	FD_SET(sd, &readfds);
+    int maxfd;
+    int xfd;
+    struct timeval time_now;
+    struct timeval time_out;
+
+    gettimeofday(&time_now, NULL);
+    memcpy(&time_out, &time_now, sizeof(struct timeval));
+    time_out.tv_sec += timeoutseconds;
+
+    xfd = x_socket();
+    maxfd = max(sd, xfd);
+
 	do {
-		ready_descriptors = select(sd + 1, &readfds, NULL, NULL, &tv);
+        do {
+            ProcessPendingEvents();
+
+            gettimeofday(&time_now, NULL);
+            tv.tv_sec = max(time_out.tv_sec - time_now.tv_sec + 1, 0); /* sloppy, but bfd */
+            tv.tv_usec = 0;
+            /* select will return if we have X stuff or we have comm stuff on sd */
+            FD_ZERO(&readfds);
+            FD_SET(sd, &readfds);
+            // FD_SET(xfd, &readfds);
+            ready_descriptors = select(maxfd + 1, &readfds, NULL, NULL, &tv);
+            // DMA(DEBUG_INFO,
+            //    "select %d/%d returned %d descriptor, %d\n",
+            //    sd, timeoutseconds, ready_descriptors, FD_ISSET(sd, &readfds));
+            
+        } while(tv.tv_sec > 0 && (!FD_ISSET(sd, &readfds) || (errno == EINTR && ready_descriptors == -1)));
+
+        FD_ZERO(&readfds);
+        FD_SET(sd, &readfds);
+        tv.tv_sec = 0; tv.tv_usec = 0;
+        ready_descriptors = select(sd + 1, &readfds, NULL, NULL, &tv);
 	}
 	while (ready_descriptors == -1 && errno == EINTR);
 	if (ready_descriptors == 0) {
@@ -381,9 +406,9 @@ static int tls_compare_certificates(const gnutls_datum * peercert)
 }
 
 
-int
+static void
 tls_check_certificate(struct connection_state *scs,
-					  const char *remote_hostname)
+					  const char *remote_hostname) 
 {
 	int certstat;
 	const gnutls_datum *cert_list;
@@ -392,7 +417,7 @@ tls_check_certificate(struct connection_state *scs,
 
 	if (gnutls_auth_get_type(scs->tls_state) != GNUTLS_CRD_CERTIFICATE) {
 		bad_certificate(scs, "Unable to get certificate from peer.\n");
-		return;					/* bad_cert will exit if -skip-certificate-check was not given */
+		return;	/* bad_cert will exit if -skip-certificate-check was not given */
 	}
 	certstat = gnutls_certificate_verify_peers(scs->tls_state);
 	if (certstat == GNUTLS_E_NO_CERTIFICATE_FOUND) {
@@ -412,10 +437,19 @@ tls_check_certificate(struct connection_state *scs,
 							"server's certificate is invalid or not X.509.\n"
 							"there may be a problem with the certificate stored in your certfile\n");
 		}
+#if defined(GNUTLS_CERT_SIGNER_NOT_FOUND)
+	} else if (certstat & GNUTLS_CERT_SIGNER_NOT_FOUND) {
+		TDM(DEBUG_INFO, "server's certificate is not signed.\n");
+		TDM(DEBUG_INFO,
+			"to verify that a certificate is trusted, use the certfile option.\n");
+#endif
+
+#if defined(GNUTLS_CERT_NOT_TRUSTED)
 	} else if (certstat & GNUTLS_CERT_NOT_TRUSTED) {
 		TDM(DEBUG_INFO, "server's certificate is not trusted.\n");
 		TDM(DEBUG_INFO,
 			"to verify that a certificate is trusted, use the certfile option.\n");
+#endif
 	}
 
 	if (gnutls_x509_crt_init(&cert) < 0) {
@@ -474,7 +508,7 @@ tls_check_certificate(struct connection_state *scs,
 	gnutls_x509_crt_deinit(cert);
 
 	TDM(DEBUG_INFO, "certificate check ok.\n");
-	return (0);
+	return;
 }
 
 struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc,
