@@ -36,7 +36,7 @@ wmbiff (0.4.28-1) unstable; urgency=medium
   * debian/watch
     - Bump to version 3; update with new location (Closes: #449774).
 
- -- Doug Torrance <dtorrance@monmouthcollege.edu>  Thu, 13 Nov 2014 16:15:11 -0600
+ -- Doug Torrance <dtorrance@monmouthcollege.edu>  Thu, 13 Nov 2014 21:48:26 -0600
 
 wmbiff (0.4.27-2.3) unstable; urgency=medium
 
