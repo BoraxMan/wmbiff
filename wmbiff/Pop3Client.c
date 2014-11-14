@@ -1,4 +1,4 @@
-/* $Id: Pop3Client.c,v 1.9 2002/03/12 23:53:15 bluehal Exp $ */
+/* $Id: Pop3Client.c,v 1.22 2004/06/19 20:53:01 bluehal Exp $ */
 /* Author : Scott Holden ( scotth@thezone.net )
    Modified : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
@@ -10,22 +10,41 @@
  * Last Updated : Tue Nov 13 13:45:23 PST 2001
  *
  */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include "Client.h"
 #include "charutil.h"
+#include "regulo.h"
+#include "MessageList.h"
+#include <strings.h>
 
 #ifdef USE_DMALLOC
 #include <dmalloc.h>
 #endif
 
-#define	PCU	(pc->u).pop
+extern int Relax;
+
+#define	PCU	(pc->u).pop_imap
 #define POP_DM(pc, lvl, args...) DM(pc, lvl, "pop3: " args)
 
-#ifdef WITH_GCRYPT
-static FILE *authenticate_md5(Pop3 pc, FILE * fp, char *unused);
-static FILE *authenticate_apop(Pop3 pc, FILE * fp, char *apop_str);
+#ifdef HAVE_GCRYPT_H
+static FILE *authenticate_md5( /*@notnull@ */ Pop3 pc, FILE * fp,
+							  char *unused);
+static FILE *authenticate_apop( /*@notnull@ */ Pop3 pc, FILE * fp,
+							   char *apop_str);
 #endif
-static FILE *authenticate_plaintext(Pop3 pc, FILE * fp, char *unused);
+static FILE *authenticate_plaintext( /*@notnull@ */ Pop3 pc, FILE * fp,
+									char *unused);
+
+void pop3_cacheHeaders( /*@notnull@ */ Pop3 pc);
+
+extern void imap_releaseHeaders(Pop3 pc
+								__attribute__ ((unused)),
+								struct msglst *h);
+
+extern struct connection_state *state_for_pcu(Pop3 pc);
 
 static struct authentication_method {
 	const char *name;
@@ -34,7 +53,7 @@ static struct authentication_method {
 	FILE *(*auth_callback) (Pop3 pc, FILE * fp, char *apop_str);
 } auth_methods[] = {
 	{
-#ifdef WITH_GCRYPT
+#ifdef HAVE_GCRYPT_H
 	"cram-md5", authenticate_md5}, {
 	"apop", authenticate_apop}, {
 #endif
@@ -42,6 +61,7 @@ static struct authentication_method {
 	NULL, NULL}
 };
 
+/*@null@*/
 FILE *pop3Login(Pop3 pc)
 {
 	int fd;
@@ -77,6 +97,7 @@ FILE *pop3Login(Pop3 pc)
 		}
 	}
 
+
 	/* try each authentication method in turn. */
 	for (a = auth_methods; a->name != NULL; a++) {
 		/* was it specified or did the user leave it up to us? */
@@ -95,13 +116,13 @@ FILE *pop3Login(Pop3 pc)
 	return NULL;
 }
 
-int pop3CheckMail(Pop3 pc)
+int pop3CheckMail( /*@notnull@ */ Pop3 pc)
 {
 	FILE *f;
 	int read;
 	char buf[BUF_SIZE];
 
-	f = pc->open(pc);
+	f = pop3Login(pc);
 	if (f == NULL)
 		return -1;
 
@@ -144,6 +165,18 @@ int pop3CheckMail(Pop3 pc)
 	return 0;
 }
 
+
+struct msglst *pop_getHeaders( /*@notnull@ */ Pop3 pc)
+{
+	if (pc->headerCache == NULL)
+		pop3_cacheHeaders(pc);
+	if (pc->headerCache != NULL)
+		pc->headerCache->in_use = 1;
+	return pc->headerCache;
+}
+
+
+
 int pop3Create(Pop3 pc, const char *str)
 {
 	/* POP3 format: pop3:user:password@server[:port] */
@@ -151,7 +184,6 @@ int pop3Create(Pop3 pc, const char *str)
 	/* If 'str' line is badly formatted, wmbiff won't display the mailbox. */
 	int i;
 	int matchedchars;
-	struct re_registers regs;
 	/* ([^: ]+) user
 	   ([^@]+) or ([^ ]+) password 
 	   ([^: ]+) server 
@@ -161,63 +193,75 @@ int pop3Create(Pop3 pc, const char *str)
 	   use of '@' in passwords
 	 */
 	const char *regexes[] = {
-		"pop3:([^: ]{1,32}) ([^ ]{1,32}) ([^: ]+)( [0-9]+)? *",
-		"pop3:([^: ]{1,32}):([^@]{1,32})@([^: ]+)(:[0-9]+)? *",
+		"pop3:([^: ]{1,32}):([^@]{0,32})@([A-Za-z1-9][-A-Za-z0-9_.]+)(:[0-9]+)?(  *([CcAaPp][-A-Za-z5 ]*))?$",
+		"pop3:([^: ]{1,32}) ([^ ]{1,32}) ([A-Za-z1-9][-A-Za-z0-9_.]+)( [0-9]+)?(  *([CcAaPp][-A-Za-z5 ]*))?$",
+		//      "pop3:([^: ]{1,32}) ([^ ]{1,32}) ([^: ]+)( [0-9]+)? *",
+		// "pop3:([^: ]{1,32}):([^@]{0,32})@([^: ]+)(:[0-9]+)? *",
 		NULL
 	};
+	struct regulo regulos[] = {
+		{1, PCU.userName, regulo_strcpy},
+		{2, PCU.password, regulo_strcpy},
+		{3, PCU.serverName, regulo_strcpy},
+		{4, &PCU.serverPort, regulo_atoi},
+		{6, PCU.authList, regulo_strcpy_tolower},
+		{0, NULL, NULL}
+	};
+
+	if (Relax) {
+		regexes[0] =
+			"pop3:([^: ]{1,32}):([^@]{0,32})@([^/: ]+)(:[0-9]+)?(  *(.*))?$";
+		regexes[1] =
+			"pop3:([^: ]{1,32}) ([^ ]{1,32}) ([^/: ]+)( [0-9]+)?(  *(.*))?$";
+	}
+
+	/* defaults */
+	PCU.serverPort = 110;
+	PCU.authList[0] = '\0';
 
 	for (matchedchars = 0, i = 0;
 		 regexes[i] != NULL && matchedchars <= 0; i++) {
-		matchedchars = compile_and_match_regex(regexes[i], str, &regs);
+		matchedchars = regulo_match(regexes[i], str, regulos);
 	}
 
 	/* failed to match either regex */
 	if (matchedchars <= 0) {
 		pc->label[0] = '\0';
-		POP_DM(pc, DEBUG_ERROR, "Couldn't parse line %s (%d)\n", str,
-			   matchedchars);
+		POP_DM(pc, DEBUG_ERROR, "Couldn't parse line %s (%d)\n"
+			   "  If this used to work, run wmbiff with the -relax option, and\n "
+			   "  send mail to wmbiff-devel@lists.sourceforge.net with the hostname\n"
+			   "  of your mail server.\n", str, matchedchars);
 		return -1;
 	}
-
-	/* copy matches where they belong */
-	copy_substring(PCU.userName, regs.start[1], regs.end[1], str);
-	copy_substring(PCU.password, regs.start[2], regs.end[2], str);
-	copy_substring(PCU.serverName, regs.start[3], regs.end[3], str);
-	if (regs.start[4] != -1)
-		PCU.serverPort = atoi(str + regs.start[4] + 1);
-	else
-		PCU.serverPort = 110;
-
-	grab_authList(str + regs.end[0], PCU.authList);
+	// grab_authList(str + matchedchars, PCU.authList);
 
 	POP_DM(pc, DEBUG_INFO, "userName= '%s'\n", PCU.userName);
-	POP_DM(pc, DEBUG_INFO, "password= is %d characters long\n",
-		   strlen(PCU.password));
 	POP_DM(pc, DEBUG_INFO, "password is %d chars long\n",
 		   strlen(PCU.password));
 	POP_DM(pc, DEBUG_INFO, "serverName= '%s'\n", PCU.serverName);
 	POP_DM(pc, DEBUG_INFO, "serverPort= '%d'\n", PCU.serverPort);
 	POP_DM(pc, DEBUG_INFO, "authList= '%s'\n", PCU.authList);
 
-	pc->open = pop3Login;
 	pc->checkMail = pop3CheckMail;
+	pc->getHeaders = pop_getHeaders;
 	pc->TotalMsgs = 0;
 	pc->UnreadMsgs = 0;
 	pc->OldMsgs = -1;
 	pc->OldUnreadMsgs = -1;
+
 	return 0;
 }
 
 
-#ifdef WITH_GCRYPT
-static FILE *authenticate_md5(Pop3 pc,
-							  FILE * fp,
-							  char *apop_str __attribute__ ((unused)))
+#ifdef HAVE_GCRYPT_H
+static FILE *authenticate_md5(Pop3 pc, FILE * fp, char *apop_str
+							  __attribute__ ((unused)))
 {
 	char buf[BUF_SIZE];
 	char buf2[BUF_SIZE];
 	unsigned char *md5;
-	GCRY_MD_HD gmh;
+	gcry_md_hd_t gmh;
+	gcry_error_t rc;
 
 	/* See if MD5 is supported */
 	fprintf(fp, "AUTH CRAM-MD5\r\n");
@@ -237,7 +281,11 @@ static FILE *authenticate_md5(Pop3 pc,
 	strcat(buf, " ");
 
 
-	gmh = gcry_md_open(GCRY_MD_MD5, GCRY_MD_FLAG_HMAC);
+	rc = gcry_md_open(&gmh, GCRY_MD_MD5, GCRY_MD_FLAG_HMAC);
+	if (rc != 0) {
+		POP_DM(pc, DEBUG_ERROR, "unable to initialize gcrypt md5.\n");
+		return NULL;
+	}
 	gcry_md_setkey(gmh, PCU.password, strlen(PCU.password));
 	gcry_md_write(gmh, (unsigned char *) buf2, strlen(buf2));
 	gcry_md_final(gmh);
@@ -268,9 +316,11 @@ static FILE *authenticate_md5(Pop3 pc,
 
 static FILE *authenticate_apop(Pop3 pc, FILE * fp, char *apop_str)
 {
-	GCRY_MD_HD gmh;
+	gcry_md_hd_t gmh;
+	gcry_error_t rc;
 	char buf[BUF_SIZE];
 	unsigned char *md5;
+
 
 	if (apop_str[0] == '\0') {
 		/* server doesn't support apop. */
@@ -279,7 +329,11 @@ static FILE *authenticate_apop(Pop3 pc, FILE * fp, char *apop_str)
 	POP_DM(pc, DEBUG_INFO, "APOP challenge: %s\n", apop_str);
 	strcat(apop_str, PCU.password);
 
-	gmh = gcry_md_open(GCRY_MD_MD5, 0);
+	rc = gcry_md_open(&gmh, GCRY_MD_MD5, 0);
+	if (rc != 0) {
+		POP_DM(pc, DEBUG_ERROR, "unable to initialize gcrypt md5.\n");
+		return NULL;
+	}
 	gcry_md_write(gmh, (unsigned char *) apop_str, strlen(apop_str));
 	gcry_md_final(gmh);
 	md5 = gcry_md_read(gmh, 0);
@@ -301,9 +355,11 @@ static FILE *authenticate_apop(Pop3 pc, FILE * fp, char *apop_str)
 		return NULL;
 	}
 }
-#endif							/* WITH_GCRYPT */
+#endif							/* HAVE_GCRYPT_H */
 
-static FILE *authenticate_plaintext(Pop3 pc, FILE * fp, char *apop_str
+/*@null@*/
+static FILE *authenticate_plaintext( /*@notnull@ */ Pop3 pc,
+									FILE * fp, char *apop_str
 									__attribute__ ((unused)))
 {
 	char buf[BUF_SIZE];
@@ -344,6 +400,61 @@ static FILE *authenticate_plaintext(Pop3 pc, FILE * fp, char *apop_str
 	};
 
 	return fp;
+}
+
+void pop3_cacheHeaders( /*@notnull@ */ Pop3 pc)
+{
+	char buf[BUF_SIZE];
+	FILE *f;
+	int i;
+
+	if (pc->headerCache != NULL) {
+		/* decrement the reference count, and free our version */
+		imap_releaseHeaders(pc, pc->headerCache);
+		pc->headerCache = NULL;
+	}
+
+	POP_DM(pc, DEBUG_INFO, "working headers\n");
+	/* login the server */
+	f = pop3Login(pc);
+	if (!f)
+		return;
+	/* pc->UnreadMsgs = pc->TotalMsgs - read; */
+	pc->headerCache = NULL;
+	for (i = pc->TotalMsgs - pc->UnreadMsgs + 1; i <= pc->TotalMsgs; ++i) {
+		struct msglst *m;
+		m = malloc(sizeof(struct msglst));
+
+		m->subj[0] = '\0';
+		m->from[0] = '\0';
+		POP_DM(pc, DEBUG_INFO, "search: %s", buf);
+
+		fprintf(f, "TOP %i 0\r\n", i);
+		fflush(f);
+		while (fgets(buf, 256, f) && buf[0] != '.') {
+			if (!strncasecmp(buf, "From: ", 6)) {
+				/* manage the from in heads */
+				strncpy(m->from, buf + 6, FROM_LEN - 1);
+				m->from[FROM_LEN - 1] = '\0';
+			} else if (!strncasecmp(buf, "Subject: ", 9)) {
+				/* manage subject */
+				strncpy(m->subj, buf + 9, SUBJ_LEN - 1);
+				m->subj[SUBJ_LEN - 1] = '\0';
+			}
+			if (!m->subj[0]) {
+				strncpy(m->subj, "[NO SUBJECT]", 14);
+			}
+			if (!m->from[0]) {
+				strncpy(m->from, "[ANONYMOUS]", 14);
+			}
+		}
+		m->next = pc->headerCache;
+		pc->headerCache = m;
+		pc->headerCache->in_use = 0;
+	}
+	fprintf(f, "QUIT\r\n");
+	fflush(f);
+	fclose(f);
 }
 
 /* vim:set ts=4: */

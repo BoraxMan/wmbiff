@@ -1,19 +1,25 @@
-/* $Id: maildirClient.c,v 1.5 2002/03/05 05:02:44 dwonis Exp $ */
+/* $Id: maildirClient.c,v 1.15 2004/03/28 00:28:58 bluehal Exp $ */
 /* Author : Yong-iL Joh ( tolkien@mizi.com )
    Modified : Jorge García ( Jorge.Garcia@uv.es )
    Modified : Dwayne C. Litzenberger ( dlitz@dlitz.net )
  * 
  * Maildir checker.
  *
- * Last Updated : $Date: 2002/03/05 05:02:44 $
+ * Last Updated : $Date: 2004/03/28 00:28:58 $
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "Client.h"
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <dirent.h>
 #include <errno.h>
 #include <utime.h>
+#include <unistd.h>
 #ifdef USE_DMALLOC
 #include <dmalloc.h>
 #endif
@@ -49,7 +55,7 @@ int maildirCheckHistory(Pop3 pc)
 	struct stat st_new;
 	struct stat st_cur;
 	struct utimbuf ut;
-	char path_new[256], path_cur[256];
+	char path_new[BUF_BIG * 2], path_cur[BUF_BIG * 2];
 
 	int count_new = 0, count_cur = 0;
 
@@ -59,6 +65,22 @@ int maildirCheckHistory(Pop3 pc)
 	strcat(path_new, "/new/");
 	strcpy(path_cur, pc->path);
 	strcat(path_cur, "/cur/");
+
+	if (pc->u.maildir.dircache_flush) {
+		/* hack to clear directory cache for network-mounted maildirs */
+		int fd;
+		char path_newtmp[BUF_BIG * 2 + 32];
+		strcpy(path_newtmp, path_new);
+		strcat(path_newtmp, ".wmbiff.dircache_flush.XXXXXX");
+		if ((fd = mkstemp(path_newtmp)) >= 0) {
+			close(fd);
+			unlink(path_newtmp);
+		} else {
+			DM(pc, DEBUG_ERROR,
+			   "Can't create dircache flush file '%s': %s\n",
+			   path_newtmp, strerror(errno));
+		}
+	}
 
 	/* maildir */
 	if (stat(path_new, &st_new)) {
@@ -83,10 +105,10 @@ int maildirCheckHistory(Pop3 pc)
 		   " SIZE(new): old %lu, new %lu\n"
 		   " TIME(cur): old %lu, new %lu"
 		   " SIZE(cur): old %lu, new %lu\n",
-		   PCM.mtime_new, st_new.st_mtime,
-		   (unsigned long) PCM.size_new, st_new.st_size,
-		   PCM.mtime_cur, st_cur.st_mtime,
-		   (unsigned long) PCM.size_cur, st_cur.st_size);
+		   PCM.mtime_new, (unsigned long) st_new.st_mtime,
+		   (unsigned long) PCM.size_new, (unsigned long) st_new.st_size,
+		   PCM.mtime_cur, (unsigned long) st_cur.st_mtime,
+		   (unsigned long) PCM.size_cur, (unsigned long) st_cur.st_size);
 
 		count_new = count_msgs(path_new);
 		count_cur = count_msgs(path_cur);
@@ -115,8 +137,10 @@ int maildirCheckHistory(Pop3 pc)
 	return 0;
 }
 
-int maildirCreate(Pop3 pc, char *str)
+int maildirCreate(Pop3 pc, const char *str)
 {
+	int i;
+	char c;
 	/* Maildir format: maildir:fullpathname */
 
 	pc->TotalMsgs = 0;
@@ -124,7 +148,28 @@ int maildirCreate(Pop3 pc, char *str)
 	pc->OldMsgs = -1;
 	pc->OldUnreadMsgs = -1;
 	pc->checkMail = maildirCheckHistory;
-	strcpy(pc->path, str + 8);	/* cut off ``maildir:'' */
+	pc->u.maildir.dircache_flush = 0;
+
+	/* special flags */
+	if (*(str + 8) == ':') {	/* path is of the format maildir::flags:path */
+		c = ' ';
+		for (i = 1; c != ':' && c != '\0'; i++) {
+			c = *(str + 8 + i);
+			switch (c) {
+			case 'F':
+				pc->u.maildir.dircache_flush = 1;
+				DM(pc, DEBUG_INFO, "maildir: dircache_flush enabled\n");
+			}
+		}
+	} else {
+		i = 0;
+	}
+	if (strlen(str + 8 + i) + 1 > BUF_BIG) {
+		DM(pc, DEBUG_ERROR, "maildir '%s' is too long.\n", str + 8 + i);
+		memset(pc->path, 0, BUF_BIG);
+	} else {
+		strncpy(pc->path, str + 8 + i, BUF_BIG - 1);	/* cut off ``maildir:'' */
+	}
 
 	DM(pc, DEBUG_INFO, "maildir: str = '%s'\n", str);
 	DM(pc, DEBUG_INFO, "maildir: path= '%s'\n", pc->path);
@@ -133,3 +178,10 @@ int maildirCreate(Pop3 pc, char *str)
 }
 
 /* vim:set ts=4: */
+/*
+ * Local Variables:
+ * tab-width: 4
+ * c-indent-level: 4
+ * c-basic-offset: 4
+ * End:
+ */

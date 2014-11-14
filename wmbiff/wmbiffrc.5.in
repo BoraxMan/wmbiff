@@ -1,7 +1,7 @@
 .\" Hey, Emacs!  This is an -*- nroff -*- source file.
 .\" $Id: wmbiffrc.5.in,v 1.17 2004/03/12 21:35:25 bluehal Exp $
 .\"
-.\" wmbiff/wmbiffrc.5.  Generated from wmbiffrc.5.in by configure.
+.\" @configure_input@
 .\"
 .\" wmbiff.1 and wmbiffrc.5 are copyright 1999-2002 by 
 .\" Jordi Mallach <jordi@debian.org>
@@ -49,11 +49,11 @@ is the default.
 .TP 
 \fBaskpass\fP
 Program run to ask for IMAP passwords, if left empty in the configuration file.
-The default is /usr/bin/ssh-askpass.  Can be specified on a per-mailbox basis.
+The default is @DEFAULT_ASKPASS@.  Can be specified on a per-mailbox basis.
 .TP 
 \fBskinfile\fP
 XPM pixmap file to load for the background.  If not a full
-path, wmbiff will search /usr/local/share/wmbiff/skins, /usr/share/wmbiff,
+path, wmbiff will search @SKINDIR@, /usr/share/wmbiff,
 /usr/local/share/wmbiff, and the current directory for the
 pixmap file.
 .TP
@@ -142,7 +142,7 @@ imap:user:passwd@server[/"mail box"][:port] [auth]
 .TP
 .I imaps
 These are IMAP4 boxes wrapped in a TLS (SSL)
-connection. This copy of WMBiff was not compiled with GNUTLS. Parameters are the same as
+connection. @GNUTLS_MAN_STATUS@ Parameters are the same as
 those for ordinary IMAP4 boxes.  Port defaults to 993. If
 143 is specified, WMBiff will attempt to connect unencrypted
 but negotiate TLS using IMAP's STARTTLS command.  TLS
@@ -259,7 +259,7 @@ mailboxes as you want.
 Authentication methods include "cram-md5", "apop" (for
 Pop3), and "plaintext".  "cram-md5" and "apop" are only
 available when wmbiff is compiled with libgcrypt.
-This copy of WMBiff was not compiled with gcrypt.
+@GCRYPT_MAN_STATUS@
 Authentication methods are tried in the following order:
 cram-md5, apop, plaintext.
 

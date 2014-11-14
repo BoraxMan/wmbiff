@@ -5,5 +5,5 @@
 
 extern void parse_command(char *, char ***, int *);
 
-extern pid_t execCommand(char *);
-#endif /* __MISC_H */
+extern pid_t execCommand(const char *);
+#endif							/* __MISC_H */

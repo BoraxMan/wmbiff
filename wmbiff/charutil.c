@@ -1,29 +1,38 @@
-/* $Id: charutil.c,v 1.7 2002/01/12 05:30:09 bluehal Exp $ */
+/* $Id: charutil.c,v 1.19 2004/04/28 00:19:03 bluehal Exp $ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <sys/types.h>
+#include <regex.h>
 #ifdef USE_DMALLOC
 #include <dmalloc.h>
 #endif
 #include "charutil.h"
 
-static __inline__ int LeftTrim(char *psValue)
+static __inline__ void LeftTrim(char *psValue)
 {
-
 	char *psTmp = psValue;
 
 	while (*psTmp == ' ' || *psTmp == '\t')
 		psTmp++;
 
-	strcpy(psValue, psTmp);
-
-	return EXIT_SUCCESS;
+	/* can't use strcpy here, as the strings must not
+	   overlap, at least according to spec. */
+	if (psTmp > psValue) {
+		while (*psTmp != '\0') {
+			*(psValue++) = *(psTmp++);
+		}
+		*(psValue) = '\0';
+	}
 }
 
-static __inline__ int RightTrim(char *psValue)
+static __inline__ void RightTrim(char *psValue)
 {
-
 	long lLength = strlen(psValue) - 1;
 
 	while ((psValue[lLength] == ' ' || psValue[lLength] == '\t')
@@ -32,17 +41,12 @@ static __inline__ int RightTrim(char *psValue)
 	}
 
 	psValue[++lLength] = '\000';
-	return EXIT_SUCCESS;
 }
 
-int FullTrim(char *psValue)
+void FullTrim(char *psValue)
 {
-
-	if (LeftTrim(psValue) != 0)
-		return EXIT_FAILURE;
-	if (RightTrim(psValue) != 0)
-		return EXIT_FAILURE;
-	return EXIT_SUCCESS;
+	RightTrim(psValue);
+	LeftTrim(psValue);
 }
 
 void Bin2Hex(unsigned char *src, int length, char *dst)
@@ -153,8 +157,9 @@ void Decode_Base64(char *src, char *dst)
 }
 
 /* helper function for the configuration line parser */
-void copy_substring(char *destination,
-					int startidx, int endidx, const char *source)
+void
+copy_substring(char *destination,
+			   int startidx, int endidx, const char *source)
 {
 	if (startidx > -1) {
 		strncpy(destination, source + startidx, endidx - startidx);
@@ -180,7 +185,7 @@ void grab_authList(const char *source, char *destination)
 	}
 }
 
-
+#ifdef USE_GNU_REGEX
 int compile_and_match_regex(const char *regex, const char *str,	/*@out@ */
 							struct re_registers *regs)
 {
@@ -191,7 +196,6 @@ int compile_and_match_regex(const char *regex, const char *str,	/*@out@ */
 
 	/* compile the regex pattern */
 	memset(&rpbuf, 0, sizeof(struct re_pattern_buffer));
-
 	/* posix egrep interprets intervals (eg. {1,32}) nicely */
 	re_syntax_options = RE_SYNTAX_POSIX_EGREP;
 	errstr = re_compile_pattern(regex, strlen(regex), &rpbuf);
@@ -217,5 +221,50 @@ int compile_and_match_regex(const char *regex, const char *str,	/*@out@ */
 	}
 #endif
 
+	regfree(&rpbuf);			// added 3 jul 02, appeasing valgrind
 	return matchedchars;
 }
+#endif
+
+/* like perl chomp(); useful for dealing with input from popen */
+void chomp(char *s)
+{
+	int l = strlen(s) - 1;
+	if (l >= 0 && s[l] == '\n')
+		s[l] = '\0';
+}
+
+char *strdup_ordie(const char *c)
+{
+	char *ret = strdup(c);
+	if (ret == NULL) {
+		fprintf(stderr, "ran out of memory\n");
+		exit(EXIT_FAILURE);
+	}
+	return (ret);
+}
+
+void StripComment(char *buf)
+{
+	char *p;
+
+	/* Strip comments at beginning of line, or after whitespace.  
+	   a kludgy way of avoiding problems with #'s in passwords. */
+	if (buf[0] == '#')
+		buf[0] = '\0';
+	for (p = (char *) buf + 1; *p && !(*p == '#' && isspace(*(p - 1)));
+		 p++);
+	if (*p) {
+		*p = '\0';
+	}
+}
+
+
+/* vim:set ts=4: */
+/*
+ * Local Variables:
+ * tab-width: 4
+ * c-indent-level: 4
+ * c-basic-offset: 4
+ * End:
+ */

@@ -20,7 +20,7 @@ struct connection_state;
    over it */
 /*@only@*/
 struct connection_state *initialize_gnutls(int sd, /*@only@ */ char *name,
-										   Pop3 pc);
+										   Pop3 pc, const char *hostname);
 
 /* take a socket descriptor and bundle it into a connection
    state structure for later communication */
@@ -53,3 +53,7 @@ int tlscomm_expect(struct connection_state *scs, const char *prefix,
 /* terminates the TLS association or just closes the socket,
    and frees the connection state */
 void tlscomm_close( /*@only@ */ struct connection_state *scs);
+
+/* internal function exported for testing */
+int getline_from_buffer(char *readbuffer, char *linebuffer,
+						int linebuflen);

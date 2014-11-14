@@ -33,17 +33,19 @@
 Extract the archive:
         tar -xvzf wmbiff-0.x.tar.gz
 
-Enter the wmbiff directory and edit the Makefile:
+Enter the wmbiff directory and follow INSTALL's directions.
         cd wmbiff-0.x/
-        vi Makefile
+        ./configure
 
 For crypto support either:
-*) Install gnutls and libgrcypt packages from your distribution.
-*) Download them from http://www.gnupg.org/mirrors.html.
-Choose a mirror, then download from the alpha/gnutls and
-alpha/libgcrypt directories.
-*) Disable crypt by uncommenting the "WITHOUT_CRYPTO" line
-in the Makefile.
+ *) Install gnutls and libgrcypt packages from your distribution.
+ *) Download them from http://www.gnupg.org/(en)/download/mirrors.html
+   Choose a mirror, then download from the alpha/gnutls and
+   alpha/libgcrypt directories.
+ *) Do nothing; the configure script will note its absence.
+
+NOTE: gnutls-0.3.5 is the version that this release was
+tested with.  Newer versions may have incompatible changes.
 
 Make the binary:
         make
@@ -61,45 +63,14 @@ and specify differrent name of config file.
 position. All other positions will be empty.
      _________________________________________________________________
    
-                                  Copyrights
-                                       
-   This program was written by Gennady Belyakov [8]gb@ccat.elect.ru
-   
-   Exterior appearance was heavily derived from wminet, written by
-   Dave Clark (clarkd@skynet.ca),
-   Antoine Nulle (warp@xs4all.nl),
-   Martijn Pieterse (pieterse@xs4all.nl)
-   
-   Some code (around mailbox checking, with some modifications) was taken
-   from xled, written by
-   Jan Schoenepauck (schoenep@uni-wuppertal.de) and
-   Joachim Gassen (joachim@fb4-1112.uni-muenster.de)
-   
-   POP3 checking code was taken from wmpop3 by
-   Scott Holden (scotth@thezone.net)
-   
-   Many thanks for:
-   Angus Mackay (amackay@gusnet.cx)
-   Jordi Mallach Pérez (jordi@sindominio.net)
-   Eugene Bobin (gene@utb.ru)
-   Helmut 'Kolbi' Kolb (office@kolbi.net)
-   Vladimir Popov (pva48@mail.ru)
-   Jorge García (Jorge.Garcia@uv.es)
-   Nick Clarey (nclarey@3glab.com)
-   Dwayne C. Litzenberger (dlitz@dlitz.net)
-   Mark Hurley (debian4tux@telocity.com)
-   Rob Funk (rfunk@funkinet.net)
-   Neil Spring (nspring@cs.washington.edu)
-   NAKAYAMA Takao (hoehoe@wakaba.jp)
-   Jay T Francis (jtf@u880.org)
-   David Smith (davidsmith@acm.org)
-   Benoît Rouits (brouits@free.fr)
-
+   See AUTHORS to see who has contributed to WMBiff.
      _________________________________________________________________
    
    Any suggestions/bug reports please send to our mailing list,
  
     wmbiff-devel@lists.sourceforge.net
+
+   Please include the output of 'wmbiff -debug'.
 
      _________________________________________________________________
 
