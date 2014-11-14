@@ -1,0 +1,81 @@
+   
+                                  Introducing
+                                       
+   wmBiff is an WindowMaker docking utility, that displays number of
+   total messages count or unread mail messages count in differrent
+   mailboxes.
+
+   Green ( cyan? :) ) digits display total number of messages, if there
+   are no unread messages in it.
+   
+   Yellow digits display number of unread messages, with blinking on new
+   mail arrival, if any.
+   
+   At this moment only unix-style and POP3 mailboxes are supported.
+   wmBiff supports up to 5 mailboxes (but you can start 2 or more
+   wmbiff's with differrent configs).
+   
+   Pressing on a 1st (left) mouse button will execute appropriate mail
+   reader (if defined in config file). Right-clicking will exec mail
+   fetching program (if any).
+   
+   It is also possible to execute user-defined command line on new mail
+   arrival (for example, play .WAV file).
+   
+     _________________________________________________________________
+   
+                          Compiling and Installation
+                                       
+Extract the archive:
+        tar -xvzf wmbiff-0.2.tar.gz
+
+Enter the wmbiff directory and edit the Makefile:
+        cd wmbiff-0.2/
+        vi Makefile
+
+Make the binary:
+        make
+
+Install the binary:
+        make install
+
+This will copy the binary to /usr/local/bin
+
+Then you need to copy sample.wmbiffrc into your home directory as
+.wmbiffrc, correct it as you like. Or, you can use the ``-c'' option
+and specify differrent name of config file.
+ Without any config file wmbiff will use only default mailbox
+(from environment variable MAIL), labeled with word SPOOL, at first
+position. All other positions will be empty.
+     _________________________________________________________________
+   
+                                  Copyrights
+                                       
+   This program was written by Gennady Belyakov [8]gb@ccat.elect.ru
+   
+   Exterior appearance was heavily derived from wminet, written by
+   Dave Clark (clarkd@skynet.ca),
+   Antoine Nulle (warp@xs4all.nl),
+   Martijn Pieterse (pieterse@xs4all.nl)
+   
+   Some code (around mailbox checking, with some modifications) was taken
+   from xled, written by
+   Jan Schoenepauck (schoenep@uni-wuppertal.de) and
+   Joachim Gassen (joachim@fb4-1112.uni-muenster.de)
+   
+   POP3 checking code was taken from wmpop3 by
+   Scott Holden (scotth@thezone.net)
+   
+   Many thanks for:
+   Angus Mackay (amackay@gusnet.cx)
+   Jordi Mallach Perez (jordi@sindominio.net)
+   Eugene Bobin (gene@utb.ru)
+   Helmut 'Kolbi' Kolb (office@kolbi.net)
+   Vladimir Popov (pva48@mail.ru)
+   
+     _________________________________________________________________
+   
+   Any suggestions/bug reports please send to
+   
+    Gennady Belyakov gb@ccat.elect.ru
+

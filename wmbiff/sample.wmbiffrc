@@ -1,0 +1,54 @@
+# Global interval -- seconds between check mailboxes
+interval=5
+
+### First string ###
+
+# Label, that will be displayed
+label.0=Spool
+
+# Path to mailbox for UNIX-style mailboxes,
+# or pop3:user:password@mailserver[:port] for POP3 accounts
+# port are optional, default - 110
+path.0=/var/spool/mail/gb
+
+# Command, which executed on new mail arrival, or special keyword 'beep'
+#notify.0=beep
+notify.0=my_play /home/gb/sounds/new_mail_has_arrived.wav
+
+# Command, which executed on left mouse click on label 
+action.0=rxvt -name mutt -e mutt
+
+# Rescan interval; default to global interval
+# For POP3-accounts bigger values (>60sec) is recommended
+#interval.0=5
+
+# Interval between mail auto-fetching; use 0 for disable (only
+# mouse right-clicking still worked)
+# use -1 for auto-fetching on new mail arrival
+#fetchinterval.0=300
+
+# Command, which used for fetching mail. Leave commented out for full disable
+#fetchcmd.0=/usr/bin/fetchmail
+
+###
+
+label.1 = KSI
+path.1=/home/gb/mail/10_ksi-linux-list
+notify.1=my_play /home/gb/sounds/new_mail_has_arrived.wav
+action.1=rxvt -name mutt -e mutt -f /home/gb/mail/10_ksi-linux-list
+
+label.2=fmeat
+path.2=/home/gb/mail/20_FreshMeat
+notify.2=my_play /home/gb/sounds/new_mail_has_arrived.wav
+action.2=rxvt -name mutt -e mutt -f /home/gb/mail/20_FreshMeat
+
+label.3=nftp
+# pop3 format: pop3:user:password@server[:port]
+path.3=pop3:user:password@server
+notify.3=my_play /home/gb/sounds/new_mail_has_arrived.wav
+action.3=rxvt -name mutt -e mutt -f /home/gb/mail/30_nftp-list
+interval.3=300		# 5 minutes
+fetchinterval.3=-1
+fetchcmd.3=fetchmail
+
+

@@ -1,0 +1,13 @@
+  *	v 0.1	17-Nov-1999
+  -	Initial release
+
+  *	v 0.1a	18-Nov-1999
+  -	Some fixes with intialization
+
+  *	v 0.2	26-Nov-1999
+  -	POP3 support added with (auto)fetching
+  -	digits blinking on new mail arrival
+  -	resource wasting lowered
+  -	individual rescan interval for differrent mailboxes
+  -	some bugfixes
+
