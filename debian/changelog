@@ -6,9 +6,9 @@ wmbiff (0.4.28-1) unstable; urgency=medium
     - Allow usernames with more than 32 characters (Closes: #626393).
     - Increase number of actions to 40 (Closes: #589408).
   * New maintainer (Closes: #767915).
-  * debian/compat
+  * debian/compat:
     - Bump to 9.
-  * debian/control
+  * debian/control:
     - Bump versioned dependency on debhelper to >=9.
     - Bump Standards-Version to 3.9.6.
     - Add ${misc:Depends} to Depends.
@@ -18,22 +18,22 @@ wmbiff (0.4.28-1) unstable; urgency=medium
     - Remove cdbs from Build-Depends.
     - Remove Uploaders field.
     - Remove references to Licq and GnomeICU support in Description.
-  * debian/copyright
+  * debian/copyright:
     - Convert to machine-readable format version 1.0.
-  * debian/dirs
+  * debian/dirs:
     - Remove unnecessary file.
-  * debian/docs
+  * debian/docs:
     - Remove README.licq, which no longer exists.
-  * debian/menu
+  * debian/menu:
     - Update section.
-  * debian/patches
+  * debian/patches:
     - Remove directory; patches either applied upstream or not needed because of
       dh_autoreconf.
-  * debian/rules
+  * debian/rules:
     - Add get-orig-source target.
     - Update to use dh and dh_autoreconf.
     - Add nocheck to DEB_BUILD_OPTIONS; otherwise dh_auto_test sometimes fails.
-  * debian/watch
+  * debian/watch:
     - Bump to version 3; update with new location (Closes: #449774).
 
  -- Doug Torrance <dtorrance@monmouthcollege.edu>  Thu, 13 Nov 2014 21:48:26 -0600
@@ -126,7 +126,7 @@ wmbiff (0.4.24-1) unstable; urgency=low
 wmbiff (0.4.23-1) unstable; urgency=low
 
   * New upstream release.
-    - Support IP addresses in IMAP paths. (Closes: #242458).
+    - Support IP addresses in IMAP paths (Closes: #242458).
 
  -- Neil Spring <nspring@cs.washington.edu>  Tue, 27 Apr 2004 17:32:36 -0700
 
@@ -141,14 +141,14 @@ wmbiff (0.4.22-1) unstable; urgency=low
 
 wmbiff (0.4.21-1) unstable; urgency=low
 
-  * New upstream release
+  * New upstream release.
     - Prevent a hang with certain IMAP servers (Closes: #234011).
 
  -- Neil Spring <nspring@cs.washington.edu>  Sat, 21 Feb 2004 10:10:16 -0800
 
 wmbiff (0.4.20-1) unstable; urgency=low
 
-  * New upstream release
+  * New upstream release.
     - Allows different mouse-click actions when a box has new mail.
   * New maintainer (thanks, Jordi).
 
@@ -182,7 +182,7 @@ wmbiff (0.4.17-1) unstable; urgency=low
 wmbiff (0.4.16-1) unstable; urgency=low
 
   * New upstream release.
-  * debian/control
+  * debian/control:
     - Bump gnutls build-dependency to libgnutls7-dev.
     - Bump debhelper build-dependency to 4.1.0 and add cdbs.
     - Bump Standards-Version to 3.5.10.0 (no changes required).
@@ -221,7 +221,7 @@ wmbiff (0.4.13-1) unstable; urgency=low
 wmbiff (0.4.12-1) unstable; urgency=low
 
   * New upstream release.
-    + Fixes parsing of -geometry option (Closes: #175220).
+    - Fixes parsing of -geometry option (Closes: #175220).
 
  -- Jordi Mallach <jordi@debian.org>  Sat,  4 Jan 2003 16:45:56 +0100
 
@@ -230,7 +230,7 @@ wmbiff (0.4.11-1) unstable; urgency=low
   * New upstream release.
     - Adds a checker for Debian security updates. See the NEWS file for more
       information.
-  * debian/control
+  * debian/control:
     - Suggests: ruby.
     - Standards-Version: 3.5.8.0 (no changes).
 
@@ -260,7 +260,7 @@ wmbiff (0.4.9-1) unstable; urgency=low
 wmbiff (0.4.8-1) unstable; urgency=low
 
   * New upstream release.
-  * debian/control
+  * debian/control:
     - Standards-Version: 3.5.7.0.
     - Change gnutls build-dep to libgnutls5-dev | libgnutls-dev.
 
@@ -275,7 +275,7 @@ wmbiff (0.4.7-1) unstable; urgency=low
 wmbiff (0.4.6-2) unstable; urgency=low
 
   * Recompile against libgnutls5.
-  * debian/control
+  * debian/control:
     - Build-Depend on libgnutls-dev (>= 0.5.1-4).
     - Bump debhelper build-dep to (>= 4.0.0).
   * wmbiff/{gnutls-common.{c,h},tlsComm.c,Imap4Client.c}: Fix includes and
@@ -366,7 +366,7 @@ wmbiff (0.3.8-1) unstable; urgency=low
 
 wmbiff (0.3.7-3) unstable; urgency=low
 
-  * Bump Build-Deps?
+  * Bump Build-Depends.
 
  -- Jordi Mallach <jordi@debian.org>  Tue, 19 Feb 2002 15:11:19 +0100
 
@@ -385,7 +385,7 @@ wmbiff (0.3.7-1) unstable; urgency=medium
   * Recompile against fixed gnutls3 (Closes: #132229).
   * wmbiff/Makefile: Correct error in install rule.
   * debian/control: Promote Build-Depends to gnutls (>> 0.3.5-1).
-  * debian/rules
+  * debian/rules:
     - Tweaks to install rule for the new upstream Makefile.
     - Remove manual D_B_O nostrip support, as we're using debhelper
       anyway.
@@ -411,7 +411,7 @@ wmbiff (0.3.4-2) unstable; urgency=low
 wmbiff (0.3.4-1) unstable; urgency=low
 
   * New upstream release.
-  * This release adds authentication protocol selection for IMAP and Pop3
+  * This release adds authentication protocol selection for IMAP and POP3
     mailboxes (Closes: #118691).
 
  -- Jordi Mallach <jordi@debian.org>  Fri, 23 Nov 2001 17:14:11 +0100
@@ -473,10 +473,10 @@ wmbiff (0.2q1-1) unstable; urgency=low
   * wmbiff/Makefile: Upstream forgot to bump the version number.
   * Add two nice patches from Rob Funk <rfunk@funknet.net>:
     - wmbiff/Imap4Client.c: Fix for imap servers which quote the folder
-      name (Closes: #95077)
+      name (Closes: #95077).
     - wmbiff/mboxClient.c: wmbiff only considered new mails those which
       had a "N" as first flag, so "ON" messages wouldn't be shown as new
-      (Closes: #95128)
+      (Closes: #95128).
     Thanks Rob!
   * Mark Hurley sent another patch, which fixes a little issue with empty
     mailboxes not updating (Closes: #94450).
@@ -505,10 +505,10 @@ wmbiff (0.2p-1) unstable; urgency=low
   * This release introduces maildir support (Closes: #75005).
   * wmbiff/Makefile: Add DESTDIR, EXTRAFLAGS and some INSTALL things,
     to install manpages with proper permissions.
-  * debian/rules
-    - Update D_B_O things for the manpages installation
-    - Add DESTDIR to the install rule
-    - Remove dh_installman invocation
+  * debian/rules:
+    - Update D_B_O things for the manpages installation.
+    - Add DESTDIR to the install rule.
+    - Remove dh_installman invocation.
   * debian/control: Update description for Maildir.
   * debian/{wmbiff.1,wmbiffrc.5,manpages}: Remove.
 
@@ -542,11 +542,11 @@ wmbiff (0.2n-1) unstable; urgency=low
     to know.
   * Apply the patches from OpenBSD's port.
   * wmbiff/Makefile: Changes to install rule.
-  * debian/rules
+  * debian/rules:
     - DH_COMPAT=3 and the changes needed.
     - DEB_BUILD_OPTIONS support.
     - s/`pwd`/$(CURDIR).
-  * debian/control
+  * debian/control:
     - Standards-Version: 3.5.2.0.
     - Update Build-Depends for X4.
     - Remove Suggests: menu.
@@ -558,19 +558,19 @@ wmbiff (0.2n-1) unstable; urgency=low
 
 wmbiff (0.2-4) unstable; urgency=low
 
-  * wmbiff/wmbiff.c
+  * wmbiff/wmbiff.c:
     - Add an ifdef to get rid of that stupid, annoying
       debug message that bloated all our .xsession-errors files.
     - Apply patch from Jorge Garcia <Jorge.Garcia@uv.es>: if a mailbox has
       > 1000 messages and after a rescan less than 1000 remain, the first
       character in the number display should be removed (Closes: #63048).
       The patch also fixes a possible segfault when too many files are open.
-  * debian/control
+  * debian/control:
     - Change maintainer email address.
     - Add Build-Depends.
   * debian/wmbiffrc.5: Add manpage for wmbiffrc.
   * debian/wmbiff.1: Small modifications to reflect the new wmbiffrc.5.
-  * debian/rules
+  * debian/rules:
     - Install wmbiffrc.5.
     - Revert changes to wmbiff/Makefile, all the modifications are handled
       here now.
@@ -614,6 +614,6 @@ wmbiff (0.1a-1) unstable; urgency=low
 
 wmbiff (0.1-1) unstable; urgency=low
 
-  * Initial Release.
+  * Initial release.
 
  -- Jordi Mallach Pérez <jordi@sindominio.net>  Thu, 18 Nov 1999 02:53:59 +0100
