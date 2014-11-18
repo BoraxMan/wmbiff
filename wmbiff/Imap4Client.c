@@ -158,7 +158,7 @@ struct connection_state *unbind(
 /*@null@*/
 FILE *imap_open(Pop3 pc)
 {
-	static int complained_already;	/* we have to succeed once before 
+	static int complained_already;	/* we have to succeed once before
 									   complaining again about failure */
 	struct connection_state *scs;
 	struct imap_authentication_method *a;
@@ -173,7 +173,7 @@ FILE *imap_open(Pop3 pc)
 		return NULL;
 	}
 
-	/* got this far; we're going to create a connection_state 
+	/* got this far; we're going to create a connection_state
 	   structure, although it might be a blacklist entry */
 	connection_name = malloc(strlen(PCU.serverName) + 20);
 	sprintf(connection_name, "%s:%d", PCU.serverName, PCU.serverPort);
@@ -234,7 +234,7 @@ FILE *imap_open(Pop3 pc)
 		}
 
 		/* we don't need the unencrypted state anymore */
-		/* note that communication_failure will close the 
+		/* note that communication_failure will close the
 		   socket and free via tls_close() */
 		free(scs);				/* fall through will scs = initialize_gnutls(sd); */
 	}
@@ -253,8 +253,8 @@ FILE *imap_open(Pop3 pc)
 
 	/* authenticate; first find out how */
 	/* note that capabilities may have changed since last
-	   time we may have asked, if we called STARTTLS, my 
-	   server will allow plain password login within an 
+	   time we may have asked, if we called STARTTLS, my
+	   server will allow plain password login within an
 	   encrypted session. */
 	tlscomm_printf(scs, "a000 CAPABILITY\r\n");
 	if (tlscomm_expect(scs, "* CAPABILITY", capabilities, BUF_SIZE) == 0) {
@@ -479,8 +479,8 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 	/* special characters aren't allowed in hostnames, rfc 1034 */
 	const char *regexes[] = {
 		// type : username     :   password @ hostname (/ name)?(:port)?
-		".*imaps?:([^: ]{1,32}):([^@]{0,32})@([A-Za-z1-9][-A-Za-z0-9_.]+)(/(\"[^\"]+\")|([^:@ ]+))?(:[0-9]+)?(  *([CcAaPp][-A-Za-z5 ]*))?$",
-		".*imaps?:([^: ]{1,32}) ([^ ]{1,32}) ([A-Za-z1-9][-A-Za-z0-9_.]+)(/(\"[^\"]+\")|([^: ]+))?( [0-9]+)?(  *([CcAaPp][-A-Za-z5 ]*))?$",
+		".*imaps?:([^: ]{1,256}):([^@]{0,32})@([A-Za-z1-9][-A-Za-z0-9_.]+)(/(\"[^\"]+\")|([^:@ ]+))?(:[0-9]+)?(  *([CcAaPp][-A-Za-z5 ]*))?$",
+		".*imaps?:([^: ]{1,256}) ([^ ]{1,32}) ([A-Za-z1-9][-A-Za-z0-9_.]+)(/(\"[^\"]+\")|([^: ]+))?( [0-9]+)?(  *([CcAaPp][-A-Za-z5 ]*))?$",
 		NULL
 	};
 	char *unaliased_str;
@@ -497,9 +497,9 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 
 	if (Relax) {
 		regexes[0] =
-			".*imaps?:([^: ]{1,32}):([^@]{0,32})@([^/: ]+)(/(\"[^\"]+\")|([^:@ ]+))?(:[0-9]+)?(  *(.*))?$";
+			".*imaps?:([^: ]{1,256}):([^@]{0,32})@([^/: ]+)(/(\"[^\"]+\")|([^:@ ]+))?(:[0-9]+)?(  *(.*))?$";
 		regexes[1] =
-			".*imaps?:([^: ]{1,32}) ([^ ]{1,32}) ([^/: ]+)(/(\"[^\"]+\")|([^: ]+))?( [0-9]+)?(  *(.*))?$";
+			".*imaps?:([^: ]{1,256}) ([^ ]{1,32}) ([^/: ]+)(/(\"[^\"]+\")|([^: ]+))?( [0-9]+)?(  *(.*))?$";
 	}
 
 
@@ -507,16 +507,7 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 	/* If 'str' line is badly formatted, wmbiff won't display the mailbox. */
 	if (strncmp("sslimap:", str, 8) == 0 || strncmp("imaps:", str, 6) == 0) {
 #ifdef HAVE_GNUTLS_GNUTLS_H
-		static int haveBeenWarned;
 		PCU.dossl = 1;
-		if (!haveBeenWarned) {
-			printf("wmbiff uses gnutls for TLS/SSL encryption support:\n"
-				   "  If you distribute software that uses gnutls, don't forget\n"
-				   "  to warn the users of your software that gnutls is at a\n"
-				   "  testing phase and may be totally insecure.\n"
-				   "\nConsider yourself warned.\n");
-			haveBeenWarned = 1;
-		}
 #else
 		printf("This copy of wmbiff was not compiled with gnutls;\n"
 			   "imaps is unavailable.  Exiting to protect your\n"
@@ -546,7 +537,7 @@ int imap4Create( /*@notnull@ */ Pop3 pc, const char *const str)
 		pc->label[0] = '\0';
 		IMAP_DM(pc, DEBUG_ERROR, "Couldn't parse line %s (%d)\n"
 				"  If this used to work, run wmbiff with the -relax option, and\n"
-				"  send mail to wmbiff-devel@lists.sourceforge.net with the hostname\n"
+				"  send mail to "PACKAGE_BUGREPORT" with the hostname\n"
 				"  of your mail server.\n", unaliased_str, matchedchars);
 		return -1;
 	}
@@ -593,7 +584,7 @@ static int authenticate_plaintext( /*@notnull@ */ Pop3 pc,
 {
 	char buf[BUF_SIZE];
 	/* is login prohibited? */
-	/* "An IMAP client which complies with [rfc2525, section 3.2] 
+	/* "An IMAP client which complies with [rfc2525, section 3.2]
 	 *  MUST NOT issue the LOGIN command if this capability is present.
 	 */
 	if (strstr(capabilities, "LOGINDISABLED")) {

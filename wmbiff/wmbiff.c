@@ -23,7 +23,7 @@
 #include <X11/Xlib.h>
 #include <X11/xpm.h>
 #include <X11/cursorfont.h>
-#include <X11/keysym.h>
+#include <X11/XKBlib.h>
 
 #include <errno.h>
 #include <string.h>
@@ -41,6 +41,7 @@
 
 
 #include "wmbiff-master-led.xpm"
+#include "wmbiff-classic-master-led.xpm"
 static char wmbiff_mask_bits[64 * 64];
 static const int wmbiff_mask_width = 64;
 // const int wmbiff_mask_height = 64;
@@ -49,7 +50,7 @@ static const int wmbiff_mask_width = 64;
 #define CHAR_HEIGHT 7
 
 #define BLINK_TIMES 8
-#define DEFAULT_SLEEP_INTERVAL 5000
+#define DEFAULT_SLEEP_INTERVAL 20000
 #define BLINK_SLEEP_INTERVAL    200
 #define DEFAULT_LOOP 5
 
@@ -58,9 +59,10 @@ static mbox_t mbox[MAX_NUM_MAILBOXES];
 
 /* this is the normal pixmap. */
 static const char *skin_filename = "wmbiff-master-led.xpm";
+static const char *classic_skin_filename = "wmbiff-classic-master-led.xpm";
 /* global notify action taken (if globalnotify option is set) */
-/*@null@*/
 static const char *globalnotify = NULL;
+
 /* path to search for pixmaps */
 /* /usr/share/wmbiff should have the default pixmap. */
 /* /usr/local/share/wmbiff if compiled locally. */
@@ -68,20 +70,24 @@ static const char *globalnotify = NULL;
 /* . is there for development. */
 static const char *skin_search_path = DEFAULT_SKIN_PATH;
 /* for gnutls */
-/*@null@*/
 const char *certificate_filename = NULL;
+/* gnutls: specify the priorities to use on the ciphers, key exchange methods,
+   macs and compression methods. */
+const char *tls = NULL;
 
 /* it could be argued that a better default exists. */
 #define DEFAULT_FONT  "-*-fixed-*-r-*-*-10-*-*-*-*-*-*-*"
-/*@null@*/
 static const char *font = NULL;
 
 int debug_default = DEBUG_ERROR;
 
 /* color from wmbiff's xpm, down to 24 bits. */
-const char *foreground = "#21B3AF";	/* foreground cyan */
-const char *background = "#202020";	/* background gray */
-static const char *highlight = "yellow";
+const char *foreground = "white";	/* foreground white */
+const char *background = "#505075";	/* background blue */
+static const char *highlight = "red";
+const char *foreground_classic = "#21B3AF";		/* classic foreground cyan */
+const char *background_classic = "#202020";		/* classic background gray */
+static const char *highlight_classic = "yellow";	/* classic highlight color */
 int SkipCertificateCheck = 0;
 int Relax = 0;					/* be not paranoid */
 static int notWithdrawn = 0;
@@ -90,6 +96,8 @@ static unsigned int num_mailboxes = 1;
 static const int x_origin = 5;
 static const int y_origin = 5;
 static int forever = 1;			/* keep running. */
+unsigned int custom_skin = 0;		/* user has choose a custom skin */
+static int classic_mode = 0;		/* use classic behaviour/theme of wmbiff */
 
 extern Window win;
 extern Window iconwin;
@@ -111,30 +119,6 @@ malloc_ordie(size_t len)
 static int mbox_y(unsigned int mboxnum)
 {
 	return ((11 * mboxnum) + y_origin);
-}
-
-/* special shortcuts for longer shell client commands */
-static int gicuCreate( /*@notnull@ */ Pop3 pc, const char *path)
-{
-	char buf[255];
-	if (isdigit(path[5])) {
-		sprintf(buf,
-				"shell:::echo `gnomeicu-client -u%s msgcount` new",
-				path + 5);
-	} else {
-		sprintf(buf, "shell:::echo `gnomeicu-client msgcount` new");
-	}
-	return (shellCreate(pc, buf));
-}
-
-static int fingerCreate( /*@notnull@ */ Pop3 pc, const char *path)
-{
-	char buf[255];
-	sprintf(buf, "shell:::finger -lm %s | "
-			"perl -ne '(/^new mail/i && print \"new\");' "
-			"-e '(/^mail last read/i && print \"old\");' "
-			"-e '(/^no( unread)? mail/i && print \"no\");'", path + 7);
-	return (shellCreate(pc, buf));
 }
 
 /* 	Read a line from a file to obtain a pair setting=value
@@ -214,9 +198,6 @@ static struct path_demultiplexer paths[] = {
 	{"pop3:", pop3Create},
 	{"pop3s:", pop3Create},
 	{"shell:", shellCreate},
-	{"gicu:", gicuCreate},
-	{"licq:", licqCreate},
-	{"finger:", fingerCreate},
 	{"imap:", imap4Create},
 	{"imaps:", imap4Create},
 	{"sslimap:", imap4Create},
@@ -252,6 +233,11 @@ static int Read_Config_File(char *filename, int *loopinterval)
 	char setting[BUF_SMALL], value[BUF_SIZE];
 	int mbox_index;
 	unsigned int i;
+	char *skin = NULL;
+
+	if (classic_mode) {
+		skin = strdup_ordie(skin_filename);
+	}
 
 	if (!(fp = fopen(filename, "r"))) {
 		DMA(DEBUG_ERROR, "Unable to open %s, no settings read: %s\n",
@@ -259,7 +245,7 @@ static int Read_Config_File(char *filename, int *loopinterval)
 		return 0;
 	}
 	while (!feof(fp)) {
-		/* skanky: -1 can represent an unparsed line 
+		/* skanky: -1 can represent an unparsed line
 		   or an error */
 		if (ReadLine(fp, setting, value, &mbox_index) == -1)
 			continue;
@@ -280,12 +266,16 @@ static int Read_Config_File(char *filename, int *loopinterval)
 			continue;
 		} else if (!strcmp(setting, "skinfile")) {
 			skin_filename = strdup_ordie(value);
+			custom_skin = 1;
 			continue;
 		} else if (!strcmp(setting, "certfile")) {	/* not yet supported */
 			certificate_filename = strdup_ordie(value);
 			continue;
 		} else if (!strcmp(setting, "globalnotify")) {
 			globalnotify = strdup_ordie(value);
+			continue;
+		} else if (!strcmp(setting, "tls")) {
+			tls = strdup_ordie(value);
 			continue;
 		} else if (mbox_index == -1) {
 			DMA(DEBUG_INFO, "Unknown global setting '%s'\n", setting);
@@ -402,6 +392,17 @@ static int Read_Config_File(char *filename, int *loopinterval)
 		}
 	}
 	(void) fclose(fp);
+
+	if (!tls)
+		// use GnuTLS's default ciphers.
+		tls = "NORMAL";
+
+	if (classic_mode && skin && !strcmp(skin, skin_filename))
+			skin_filename = classic_skin_filename;
+
+	if (skin)
+		free(skin);
+
 	for (i = 0; i < num_mailboxes; i++)
 		if (mbox[i].label[0] != '\0')
 			parse_mbox_path(i);
@@ -452,17 +453,6 @@ static void init_biff(char *config_file)
 	if (gcry_check_version("1.1.42") == NULL) {
 		DMA(DEBUG_ERROR, "Error: incompatible gcrypt version.\n");
 	}
-
-	/* 
-	   if ((rc = gcry_control(GCRYCTL_INIT_SECMEM, 16384, 0)) != 0) {
-	   DMA(DEBUG_ERROR,
-	   "Error: gcry_control() to initialize secure memory returned non-zero: %d\n"
-	   " Message: %s\n"
-	   " libgcrypt version: %s\n"
-	   " recovering: will fail later if using CRAM-MD5 or APOP authentication.\n",
-	   rc, gcry_strerror(rc), gcry_check_version(NULL));
-	   };
-	 */
 #endif
 
 	DMA(DEBUG_INFO, "config_file = %s.\n", config_file);
@@ -516,7 +506,6 @@ static void init_biff(char *config_file)
 				if (j < 5) {
 					memset(mbox[i].label + j, ' ', 5 - j);
 				}
-				mbox[i].label[5] = ':';
 			}
 			/* but always end after 5 characters */
 			mbox[i].label[6] = '\0';
@@ -564,8 +553,7 @@ int exists(const char *filename)
 
 /* acts like execvp, with code inspired by it */
 /* mustfree */
-static char *search_path(const char *path,	/*@notnull@ */
-						 const char *find_me)
+static char *search_path(const char *path, const char *find_me)
 {
 	char *buf;
 	const char *p;
@@ -727,7 +715,7 @@ static void blitMsgCounters(unsigned int i)
 			BlitString(mbox[i].TextStatus, 39, y_row, newmail);
 		} else {
 			int mailcount =
-				(newmail) ? mbox[i].UnreadMsgs : mbox[i].TotalMsgs;
+				(newmail) ? mbox[i].UnreadMsgs : ( classic_mode ? mbox[i].TotalMsgs : 0 );
 			BlitNum(mailcount, 45, y_row, newmail);
 		}
 	}
@@ -739,10 +727,9 @@ static void blitMsgCounters(unsigned int i)
 static void execnotify( /*@null@ */ const char *notifycmd)
 {
 	if (notifycmd != NULL) {	/* need to call notify() ? */
-		if (!strcasecmp(notifycmd, "beep")) {	/* Internal keyword ? */
-			/* Yes, bell */
+		if (classic_mode && !strcasecmp(notifycmd, "beep"))
 			XBell(display, 100);
-		} else if (!strcasecmp(notifycmd, "true")) {
+		else if (!strcasecmp(notifycmd, "true")) {
 			/* Yes, nothing */
 		} else {
 			/* Else call external notifyer, ignoring the pid */
@@ -762,11 +749,6 @@ displayMsgCounters(unsigned int i, int mail_stat, int *Blink_Mode)
 		*Blink_Mode |= (1 << i);	/* Global blink flag set for this mailbox */
 		blitMsgCounters(i);
 		execnotify(mbox[i].notify);
-
-		/* Autofetch on new mail arrival? */
-		if (mbox[i].fetchinterval == -1 && mbox[i].fetchcmd[0] != '\0') {
-			(void) execCommand(mbox[i].fetchcmd);	/* yes */
-		}
 		break;
 	case 1:					/* mailbox has been rescanned/changed */
 		blitMsgCounters(i);
@@ -853,10 +835,10 @@ static int periodic_mail_check(void)
 
 				XUndefineCursor(display, iconwin);
 
-				if ((mailstat == 2) && (mbox[i].notify[0] == '\0')) {
-					/* for global notify */
+				/* Global notify */
+				if (mailstat == 2)
 					NewMail = 1;
-				}
+
 				displayMsgCounters(i, mailstat, &Blink_Mode);
 				/* update our idea of current time, as it
 				   may have changed as we check. */
@@ -887,9 +869,8 @@ static int periodic_mail_check(void)
 	}
 
 	/* exec globalnotify if there was any new mail */
-	if (NewMail == 1) {
+	if (NewMail == 1)
 		execnotify(globalnotify);
-	}
 
 	if (Blink_Mode == 0) {
 		for (i = 0; i < num_mailboxes; i++) {
@@ -933,7 +914,7 @@ static char **CreateBackingXPM(int width, int height,
 	ret[0] = malloc_ordie(30);
 	sprintf(ret[0], "%d %d %d %d", width, height, colors, 1);
 	ret[1] = (char *) " \tc #0000FF";	/* no color */
-	ret[2] = (char *) ".\tc #202020";	/* background gray */
+	ret[2] = (char *) ".\tc #505075";	/* background gray */
 	ret[2] = malloc_ordie(30);
 	sprintf(ret[2], ".\tc %s", background);
 	ret[3] = (char *) "+\tc #000000";	/* shadowed */
@@ -1014,12 +995,16 @@ static void restart_wmbiff(int sig
 #endif
 	)
 {
-	DMA(DEBUG_ERROR, "exec()'ing %s\n", restart_args[0]);
-	sleep(1);
-	execvp(restart_args[0], (char *const *) restart_args);
-	DMA(DEBUG_ERROR, "exec of %s failed: %s\n",
-		restart_args[0], strerror(errno));
-	exit(EXIT_FAILURE);
+	if (restart_args) {
+		DMA(DEBUG_ERROR, "exec()'ing %s\n", restart_args[0]);
+		sleep(1);
+		execvp(restart_args[0], (char *const *) restart_args);
+		DMA(DEBUG_ERROR, "exec of %s failed: %s\n",
+			restart_args[0], strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+	else
+		fprintf(stderr, "Unable to restart wmbiff: missing restart arguments (NULL)!\n");
 }
 
 extern int x_socket(void)
@@ -1135,7 +1120,7 @@ extern void ProcessPendingEvents(void)
 			break;
 		case KeyPress:{
 				XKeyPressedEvent *xkpe = (XKeyPressedEvent *) & Event;
-				KeySym ks = XKeycodeToKeysym(display, xkpe->keycode, 0);
+				KeySym ks = XkbKeycodeToKeysym(display, xkpe->keycode, 0, 0);
 				if (ks > XK_0 && ks < XK_0 + min(9U, num_mailboxes)) {
 					const char *click_action = mbox[ks - XK_1].action;
 					if (click_action != NULL
@@ -1158,7 +1143,6 @@ extern void ProcessPendingEvents(void)
 static void do_biff(int argc, const char **argv)
 {
 	unsigned int i;
-	time_t curtime;
 	int Sleep_Interval;
 	const char **skin_xpm = NULL;
 	const char **bkg_xpm = NULL;
@@ -1175,17 +1159,15 @@ static void do_biff(int argc, const char **argv)
 	if (skin_xpm == NULL) {
 		DMA(DEBUG_ERROR, "using built-in xpm; %s wasn't found in %s\n",
 			skin_filename, skin_search_path);
-		skin_xpm = wmbiff_master_xpm;
+		skin_xpm = (classic_mode ? wmbiff_classic_master_xpm : wmbiff_master_xpm);
 	}
 
-	bkg_xpm = (const char **) CreateBackingXPM(wmbiff_mask_width,
-											   wmbiff_mask_height,
-											   skin_xpm);
+	bkg_xpm = (const char **) CreateBackingXPM(wmbiff_mask_width, wmbiff_mask_height, skin_xpm);
 
-	createXBMfromXPM(wmbiff_mask_bits, bkg_xpm,
+	createXBMfromXPM(wmbiff_mask_bits, (const char**)bkg_xpm,
 					 wmbiff_mask_width, wmbiff_mask_height);
 
-	openXwindow(argc, argv, bkg_xpm, skin_xpm, wmbiff_mask_bits,
+	openXwindow(argc, argv, (const char**)bkg_xpm, skin_xpm, wmbiff_mask_bits,
 				wmbiff_mask_width, wmbiff_mask_height, notWithdrawn);
 
 	/* now that display is set, we can create the cursors
@@ -1198,15 +1180,9 @@ static void do_biff(int argc, const char **argv)
 			DMA(DEBUG_ERROR, "unable to load font. exiting.\n");
 			exit(EXIT_FAILURE);
 		}
-		/* make the whole background black */
-		// removed; seems unnecessary with CreateBackingXPM 
-		//      eraseRect(x_origin, y_origin,
-		//    wmbiff_mask_width - 6, wmbiff_mask_height - 6, 
-		//          background);
 	}
 
 	/* First time setup of button regions and labels */
-	curtime = time(0);
 	for (i = 0; i < num_mailboxes; i++) {
 		/* make it easy to recover the mbox index from a mouse click */
 		AddMouseRegion(i, x_origin, mbox_y(i), 58, mbox_y(i + 1) - 1);
@@ -1217,20 +1193,24 @@ static void do_biff(int argc, const char **argv)
 	}
 
 	do {
-		/* waitpid(0, NULL, WNOHANG); */
 
 		Sleep_Interval = periodic_mail_check();
-
 		ProcessPendingEvents();
-
 		XSleep(Sleep_Interval);
 	}
 	while (forever);			/* forever is usually true,
 								   but not when debugging with -exit */
-	if (skin_xpm != NULL && skin_xpm != wmbiff_master_xpm) {
+	if (skin_xpm != NULL && skin_xpm != wmbiff_master_xpm
+		&& skin_xpm != wmbiff_classic_master_xpm) {
 		free(skin_xpm);			// added 3 jul 02, appeasing valgrind
 	}
 	if (bkg_xpm != NULL) {
+		// Allocated in CreateBackingXPM()
+		free((void *)bkg_xpm[0]);
+		free((void *)bkg_xpm[2]);
+		int mem_block;
+		for (mem_block = 6; mem_block < 6 + wmbiff_mask_height; mem_block++)
+			free((void *)bkg_xpm[mem_block]);
 		free(bkg_xpm);
 	}
 }
@@ -1280,10 +1260,10 @@ static void printversion(void)
 }
 
 
-static void parse_cmd(int argc, const char **argv,	/*@out@ */
-					  char *config_file)
+static void parse_cmd(int argc, const char **argv, char *config_file)
 {
 	int i;
+	int fg = 0, bg = 0, hi = 0;
 
 	config_file[0] = '\0';
 
@@ -1298,7 +1278,8 @@ static void parse_cmd(int argc, const char **argv,	/*@out@ */
 				if (strcmp(arg + 1, "bg") == 0) {
 					if (argc > (i + 1)) {
 						background = strdup_ordie(argv[i + 1]);
-						DMA(DEBUG_INFO, "new background: %s", foreground);
+						bg = 1;
+						DMA(DEBUG_INFO, "new background: '%s'\n", foreground);
 						i++;
 						if (font == NULL)
 							font = DEFAULT_FONT;
@@ -1319,7 +1300,8 @@ static void parse_cmd(int argc, const char **argv,	/*@out@ */
 				if (strcmp(arg + 1, "fg") == 0) {
 					if (argc > (i + 1)) {
 						foreground = strdup_ordie(argv[i + 1]);
-						DMA(DEBUG_INFO, "new foreground: %s", foreground);
+						fg = 1;
+						DMA(DEBUG_INFO, "new foreground: '%s'\n", foreground);
 						i++;
 						if (font == NULL)
 							font = DEFAULT_FONT;
@@ -1331,7 +1313,7 @@ static void parse_cmd(int argc, const char **argv,	/*@out@ */
 						} else {
 							font = strdup_ordie(argv[i + 1]);
 						}
-						DMA(DEBUG_INFO, "new font: %s", font);
+						DMA(DEBUG_INFO, "new font: '%s'\n", font);
 						i++;
 					}
 				} else {
@@ -1355,7 +1337,8 @@ static void parse_cmd(int argc, const char **argv,	/*@out@ */
 				if (strcmp(arg + 1, "hi") == 0) {
 					if (argc > (i + 1)) {
 						highlight = strdup_ordie(argv[i + 1]);
-						DMA(DEBUG_INFO, "new highlight: %s", highlight);
+						hi = 1;
+						DMA(DEBUG_INFO, "new highlight: '%s'\n", highlight);
 						i++;
 						if (font == NULL)
 							font = DEFAULT_FONT;
@@ -1398,6 +1381,9 @@ static void parse_cmd(int argc, const char **argv,	/*@out@ */
 					forever = 0;
 				}
 				break;
+			case 'o':			/* use classic behaviour/theme */
+				classic_mode = 1;
+				break;
 			default:
 				usage();
 				exit(EXIT_SUCCESS);
@@ -1415,6 +1401,16 @@ static void parse_cmd(int argc, const char **argv,	/*@out@ */
 			}
 		}
 	}
+
+	if (classic_mode) {
+		/* load classic colors if user did not override them */
+		if(!fg)
+			foreground = foreground_classic;
+		if(!bg)
+			background = background_classic;
+		if(!hi)
+			highlight = highlight_classic;
+	}
 }
 
 int main(int argc, const char *argv[])
@@ -1425,8 +1421,10 @@ int main(int argc, const char *argv[])
 	   will need them if we have to restart on sigusr1 */
 	restart_args =
 		(const char **) malloc((argc + 1) * sizeof(const char *));
-	memcpy(restart_args, argv, (argc) * sizeof(const char *));
-	restart_args[argc] = NULL;
+	if (restart_args) {
+		memcpy(restart_args, argv, (argc) * sizeof(const char *));
+		restart_args[argc] = NULL;
+	}
 
 	parse_cmd(argc, argv, uconfig_file);
 
@@ -1455,14 +1453,12 @@ int main(int argc, const char *argv[])
 	signal(SIGPIPE, SIG_IGN);	/* write() may fail */
 
 	do_biff(argc, argv);
+
+	// free resources
+	if (restart_args)
+		free(restart_args);
+	if (custom_skin)
+		free((void *)skin_filename);
+
 	return 0;
 }
-
-/* vim:set ts=4: */
-/*
- * Local Variables:
- * tab-width: 4
- * c-indent-level: 4
- * c-basic-offset: 4
- * End:
- */

@@ -38,6 +38,9 @@ extern const char *certificate_filename;
 /* if set, don't fail when dealing with a bad certificate.
    (continue to whine, though, as bad certs should be fixed) */
 extern int SkipCertificateCheck;
+/* gnutls: specify the priorities to use on the ciphers, key exchange methods,
+   macs and compression methods. */
+extern const char *tls;
 
 /* WARNING: implcitly uses scs to gain access to the mailbox
    that holds the per-mailbox debug flag. */
@@ -55,8 +58,8 @@ struct connection_state {
 	int sd;
 	char *name;
 #ifdef USE_GNUTLS
-	gnutls_session tls_state;
-	gnutls_certificate_credentials xcred;
+	gnutls_session_t tls_state;
+	gnutls_certificate_credentials_t xcred;
 #else
 	/*@null@ */ void *tls_state;
 	/*@null@ */ void *xcred;
@@ -124,7 +127,7 @@ static int wait_for_it(int sd, int timeoutseconds)
             ProcessPendingEvents();
 
             gettimeofday(&time_now, NULL);
-            tv.tv_sec = max(time_out.tv_sec - time_now.tv_sec + 1, 0); /* sloppy, but bfd */
+            tv.tv_sec = max(time_out.tv_sec - time_now.tv_sec + 1, (time_t) 0); /* sloppy, but bfd */
             tv.tv_usec = 0;
             /* select will return if we have X stuff or we have comm stuff on sd */
             FD_ZERO(&readfds);
@@ -134,7 +137,7 @@ static int wait_for_it(int sd, int timeoutseconds)
             // DMA(DEBUG_INFO,
             //    "select %d/%d returned %d descriptor, %d\n",
             //    sd, timeoutseconds, ready_descriptors, FD_ISSET(sd, &readfds));
-            
+
         } while(tv.tv_sec > 0 && (!FD_ISSET(sd, &readfds) || (errno == EINTR && ready_descriptors == -1)));
 
         FD_ZERO(&readfds);
@@ -295,6 +298,7 @@ void tlscomm_printf(struct connection_state *scs, const char *format, ...)
 	va_list args;
 	char buf[1024];
 	int bytes;
+	ssize_t unused __attribute__((unused));
 
 	if (scs == NULL) {
 		DMA(DEBUG_ERROR, "null connection to tlscomm_printf\n");
@@ -316,7 +320,8 @@ void tlscomm_printf(struct connection_state *scs, const char *format, ...)
 			}
 		} else
 #endif
-			(void) write(scs->sd, buf, bytes);
+			/* Why???? */
+			unused = write(scs->sd, buf, bytes);
 	} else {
 		printf
 			("warning: tlscomm_printf called with an invalid socket descriptor\n");
@@ -340,6 +345,16 @@ bad_certificate(const struct connection_state *scs, const char *msg)
 	}
 }
 
+static void
+warn_certificate(const struct connection_state *scs, const char *msg)
+{
+	if (!SkipCertificateCheck) {
+		TDM(DEBUG_ERROR, "%s", msg);
+		TDM(DEBUG_ERROR, "to ignore this warning, run wmbiff "
+			"with the -skip-certificate-check option\n");
+	}
+}
+
 /* a start of a hack at verifying certificates.  does not
    provide any security at all.  I'm waiting for either
    gnutls to make this as easy as it should be, or someone
@@ -349,13 +364,13 @@ bad_certificate(const struct connection_state *scs, const char *msg)
 #define CERT_SEP "-----BEGIN"
 
 /* this bit is based on read_ca_file() in gnutls */
-static int tls_compare_certificates(const gnutls_datum * peercert)
+static int tls_compare_certificates(const gnutls_datum_t * peercert)
 {
-	gnutls_datum cert;
+	gnutls_datum_t cert;
 	unsigned char *ptr;
 	FILE *fd1;
 	int ret;
-	gnutls_datum b64_data;
+	gnutls_datum_t b64_data;
 	unsigned char *b64_data_data;
 	struct stat filestat;
 
@@ -382,8 +397,8 @@ static int tls_compare_certificates(const gnutls_datum * peercert)
 			return 0;
 		}
 
-		ptr = (unsigned char *) strstr(b64_data.data, CERT_SEP) + 1;
-		ptr = (unsigned char *) strstr(ptr, CERT_SEP);
+		ptr = (unsigned char *) strstr((char *) b64_data.data, CERT_SEP) + 1;
+		ptr = (unsigned char *) strstr((char *) ptr, CERT_SEP);
 
 		b64_data.size = b64_data.size - (ptr - b64_data.data);
 		b64_data.data = ptr;
@@ -408,34 +423,47 @@ static int tls_compare_certificates(const gnutls_datum * peercert)
 
 static void
 tls_check_certificate(struct connection_state *scs,
-					  const char *remote_hostname) 
+					  const char *remote_hostname)
 {
-	int certstat;
-	const gnutls_datum *cert_list;
-	int cert_list_size = 0;
-	gnutls_x509_crt cert;
+	int ret;
+	unsigned int certstat;
+	const gnutls_datum_t *cert_list;
+	unsigned int cert_list_size = 0;
+	gnutls_x509_crt_t cert;
 
 	if (gnutls_auth_get_type(scs->tls_state) != GNUTLS_CRD_CERTIFICATE) {
 		bad_certificate(scs, "Unable to get certificate from peer.\n");
 		return;	/* bad_cert will exit if -skip-certificate-check was not given */
 	}
-	certstat = gnutls_certificate_verify_peers(scs->tls_state);
-	if (certstat == GNUTLS_E_NO_CERTIFICATE_FOUND) {
-		bad_certificate(scs, "server presented no certificate.\n");
+	ret = gnutls_certificate_verify_peers2(scs->tls_state, &certstat);
+
+	if (ret < 0) {
+		char errbuf[1024];
+
+		snprintf(errbuf, 1024, "could not verify certificate: %s (%d).\n",
+			gnutls_strerror(ret), ret);
+		bad_certificate(scs, (ret == GNUTLS_E_NO_CERTIFICATE_FOUND ?
+			"server presented no certificate.\n" :
+			errbuf));
+		return;
 #ifdef GNUTLS_CERT_CORRUPTED
 	} else if (certstat & GNUTLS_CERT_CORRUPTED) {
 		bad_certificate(scs, "server's certificate is corrupt.\n");
 #endif
 	} else if (certstat & GNUTLS_CERT_REVOKED) {
 		bad_certificate(scs, "server's certificate has been revoked.\n");
+	} else if (certstat & GNUTLS_CERT_EXPIRED) {
+		bad_certificate(scs, "server's certificate is expired.\n");
+	} else if (certstat & GNUTLS_CERT_INSECURE_ALGORITHM) {
+		warn_certificate(scs, "server's certificate use an insecure algorithm.\n");
 	} else if (certstat & GNUTLS_CERT_INVALID) {
 		if (gnutls_certificate_type_get(scs->tls_state) == GNUTLS_CRT_X509) {
 			/* bad_certificate(scs, "server's certificate is not trusted.\n"
 			   "there may be a problem with the certificate stored in your certfile\n"); */
 		} else {
 			bad_certificate(scs,
-							"server's certificate is invalid or not X.509.\n"
-							"there may be a problem with the certificate stored in your certfile\n");
+				"server's certificate is invalid or not X.509.\n"
+				"there may be a problem with the certificate stored in your certfile\n");
 		}
 #if defined(GNUTLS_CERT_SIGNER_NOT_FOUND)
 	} else if (certstat & GNUTLS_CERT_SIGNER_NOT_FOUND) {
@@ -454,7 +482,7 @@ tls_check_certificate(struct connection_state *scs,
 
 	if (gnutls_x509_crt_init(&cert) < 0) {
 		bad_certificate(scs,
-						"Unable to initialize certificate data structure");
+			"Unable to initialize certificate data structure");
 	}
 
 
@@ -502,7 +530,7 @@ tls_check_certificate(struct connection_state *scs,
 	if (certificate_filename != NULL &&
 		tls_compare_certificates(&cert_list[0]) == 0) {
 		bad_certificate(scs,
-						"server's certificate was not found in the certificate file.\n");
+			"server's certificate was not found in the certificate file.\n");
 	}
 
 	gnutls_x509_crt_deinit(cert);
@@ -511,7 +539,7 @@ tls_check_certificate(struct connection_state *scs,
 	return;
 }
 
-struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc,
+struct connection_state *initialize_gnutls(intptr_t sd, char *name, Pop3 pc,
 										   const char *remote_hostname)
 {
 	static int gnutls_initialized;
@@ -530,25 +558,16 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc,
 
 	assert(gnutls_init(&scs->tls_state, GNUTLS_CLIENT) == 0);
 	{
-		const int protocols[] = { GNUTLS_TLS1, GNUTLS_SSL3, 0 };
-		const int ciphers[] =
-			{ GNUTLS_CIPHER_RIJNDAEL_128_CBC, GNUTLS_CIPHER_3DES_CBC,
-			GNUTLS_CIPHER_RIJNDAEL_256_CBC,
-			GNUTLS_CIPHER_ARCFOUR, 0
-		};
-		const int compress[] = { GNUTLS_COMP_ZLIB, GNUTLS_COMP_NULL, 0 };
-		const int key_exch[] = { GNUTLS_KX_RSA, GNUTLS_KX_DHE_DSS,
-			GNUTLS_KX_DHE_RSA, 0
-		};
-		/* mutt with gnutls doesn't use kx_srp or kx_anon_dh */
-		const int mac[] = { GNUTLS_MAC_SHA, GNUTLS_MAC_MD5, 0 };
-		assert(gnutls_protocol_set_priority(scs->tls_state, protocols) ==
-			   0);
-		assert(gnutls_cipher_set_priority(scs->tls_state, ciphers) == 0);
-		assert(gnutls_compression_set_priority(scs->tls_state, compress) ==
-			   0);
-		assert(gnutls_kx_set_priority(scs->tls_state, key_exch) == 0);
-		assert(gnutls_mac_set_priority(scs->tls_state, mac) == 0);
+		const char *err_pos;
+		if (GNUTLS_E_SUCCESS != gnutls_priority_set_direct(scs->tls_state, tls, &err_pos)) {
+			DMA(DEBUG_ERROR,
+				"Unable to set the priorities to use on the ciphers, "
+				"key exchange methods, macs and/or compression methods.\n"
+				"See 'tls' parameter in config file: '%s'.\n",
+				err_pos);
+			exit(1);
+		}
+
 		/* no client private key */
 		if (gnutls_certificate_allocate_credentials(&scs->xcred) < 0) {
 			DMA(DEBUG_ERROR, "gnutls memory error\n");
@@ -564,9 +583,9 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc,
 				exit(1);
 			}
 			zok = gnutls_certificate_set_x509_trust_file(scs->xcred,
-														 (char *)
-														 certificate_filename,
-														 GNUTLS_X509_FMT_PEM);
+					(char *)
+					certificate_filename,
+					GNUTLS_X509_FMT_PEM);
 			if (zok < 0) {
 				DMA(DEBUG_ERROR,
 					"GNUTLS did not like your certificate file %s (%d).\n",
@@ -579,7 +598,7 @@ struct connection_state *initialize_gnutls(int sd, char *name, Pop3 pc,
 		gnutls_cred_set(scs->tls_state, GNUTLS_CRD_CERTIFICATE,
 						scs->xcred);
 		gnutls_transport_set_ptr(scs->tls_state,
-								 (gnutls_transport_ptr) sd);
+								 (gnutls_transport_ptr_t) sd);
 		do {
 			zok = gnutls_handshake(scs->tls_state);
 		}
