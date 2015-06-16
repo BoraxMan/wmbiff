@@ -2,8 +2,14 @@ Source: wmbiff
 Section: x11
 Priority: optional
 Maintainer: Doug Torrance <dtorrance@monmouthcollege.edu>
-Build-Depends: debhelper (>= 9), libgnutls28-dev, libgcrypt20-dev, libxpm-dev,
- libxext-dev, libx11-dev, pkg-config, dh-autoreconf
+Build-Depends: debhelper (>= 9),
+               dh-autoreconf,
+               libgcrypt20-dev,
+               libgnutls28-dev,
+               libx11-dev,
+               libxext-dev,
+               libxpm-dev,
+               pkg-config
 Standards-Version: 3.9.6
 Homepage: http://windowmaker.org/dockapps/?name=wmbiff
 Vcs-Browser: https://github.com/d-torrance/wmbiff
@@ -11,8 +17,8 @@ Vcs-Git: https://github.com/d-torrance/wmbiff.git
 
 Package: wmbiff
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Suggests: ssh-askpass, ruby
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: ruby, ssh-askpass
 Description: Dockable app that displays information about mailboxes
  WMBiff is an WindowMaker docking utility, that displays the
  number of read and unread messages in (usually) five
