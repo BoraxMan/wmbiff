@@ -1,7 +1,7 @@
 Source: wmbiff
 Section: x11
 Priority: optional
-Maintainer: Doug Torrance <dtorrance@monmouthcollege.edu>
+Maintainer: Doug Torrance <dtorrance@piedmont.edu>
 Build-Depends: debhelper (>= 9),
                dh-autoreconf,
                libgcrypt20-dev,
