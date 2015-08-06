@@ -1,3 +1,12 @@
+wmbiff (0.4.28-2) unstable; urgency=medium
+
+  * debian/control
+    - Tidy using wrap-and-sort.
+  * debian/{control,copyright}
+    - Update maintainer email address.
+
+ -- Doug Torrance <dtorrance@piedmont.edu>  Thu, 06 Aug 2015 07:01:54 -0400
+
 wmbiff (0.4.28-1) unstable; urgency=medium
 
   * New upstream release.
